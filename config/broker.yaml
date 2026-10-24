@@ -1,0 +1,31 @@
+# 模拟券商与账户设置。改动会影响所有账户之后的成交，历史记录不变。
+
+initial_cash: 100000          # 初始资金：建议与计划投入实盘的金额一致
+
+accounts:                     # 账户名: 策略
+  main: agent                 # 主策略：第二阶段由 Agent 生成订单；第一阶段只做底仓与强制止损
+  quant: quant                # 纯量化初筛组：直接买初筛排名靠前的股票
+  random: random              # 随机选股对照组：同样风控，候选池里随机挑
+  etf: etf                    # 只持有底仓 ETF
+
+base_etf:                     # 底仓 ETF，同时作为"只持有底仓"对照组的标的
+  code: sh510300
+  name: 沪深300ETF
+benchmark: sh000300           # 报告中的基准指数
+
+exec_time: "14:45"            # 交易日执行时点：取这一分钟（含）之前最后一笔分钟线价格
+
+fees:
+  commission_rate: 0.00025    # 佣金万 2.5
+  commission_min: 5           # 单笔最低 5 元
+  stamp_tax_sell: 0.0005      # 卖出印花税（仅股票）
+  transfer_fee: 0.00001       # 过户费（仅股票，双向）
+
+slippage:                     # 按近 20 日日均成交额分档（元），从高到低匹配
+  - {min_avg_amount: 1000000000, rate: 0.001}
+  - {min_avg_amount: 100000000, rate: 0.002}
+  - {min_avg_amount: 0, rate: 0.005}
+etf_slippage: 0.0005
+fallback_penalty: 0.002       # 取不到 14:45 分钟价、退回用收盘价成交时额外加的滑点
+volume_cap_ratio: 0.01        # 单笔不超过当日截至执行时点成交量的 1%
+lot_size: 100

@@ -1,0 +1,38 @@
+# 风控规则 —— 只有你能改。Agent 和自我进化流程都不允许修改本文件。
+
+regime:                       # 市场状态：由代码按沪深 300 均线客观判定
+  index: sh000300
+  # 进攻：收盘在 120 日均线上方，且 20 日均线高于 5 个交易日前
+  # 防守：收盘在 120 日均线下方，且在 60 日均线下方
+  # 其余为中性
+
+bands:                        # 各状态下的总仓位区间与个股仓位上限（占总资产）
+  offense: {min: 0.70, max: 0.95, stock_max: 0.80}
+  neutral: {min: 0.50, max: 0.80, stock_max: 0.50}
+  defense: {min: 0.30, max: 0.50, stock_max: 0.20}
+  breaker: {min: 0.30, max: 0.50, stock_max: 0.00}
+
+position:
+  max_single: 0.20            # 单只个股仓位上限
+  max_stocks: 6               # 最多同时持有个股数量
+  max_industry: 0.35          # 单一行业上限（订单带 industry 字段时检查）
+  max_risk_per_trade: 0.01    # 单笔最大风险：(买入价 - 止损价) × 股数 ≤ 总资产 1%
+  stop_loss_pct: 0.08         # 默认止损：较持仓成本亏损 8%
+  time_stop_days: 20          # 持有满 20 个交易日仍亏损则触发时间止损
+  min_hold_days: 3            # 最短持有期（交易日），止损类卖出不受限
+  max_new_per_week: 3         # 每周最多新开个股仓位数
+  etf_rebalance_tolerance: 0.05  # 底仓 ETF 与目标偏离不足 5% 且当天没有个股买入时不调整
+
+universe:
+  exclude_prefixes: ["688", "689", "8", "4", "92"]   # 科创板、北交所：没有交易权限就排除，否则实盘无法跟随
+  exclude_st: true
+  min_listed_days: 60
+  min_avg_amount: 100000000   # 近 20 日日均成交额 ≥ 1 亿
+  max_day_change: 0.07        # 当日涨幅 > 7% 不买
+  max_5d_change: 0.25         # 近 5 日涨幅 > 25% 不买
+
+drawdown:                     # 账户从净值高点的回撤
+  warn: 0.08                  # 个股仓位上限降一档
+  breaker: 0.12               # 熔断：暂停新开个股仓位
+  breaker_days: 10            # 熔断持续交易日数
+  halt: 0.18                  # 系统暂停，需人工执行 `python -m sim resume <账户>` 才恢复

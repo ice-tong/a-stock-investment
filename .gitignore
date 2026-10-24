@@ -1,0 +1,13 @@
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+.DS_Store
+
+# 研究过程中的临时数据不入库；模拟交易的初筛结果要留档
+data/*
+!data/.gitkeep
+!data/screen/
+
+# 日报和资金看板可随时由账本重新生成
+reports/sim/
