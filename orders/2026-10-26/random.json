@@ -1,0 +1,71 @@
+{
+  "account": "random",
+  "strategy": "random",
+  "trade_date": "2026-10-26",
+  "decided_on": "2026-10-23",
+  "frozen_at": "2026-10-24T22:17:39",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.2
+  },
+  "equity_estimate": 100000.0,
+  "orders": [
+    {
+      "target_weight": 0.05,
+      "reason_type": "entry",
+      "risk_notes": [],
+      "code": "sh600036",
+      "name": "招商银行",
+      "reason": "随机抽取（初筛排名 13）",
+      "status": "approved",
+      "id": "20261026-random-01"
+    },
+    {
+      "target_weight": 0.05,
+      "reason_type": "entry",
+      "risk_notes": [],
+      "code": "sh601328",
+      "name": "交通银行",
+      "reason": "随机抽取（初筛排名 6）",
+      "status": "approved",
+      "id": "20261026-random-02"
+    },
+    {
+      "target_weight": 0.05,
+      "reason_type": "entry",
+      "risk_notes": [],
+      "code": "sh600887",
+      "name": "伊利股份",
+      "reason": "随机抽取（初筛排名 5）",
+      "status": "approved",
+      "id": "20261026-random-03"
+    },
+    {
+      "target_weight": 0.05,
+      "reason_type": "entry",
+      "risk_notes": [
+        "本周新开仓已达上限 3"
+      ],
+      "code": "sh601939",
+      "name": "建设银行",
+      "reason": "随机抽取（初筛排名 12）",
+      "status": "rejected",
+      "id": "20261026-random-04"
+    },
+    {
+      "code": "sh510300",
+      "name": "沪深300ETF",
+      "target_weight": 0.35,
+      "reason_type": "park",
+      "reason": "底仓 ETF：闲置资金停泊",
+      "status": "approved",
+      "risk_notes": [
+        "市场状态 defense，风控状态 normal，总仓位区间 30%-50%"
+      ],
+      "id": "20261026-random-05"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "account": "quant",
+  "strategy": "quant",
+  "trade_date": "2026-10-26",
+  "decided_on": "2026-10-23",
+  "frozen_at": "2026-10-24T22:17:39",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.2
+  },
+  "equity_estimate": 100000.0,
+  "orders": [
+    {
+      "target_weight": 0.05,
+      "reason_type": "entry",
+      "risk_notes": [],
+      "code": "sh600825",
+      "name": "新华传媒",
+      "reason": "初筛排名 1，20 日风险调整动量 2.10",
+      "status": "approved",
+      "id": "20261026-quant-01"
+    },
+    {
+      "target_weight": 0.05,
+      "reason_type": "entry",
+      "risk_notes": [],
+      "code": "sz002242",
+      "name": "九阳股份",
+      "reason": "初筛排名 2，20 日风险调整动量 1.47",
+      "status": "approved",
+      "id": "20261026-quant-02"
+    },
+    {
+      "target_weight": 0.05,
+      "reason_type": "entry",
+      "risk_notes": [],
+      "code": "sh601857",
+      "name": "中国石油",
+      "reason": "初筛排名 3，20 日风险调整动量 0.88",
+      "status": "approved",
+      "id": "20261026-quant-03"
+    },
+    {
+      "target_weight": 0.05,
+      "reason_type": "entry",
+      "risk_notes": [
+        "本周新开仓已达上限 3"
+      ],
+      "code": "sh600887",
+      "name": "伊利股份",
+      "reason": "初筛排名 5，20 日风险调整动量 0.46",
+      "status": "rejected",
+      "id": "20261026-quant-04"
+    },
+    {
+      "code": "sh510300",
+      "name": "沪深300ETF",
+      "target_weight": 0.35,
+      "reason_type": "park",
+      "reason": "底仓 ETF：闲置资金停泊",
+      "status": "approved",
+      "risk_notes": [
+        "市场状态 defense，风控状态 normal，总仓位区间 30%-50%"
+      ],
+      "id": "20261026-quant-05"
+    }
+  ]
+}

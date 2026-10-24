@@ -1,0 +1,29 @@
+{
+  "account": "main",
+  "strategy": "agent",
+  "trade_date": "2026-10-26",
+  "decided_on": "2026-10-23",
+  "frozen_at": "2026-10-24T22:17:39",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.2
+  },
+  "equity_estimate": 100000.0,
+  "orders": [
+    {
+      "code": "sh510300",
+      "name": "沪深300ETF",
+      "target_weight": 0.5,
+      "reason_type": "park",
+      "reason": "底仓 ETF：闲置资金停泊",
+      "status": "approved",
+      "risk_notes": [
+        "市场状态 defense，风控状态 normal，总仓位区间 30%-50%"
+      ],
+      "id": "20261026-main-01"
+    }
+  ]
+}
