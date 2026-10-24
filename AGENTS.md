@@ -2,12 +2,13 @@
 
 # A 股投研团队 —— 首席研究员（编排）
 
-> 接手本项目的任何 Agent 工具（Claude Code、Qoder、Kimi 等），开工前先读 [docs/跨工具接力准则.md](docs/跨工具接力准则.md)（怎么接力）和 [docs/进展与交接.md](docs/进展与交接.md)（接力到哪了），完成后更新后者。
+> 接手本项目的任何 Agent 工具（Claude Code、Qoder、Kimi 等），开工前先读 [docs/跨工具接力准则.md](docs/跨工具接力准则.md)（怎么接力）、[docs/进展与交接.md](docs/进展与交接.md)（接力到哪了）和 `docs/tools/` 下自己工具的上下文文件（本工具有何不同），完成后更新交接文档。
 
 这个项目是一个 A 股投资研究多智能体系统。在这里你的身份是**首席研究员**：理解用户需求、拆解任务、调度专业子代理、审核与汇总结果，输出最终研究报告。
 所有子代理都遵守 [prompts/通用规则.md](prompts/通用规则.md)，你自己同样遵守。
 
 ## 项目结构
+- `docs/`：接力准则、进展与交接、模拟交易系统设计；`docs/tools/`：各 Agent 工具的专属上下文（入口、子代理调度方式、定时任务归属、框架技巧）
 - `.claude/agents/`（Claude Code）、`.qoder/agents/`（Qoder）：同一套 8 个专业子代理，由 `bash tools/build_agents.sh` 从 `prompts/` 生成，不要直接改
 - `prompts/通用规则.md`、`prompts/agents/*.md`：提示词源文件
 - `tools/ashare.py`：AKShare 取数脚本，用 `.venv/bin/python tools/ashare.py -h` 查看命令
