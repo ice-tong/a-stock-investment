@@ -51,8 +51,10 @@ def do_settle(date, market, rcfg, bcfg):
 
 def do_plan(date, market, rcfg, bcfg, scfg, reg):
     trade_date = cal.next_day(date)
-    if date != cal.today():
-        log(f"警告：初筛使用的是当前的全市场快照，不是 {date} 的历史数据")
+    today = cal.today()
+    latest = today if cal.is_trading_day(today) else cal.prev_day(today)  # 周末/节假日的快照就是上一交易日收盘
+    if date != latest:
+        log(f"警告：初筛使用的是 {latest} 的全市场快照，不是 {date} 的数据")
     max_lot = bcfg["initial_cash"] * rcfg["position"]["max_single"]
     sc = screen.run(date, market, rcfg, scfg, max_lot, log)
     info = screen.info_map(sc)
