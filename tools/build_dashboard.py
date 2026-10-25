@@ -441,7 +441,7 @@ def main() -> int:
     <div class="table-card"><table>
       <thead><tr><th>时间</th><th>任务</th><th>状态</th><th>汇报</th></tr></thead>
       <tbody>{log_table}</tbody></table></div>
-    <p class="small muted" style="margin-top:8px">execute（交易日 15:10）/ evening（交易日 20:00）/ 黄金提醒（仅触发或失败时记录）。非交易日记为 skipped。</p>
+    <p class="small muted" style="margin-top:8px">execute（交易日 15:10）/ research（每天 19:00，复盘+草稿）/ evening（交易日 20:00）/ 黄金提醒（仅触发或失败时记录）。非交易日 execute/evening 记为 skipped。</p>
   </section>
 
   <section>
@@ -453,7 +453,7 @@ def main() -> int:
     <h2>策略依据</h2>
     <div class="grid grid-2">
       <div class="card"><div class="label">main · agent 主策略</div>
-        <p class="small">已接入（2026-10-25）：交易日 19:00 研究任务跑「初筛 → 子代理研究 → 组合经理决策」，把订单草稿（含理由与置信度）写入 main.draft.json；20:00 evening 的 sim plan 逐条风控校验后冻结，被拒订单在「依据」列显示风控原因。无草稿的日子只做底仓停泊与强制止损。</p></div>
+        <p class="small">已接入（2026-10-25）：每天 19:00 晚间任务先做交易复盘（写 journal/daily），再跑「初筛 → 子代理研究 → 组合经理决策」，把订单草稿（含理由与置信度）写入次日交易日的 main.draft.json；交易日 20:00 evening 的 sim plan 逐条风控校验后冻结，被拒订单在「依据」列显示风控原因。无草稿的日子只做底仓停泊与强制止损。</p></div>
       <div class="card"><div class="label">quant · 量化初筛</div>
         <p class="small">初筛规则：收盘 &gt; 20 日线 &gt; 60 日线，且通过流动性与涨幅过滤；得分 = 20 日收益 ÷ 20 日波动（风险调整动量），按排名买入前 {qcfg.get('n_stocks', 4)} 只；持仓跌出排名前 {qcfg.get('keep_rank', 12)} 才卖，降低换手。每只票的排名与得分见订单「依据」列与下方初筛快照。</p></div>
       <div class="card"><div class="label">random · 随机对照</div>
