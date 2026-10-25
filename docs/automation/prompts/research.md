@@ -50,7 +50,7 @@
 11. 执行日志：`.venv/bin/python tools/runlog.py add --task research --status ok --line "复盘 <L>: <一句>" --line "草稿 <目标日>: <订单摘要或'无个股订单'>"`。
 12. 重建状态看板并尽力发布：运行 `.venv/bin/python tools/build_dashboard.py`（同时更新 web/index.html 与 dist/index.html）；若当前会话存在 sites 插件 MCP 工具（mcp__plugin_sites_qoder_sites__prepare_site / get_publish_status / publish_site）：生成一个新 UUID 作为 actionId，调用 prepare_site，参数 projectRoot="/Users/yancong/agent-workspace/a-stock-investment"、webDirectory="dist"、projectId="01a1728a-617c-708f-99f9-03e5934f09f3"；读 get_publish_status 至 canPublish=true 后调用 publish_site（同一 actionId），再确认 published=true。若工具缺失或任一步失败，最多重试一次；仍不行就放弃发布，并在汇报中注明“看板已本地更新，站点待同步发布”。然后提交：`git add web/index.html dist/index.html journal orders data && git commit -m "[qoder-cn-cron] research: <复盘日> 复盘与草稿，看板已同步"`（reports/sim/ 在 .gitignore 中，不要 add；无改动则跳过）。
 13. 用一小段中文汇报：复盘要点、草稿订单（标的/权重/理由/置信度）、分歧与数据缺口、提示 evening 将风控冻结。不得给“必涨”“稳赚”类确定性表述。
-13b. Bark 推送（用户要求）：`.venv/bin/python tools/notify.py --title "模拟盘研究 <日期>" --body "复盘: <一句>\n草稿 <目标日>: <订单摘要或'无个股订单'>\n观察名单: <新增/更新条数>\n看板: 已发布 / 站点待同步发布"`。推送失败不影响任务，在汇报里注明即可。
+13b. Bark 推送（用户要求）：`.venv/bin/python tools/notify.py --title "模拟盘研究 <日期>" --body "复盘: <一句>\n草稿 <目标日>: <订单摘要或'无个股订单'>\n观察名单: <新增/更新条数>\n看板: 已发布 / 站点待同步发布\nhttps://ashare-sim-dashboard-wv51upzp22k.qoder.zone" --url "https://ashare-sim-dashboard-wv51upzp22k.qoder.zone"`（正文末尾附看板 URL，并传 `--url` 让点击通知直接打开）。推送失败不影响任务，在汇报里注明即可。
 14. 失败处理：任一部分失败时 runlog add --task research --status failed --line "<摘要>" 并汇报一次，同时推送 `.venv/bin/python tools/notify.py --title "模拟盘 research 失败" --body "<摘要>"`；不要写半成品草稿——evening 会自动退回仅底仓订单。
 
 硬性约束：不修改 accounts/、orders/ 已冻结文件和 config/risk.yaml；不替用户实盘下单；草稿只是建议，风控有一票否决。
