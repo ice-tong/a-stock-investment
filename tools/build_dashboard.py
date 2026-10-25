@@ -190,22 +190,39 @@ def load_config():
         import yaml
         risk = yaml.safe_load((ROOT / "config" / "risk.yaml").read_text(encoding="utf-8"))
         broker = yaml.safe_load((ROOT / "config" / "broker.yaml").read_text(encoding="utf-8"))
-        return risk, broker
+        strategy = yaml.safe_load((ROOT / "config" / "strategy.yaml").read_text(encoding="utf-8"))
+        return risk, broker, strategy
     except Exception:
-        return {}, {}
+        return {}, {}, {}
 
 
-def order_rows(orders_json) -> str:
+def order_rows(orders_json, with_account=False) -> str:
     rows = []
     for o in orders_json.get("orders", []):
         st = "tag-approved" if o.get("status") == "approved" else "tag-rejected"
         stx = "批准" if o.get("status") == "approved" else "拒绝"
         ty = "tag-park" if o.get("reason_type") == "park" else "tag-entry"
-        rows.append(f"<tr><td>{esc(o.get('name'))} <span class='muted small num'>{esc(o.get('code'))}</span></td>"
+        notes = o.get("risk_notes") or []
+        basis = esc(o.get("reason", ""))
+        if notes and o.get("status") != "approved":
+            basis += f"<br><span class='muted small'>风控：{esc('; '.join(notes))}</span>"
+        acct = f"<td>{esc(orders_json.get('account', ''))}</td>" if with_account else ""
+        rows.append(f"{acct}<td>{esc(o.get('name'))} <span class='muted small num'>{esc(o.get('code'))}</span></td>"
                     f"<td class='num'>{o.get('target_weight', 0) * 100:.0f}%</td>"
                     f"<td><span class='tag {ty}'>{esc(o.get('reason_type'))}</span></td>"
-                    f"<td><span class='tag {st}'>{stx}</span></td></tr>")
-    return "".join(rows) or "<tr><td colspan=4 class='muted'>无订单</td></tr>"
+                    f"<td><span class='tag {st}'>{stx}</span></td><td class='small'>{basis}</td>")
+    return "".join(rows) or f"<tr><td colspan={6 if with_account else 5} class='muted'>无订单</td></tr>"
+
+
+def load_screen():
+    d = ROOT / "data" / "screen"
+    if not d.exists():
+        return None, []
+    files = sorted(f.name for f in d.iterdir() if f.suffix == ".csv")
+    if not files:
+        return None, []
+    date = files[-1][:-4]
+    return date, read_csv(d / files[-1])
 
 
 def main() -> int:
@@ -219,7 +236,9 @@ def main() -> int:
     order_date, orders = load_orders()
     runlog = load_runlog()
     worklog = load_worklog()
-    risk, broker = load_config()
+    risk, broker, strategy = load_config()
+    qcfg = (strategy or {}).get("quant", {})
+    rcfg = (strategy or {}).get("random", {})
     band = (risk.get("bands") or {}).get(regime, {})
 
     # ---- 主账户 hero ----
@@ -281,33 +300,48 @@ def main() -> int:
         wd = "一二三四五六日"[datetime.date.fromisoformat(order_date).weekday()]
         orders_head = f"{order_date}（周{wd}）冻结订单"
         main_orders = order_rows(oj)
-        ctrl_rows = []
+        ctrl_table = ""
         for name, label in ACCOUNTS[1:]:
             oj2 = orders.get(name)
-            if not oj2:
-                continue
-            for o in oj2.get("orders", []):
-                st = "tag-approved" if o.get("status") == "approved" else "tag-rejected"
-                stx = "批准" if o.get("status") == "approved" else "拒绝"
-                ctrl_rows.append(
-                    f"<tr><td>{esc(name)}</td><td>{esc(o.get('name'))} <span class='muted small num'>{esc(o.get('code'))}</span></td>"
-                    f"<td class='num'>{o.get('target_weight', 0) * 100:.0f}%</td>"
-                    f"<td><span class='tag {'tag-park' if o.get('reason_type') == 'park' else 'tag-entry'}'>{esc(o.get('reason_type'))}</span></td>"
-                    f"<td><span class='tag {st}'>{stx}</span></td>"
-                    f"<td class='small muted'>{esc(o.get('risk_notes', [''])[0] if o.get('status') != 'approved' and o.get('risk_notes') else o.get('reason', ''))}</td></tr>")
-        ctrl_table = "".join(ctrl_rows) or "<tr><td colspan=6 class='muted'>无</td></tr>"
+            if oj2:
+                ctrl_table += order_rows(oj2, with_account=True)
+        ctrl_table = ctrl_table or "<tr><td colspan=6 class='muted'>无</td></tr>"
         orders_html = f"""
     <div class="card hero" style="margin-bottom:14px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><h3 style="font-size:1rem">main</h3>
       <span class="tag tag-park">agent</span></div>
-      <table><thead><tr><th>标的</th><th>目标仓位</th><th>类型</th><th>状态</th></tr></thead><tbody>{main_orders}</tbody></table>
+      <table><thead><tr><th>标的</th><th>目标仓位</th><th>类型</th><th>状态</th><th>依据</th></tr></thead><tbody>{main_orders}</tbody></table>
     </div>
-    <div class="table-card"><table><thead><tr><th>账户</th><th>标的</th><th>目标仓位</th><th>类型</th><th>状态</th><th>备注</th></tr></thead>
+    <div class="table-card"><table><thead><tr><th>账户</th><th>标的</th><th>目标仓位</th><th>类型</th><th>状态</th><th>依据 / 风控备注</th></tr></thead>
     <tbody>{ctrl_table}</tbody></table></div>
     <p class="small muted" style="margin-top:8px">对照组订单明细；冻结含 SHA256 校验，执行时点为交易日 14:45 价格。</p>"""
     else:
         orders_head = "冻结订单"
         orders_html = '<div class="card"><p class="muted">当前无冻结订单（等待下一次 evening 冻结）。</p></div>'
+
+    # ---- 策略依据与初筛快照 ----
+    screen_date, screen_rows = load_screen()
+    picked = {}
+    for name, _ in ACCOUNTS:
+        for o in (orders.get(name) or {}).get("orders", []):
+            if o.get("reason_type") == "entry":
+                picked.setdefault(o.get("code"), []).append(f"{name}{'✓' if o.get('status') == 'approved' else '✗'}")
+    top = sorted([r for r in screen_rows if r.get("rank")], key=lambda r: int(r["rank"]))[:10]
+    screen_table = ""
+    for r in top:
+        tags = "".join(f"<span class='tag tag-entry' style='margin-right:4px'>{esc(x)}</span>" for x in picked.get(r["code"], []))
+        screen_table += (f"<tr><td class='num'>{esc(r['rank'])}</td>"
+                         f"<td>{esc(r['name'])} <span class='muted small num'>{esc(r['code'])}</span></td>"
+                         f"<td class='num'>{float(r['close']):.2f}</td>"
+                         f"<td class='num'>{float(r['ret_20']) * 100:+.1f}%</td>"
+                         f"<td class='num'>{float(r['vol_20']) * 100:.1f}%</td>"
+                         f"<td class='num'>{float(r['score']):.2f}</td>"
+                         f"<td>{tags or '<span class=muted>—</span>'}</td></tr>")
+    screen_block = (f"<div class='table-card' style='margin-top:14px'><table>"
+                    f"<thead><tr><th>排名</th><th>标的</th><th>收盘</th><th>20日收益</th><th>20日波动</th><th>动量得分</th><th>被选</th></tr></thead>"
+                    f"<tbody>{screen_table}</tbody></table></div>"
+                    f"<p class='small muted' style='margin-top:8px'>初筛快照 {esc(screen_date)}（data/screen/）：得分 = 20 日收益 ÷ 20 日波动率；"
+                    f"被选列中 ✓ 表示批准买入、✗ 表示被风控拒绝。</p>") if top else ""
 
     # ---- 风控参数 ----
     fees = (broker or {}).get("fees", {})
@@ -407,6 +441,22 @@ def main() -> int:
   <section>
     <h2>{esc(orders_head)}</h2>
     {orders_html}
+  </section>
+
+  <section>
+    <h2>策略依据</h2>
+    <div class="grid grid-2">
+      <div class="card"><div class="label">main · agent 主策略</div>
+        <p class="small">第一阶段不做个股选择：只把闲置资金停泊到底仓 ETF（park），加触发式强制止损。第二阶段起由 Agent 基于研究报告出订单草稿（含理由与置信度）写入 main.draft.json，经 sim plan 逐条风控校验后冻结——届时订单「依据」列将展示研究结论。</p></div>
+      <div class="card"><div class="label">quant · 量化初筛</div>
+        <p class="small">初筛规则：收盘 &gt; 20 日线 &gt; 60 日线，且通过流动性与涨幅过滤；得分 = 20 日收益 ÷ 20 日波动（风险调整动量），按排名买入前 {qcfg.get('n_stocks', 4)} 只；持仓跌出排名前 {qcfg.get('keep_rank', 12)} 才卖，降低换手。每只票的排名与得分见订单「依据」列与下方初筛快照。</p></div>
+      <div class="card"><div class="label">random · 随机对照</div>
+        <p class="small">从同一初筛候选池随机抽取，持有满 {rcfg.get('rotate_days', 20)} 个交易日轮换；用来检验 quant 与未来的 Agent 是否真有超额收益。</p></div>
+      <div class="card"><div class="label">etf · 底仓对照</div>
+        <p class="small">只持有沪深300ETF（510300），不选股、不择时，作为"什么都不做"的基线。</p></div>
+    </div>
+    <p class="small muted" style="margin-top:8px">所有订单冻结前都要过风控代码一票否决（仓位区间、单票上限、每周新开仓上限等，见 config/risk.yaml）；被拒订单在「依据」列显示风控原因。</p>
+    {screen_block}
   </section>
 
   <section>
