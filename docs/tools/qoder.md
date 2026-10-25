@@ -33,7 +33,7 @@ Qoder 自动注入工作区根目录的 `AGENTS.md`，无需额外配置。
 
 ## 状态看板（Qoder Sites，CN 账号）
 - 站点：`https://ashare-sim-dashboard-wv51upzp22k.qoder.zone`（私有），描述符 `.A股模拟交易状态看板.qoder.site`，projectId `01a1728a-617c-708f-99f9-03e5934f09f3`，siteId `01a1728a-617f-79a7-97af-a1db216409b8`。
-- 页面由 `tools/build_dashboard.py` 生成（四策略收益对照 + 标签页详情；main 标签含候选池与观察名单；另有对照组初筛快照与执行日志），发布输出目录为 `dist/`。
+- 页面由 `tools/build_dashboard.py` 生成（多账户收益对照 + 标签页详情；main 标签含候选池与观察名单；另有对照组初筛快照与执行日志），发布输出目录为 `dist/`。
 - 国际版旧站点 `ashare-sim-dashboard-hnjfa46w01s.qoder.website`（projectId `01a17110-976d-72b4-bda2-73e3f45aa97a`）仍留在国际版账号，CN 会话无法发布也无法删除；迁移后看板只更新 CN 站点。
 - cron 会话**可能没有 sites 插件**（qoder_cron 无法为任务挂插件）：发布失败时任务只注明"站点待同步发布"，本地 `dist/` 已是最新；任何带 sites 插件的会话用新 actionId 调 `prepare_site`（复用上述 projectId、webDirectory="dist"）+ `publish_site` 即可补发。
 

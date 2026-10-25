@@ -4,14 +4,14 @@
 
 背景：
 - main 账户（agent 策略）的个股订单只能来自你写的草稿 orders/<目标交易日>/main.draft.json；交易日 20:00 的 evening 任务运行 sim plan 做风控校验并冻结次日订单，不合规订单会被自动拒绝或缩量，你不参与冻结。
-- 草稿目标交易日规则：T_plan = 今天（若今天是交易日）否则今天之后的下一个交易日；目标日 = T_plan 的下一个交易日（即下一次 evening plan 会冻结的那天）。用命令取：`.venv/bin/python -c "from sim import calendar as cal; t=cal.today(); tp=t if cal.is_trading_day(t) else cal.next_day(t); print(cal.next_day(tp))"`。周末写的草稿会在周一晚被带新数据的草稿覆盖，属正常设计。
+- 草稿目标交易日规则：T_plan = 今天（若今天是交易日）否则今天之后的下一个交易日；目标日 = T_plan 的下一个交易日（即下一次 evening plan 会冻结的那天）。用命令取：`.venv/bin/python -c "from sim import calendar as cal; t=cal.today(); tp=t if cal.is_trading_day(t) else cal.next_day(t); print(cal.next_day(tp))"`。**非交易日（周末、节假日）不做第二部分**：只做第一部分复盘（周六另按 `docs/automation/prompts/evolution.md` 做进化任务），草稿留到下一个交易日晚上再写——plan 会丢弃 `decided_on` 早于结算日的草稿，周末硬写等于白跑。
 - 风控红线（config/risk.yaml，禁止修改）：单只个股 ≤20%、同时持股 ≤6 只、每周新开仓 ≤3 只、默认止损 -8%；总仓位区间随市场状态变化，以最近一份冻结订单里的 band 为准。
 - 子代理定义在 .qoder/agents/，用 Agent 工具按 subagent_type 委派（fundamental-agent、event-sentiment-agent、technical-flow-agent 等）；委派 prompt 必须自包含。
 
 第一部分：交易复盘
 1. 复盘日 L：今天是交易日则 L=今天（复当日成交与持仓；当日净值以 20:00 结算为准，复盘里注明）；否则 L = accounts/main/state.json 的 last_settled。
 2. 幂等：若 journal/daily/<L>.md 已存在，跳过复盘部分。
-3. 读四个账户 trades.csv 中 date==L 的成交（main 优先）与 accounts/*/state.json 持仓；检查：成交 vs 冻结订单的偏离（部分成交/滑点）、每只持仓距止损价距离、时间止损剩余天数、单日涨跌超 3% 的持仓。
+3. 读各账户 trades.csv 中 date==L 的成交（main 优先）与 accounts/*/state.json 持仓；检查：成交 vs 冻结订单的偏离（部分成交/滑点）、每只持仓距止损价距离、时间止损剩余天数、单日涨跌超 3% 的持仓。
 4. 归因委派（仅在需要时）：main 当日有成交、或任一持仓浮亏超 5% 时，对该标的并行委派 technical-flow-agent 与 event-sentiment-agent 归因；否则不委派。
 5. 写 journal/daily/<L>.md（目录不存在则创建）：成交回顾、持仓检查、归因（如有）、结论与教训 1-3 条。无成交时只做简短持仓检查也要写。
 
@@ -43,7 +43,10 @@
 8b. 维护观察名单 `data/watchlist.json`（格式 `{"items": [{"code","name","added","source","thesis","trigger","trigger_type","trigger_level","status","review_by","note"}]}`，status 取 watching / researched / rejected）：研究过但暂不买的写 researched，`trigger` 为人类可读描述，`trigger_type/trigger_level` 尽量给结构化值（pool 每晚在 md 的"观察名单触发状态"里评估）；被否决的写 rejected 与原因；`review_by` 不超过 20 个交易日，过期条目删除；总数控制在 30 条以内。观察名单下次会自动进入候选池，研究成果跨天积累。
 8c. 影子使用记录：v2 的 5 只 shadow shortlist 只记录，不进入 shortlist/订单；20-30 个交易日后由进化官比较 v1/v2 候选池与 shortlist 的前向 5/20/60 日收益，再决定是否替换 main。不要在每晚决策里用 v2 替代 v1。
 9. 组合经理决策（你自己做）：**先看组合槽位，再选股**——当前持仓行业暴露（单一行业 ≤35%）、最多 6 只、每周新开仓 ≤3 只、regime 总仓位区间；同一风格/行业不要扎堆。输出订单列表，每笔字段 code、name、target_weight（新仓单只 ≤0.05；个股合计+底仓 ETF 落在当前 regime 区间内）、reason（一句话：研究结论 + 置信度高/中/低）、confidence（"高"/"中"/"低"）、channels（买入单必填：该股在 `data/pool/<日期>.csv` 的 channels 原值，池外标的写 "池外:<来源>"）、可选 stop_price 与 industry；confidence 与 channels 会随订单冻结，供 `python -m sim attrib` 归因，不要省略；卖出用 reason_type "exit" 且 target_weight 低于当前权重。没有值得买的就输出空 orders 列表（代码会自动补底仓停泊），不要为了交易而交易。
-10. 写草稿 `orders/<目标交易日>/main.draft.json`，格式 `{"orders": [...]}`；若该日 main.json 已冻结则跳过不写。只允许写这一个文件、`journal/`、`data/pool/`（由 sim pool 生成）、`data/pool_v2/`（由 sim pool2 生成）与 `data/watchlist.json`；不得改 orders/ 其他文件、accounts/、config/。
+10. 写草稿 `orders/<目标交易日>/main.draft.json`，格式 `{"meta": {"tool": "<你所在的工具：qoder / claude-code / kimi>", "model": "<模型名>", "written_at": "<ISO 时间，如 2026-10-26T19:42:00>", "decided_on": "<研究数据所属的交易日>"}, "orders": [...]}`；若该日 main.json 已冻结则跳过不写。
+   - `decided_on` 必填且必须是研究数据所属的交易日（不是写文件的时刻）：plan 会丢弃 `decided_on` 早于结算日的整份草稿，写错等于放弃当天下单。
+   - `meta` 会原样写进冻结订单，`python -m sim attrib` 按 model 分组统计，用来比较不同模型的决策质量。
+   - 只允许写这一个文件、`journal/`、`data/pool/`（由 sim pool 生成）、`data/pool_v2/`（由 sim pool2 生成）与 `data/watchlist.json`；不得改 orders/ 其他文件、accounts/、config/。
 11. 执行日志：`.venv/bin/python tools/runlog.py add --task research --status ok --line "复盘 <L>: <一句>" --line "草稿 <目标日>: <订单摘要或'无个股订单'>"`。
 12. 重建状态看板并尽力发布：运行 `.venv/bin/python tools/build_dashboard.py`（同时更新 web/index.html 与 dist/index.html）；若当前会话存在 sites 插件 MCP 工具（mcp__plugin_sites_qoder_sites__prepare_site / get_publish_status / publish_site）：生成一个新 UUID 作为 actionId，调用 prepare_site，参数 projectRoot="/Users/yancong/agent-workspace/a-stock-investment"、webDirectory="dist"、projectId="01a1728a-617c-708f-99f9-03e5934f09f3"；读 get_publish_status 至 canPublish=true 后调用 publish_site（同一 actionId），再确认 published=true。若工具缺失或任一步失败，最多重试一次；仍不行就放弃发布，并在汇报中注明“看板已本地更新，站点待同步发布”。然后提交：`git add web/index.html dist/index.html journal orders data && git commit -m "[qoder-cn-cron] research: <复盘日> 复盘与草稿，看板已同步"`（reports/sim/ 在 .gitignore 中，不要 add；无改动则跳过）。
 13. 用一小段中文汇报：复盘要点、草稿订单（标的/权重/理由/置信度）、分歧与数据缺口、提示 evening 将风控冻结。不得给“必涨”“稳赚”类确定性表述。

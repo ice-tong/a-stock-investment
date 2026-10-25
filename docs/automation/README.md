@@ -167,7 +167,7 @@
 
 | 检查项 | 做法 | 期望 |
 |---|---|---|
-| 环境 | `python -m pytest -q`、`python -m sim status` | 测试全绿；四个账户存在，`last_settled` 为最近已结算日 |
+| 环境 | `python -m pytest -q`、`python -m sim status` | 测试全绿；五个账户存在（main / quant / random / etf_band / etf），`last_settled` 为最近已结算日 |
 | 任务配置 | 工具的任务列表 | 3 个模拟盘任务时间/时区/工作目录正确 |
 | research 手动跑 | 非交易日触发一次 | 新增/跳过 journal、写 `orders/<目标日>/main.draft.json`、runlog 有 research 行 |
 | 看板 | 看 `dist/index.html` mtime 与页面 | 执行日志出现本次运行；站点已发布或注明待同步 |
