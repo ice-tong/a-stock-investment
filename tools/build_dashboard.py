@@ -14,8 +14,10 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 ACCOUNTS = [("main", "main · 主策略"), ("quant", "quant · 量化初筛"),
-            ("random", "random · 随机对照"), ("etf", "etf · 底仓对照")]
-CONTROL_NOTE = {"main": "本看板主角", "quant": "对照组", "random": "对照组", "etf": "对照组"}
+            ("random", "random · 随机对照"), ("etf_band", "etf_band · 仓位对照"),
+            ("etf", "etf · 底仓对照")]
+CONTROL_NOTE = {"main": "本看板主角", "quant": "对照组", "random": "对照组",
+                "etf_band": "对照组", "etf": "对照组"}
 REASON_CN = {"entry": "新开仓", "exit": "调仓卖出", "park": "底仓停泊",
              "stop_loss": "止损卖出", "time_stop": "时间止损", "breaker": "熔断卖出", "halt": "停机卖出"}
 REASON_TAG = {"entry": "tag-entry", "park": "tag-park", "exit": "tag-skipped",
@@ -372,13 +374,14 @@ def main() -> int:
         "main": "agent 主策略：每天 19:00 复盘 + sim pool 全市场多路召回 → 轻量点评 → 深度研究 → 订单草稿；交易日 20:00 风控冻结。无草稿时只做底仓停泊与强制止损。",
         "quant": f"量化初筛：收盘 > 20 日线 > 60 日线；得分 = 20 日收益 ÷ 20 日波动，买前 {qcfg.get('n_stocks', 4)} 名；跌出前 {qcfg.get('keep_rank', 12)} 才卖。",
         "random": f"随机对照：从初筛候选池随机抽取，持有满 {rcfg.get('rotate_days', 20)} 个交易日轮换。",
+        "etf_band": "仓位对照：不买个股，ETF 仓位跟当日仓位区间上沿（防守 50% / 中性 80% / 进攻 95%）。与 etf（固定 98%）配对后，main − etf_band 是选股净贡献，etf_band − etf 是仓位控制贡献。",
         "etf": "底仓对照：只持有沪深300ETF（510300），不选股、不择时。",
     }
 
     def summary_cards(a) -> str:
         return f"""<div class="grid grid-4">
       <div class="card hero"><div class="label">净值</div><div class="value num">{money(a['equity'])}</div>
-        <div class="foot">现金 {money(a['cash'])} · 结算至 {esc(a['last_settled'])}</div></div>
+        <div class="foot">现金 {money(a['cash'])} · 结算至 {esc(a['last_settled'] or '未结算')}</div></div>
       <div class="card hero"><div class="label">累计盈亏</div><div class="value num {cls(a['pnl'])}">{money(a['pnl'])}</div>
         <div class="foot {cls(a['pnl_pct'])}">{pct(a['pnl_pct'])}（初始 {money(a['state']['initial_cash'])}）</div></div>
       <div class="card hero"><div class="label">当日盈亏</div><div class="value num {cls(a['day_pnl'])}">{money(a['day_pnl'])}</div>
