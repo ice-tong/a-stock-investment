@@ -9,6 +9,7 @@ data/*
 !data/.gitkeep
 !data/screen/
 !data/pool/
+!data/pool_v2/
 !data/watchlist.json
 
 # 日报和资金看板可随时由账本重新生成

@@ -1,6 +1,7 @@
 # 代码策略参数（量化组、随机组、主策略候选池）。这部分可以进化，但需要你批准。
 
-version: strategy-v1.0          # 主策略版本：每次批准的改动 +0.1，记入 evolution/CHANGELOG.md；冻结订单会带上它，归因按版本分组
+version: strategy-v1.1          # 主策略版本：每次批准的改动 +0.1，记入 evolution/CHANGELOG.md；冻结订单会带上它，归因按版本分组
+                                # v1.1（2026-10-25 用户批准方案 2）：候选池分诊排序 + 研究 prompt 配额 + 影子池 v2；不改变风控/账本
 
 screen:
   prefilter_top: 120          # 全市场按成交额初选前 N 只，再拉日线细筛
@@ -26,3 +27,16 @@ pool:                         # 主策略候选池（sim/pool.py）：全市场�
   sector_top: 5               # 强势行业通道：取 20 日收益中位数前 N 个行业
   sector_per: 4               # 每个强势行业取前 N 只
   sector_min_size: 8          # 行业至少有 N 只合规股票才参与排名
+
+pool_v2:                      # 影子候选引擎（sim/pool_v2.py）：只读影子，不进 main 下单链路；2026-10-25 用户批准 P-002 阶段 2
+  total: 56                   # 目标候选数量（40–60；实际会因行业上限/过滤略少）
+  per_industry: 3             # 每个行业最多几只，避免单一行业抱团
+  min_industries: 8           # 期望覆盖的行业数（仅用于展示与后续校验）
+  stop_prob_max: 0.45         # 触损概率上限（按 -8% 止损、20 日持有估算）；超过的不进“可行动”
+  vol_max: 0.60               # 60 日年化波动上限
+  ret20_max: 0.30             # 20 日涨幅上限（剔除极端追高）
+  max_lot_value: 5000         # 一手金额上限 = 10 万 × 5% 研究目标仓位；P-001 若通过可改为 10000
+  weights:                    # regime → 风格配额（百分比，合计 100）
+    defense: {lowvol: 35, pullback: 25, squeeze: 20, breakout: 10, reversal: 10}
+    neutral: {lowvol: 20, squeeze: 20, pullback: 25, breakout: 20, reversal: 15}
+    offense: {breakout: 30, squeeze: 20, pullback: 20, lowvol: 15, reversal: 15}

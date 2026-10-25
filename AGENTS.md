@@ -86,7 +86,7 @@
 
 ## 模拟交易系统（设计见 docs/模拟交易系统设计.md）
 - `sim/`：确定性内核（交易日历、撮合、账本、风控、初筛、对照组、报告），命令 `.venv/bin/python -m sim -h`
-- 主策略候选池：`python -m sim pool` 全市场多路召回（`sim/pool.py`，参数在 `config/strategy.yaml` 的 `pool:`），产物 `data/pool/<日期>.md`；Agent 维护的观察名单 `data/watchlist.json`。`data/screen/` 初筛只服务 quant / random 对照组
+- 主策略候选池：`python -m sim pool` 全市场多路召回 + v1.1 分诊（`sim/pool.py`，参数在 `config/strategy.yaml` 的 `pool:`），产物 `data/pool/<日期>.md`；影子池 `python -m sim pool2`（`sim/pool_v2.py`，只读，不进下单链路，产物 `data/pool_v2/`）；Agent 维护的观察名单 `data/watchlist.json`。`data/screen/` 初筛只服务 quant / random 对照组
 - 策略进化：`python -m sim attrib` 出归因（`sim/attrib.py`）；进化官每周六按 `docs/automation/prompts/evolution.md` 写 `evolution/`（周报、观察项、提案、路线图、CHANGELOG、经验库）。提案只有用户在对话中批准后才能实施，实施时 `config/strategy.yaml` 的 version +0.1
 - `config/`：`broker.yaml` 费率与账户、`risk.yaml` 风控规则、`strategy.yaml` 代码策略参数
 - `accounts/<账户>/`：账本（state.json / trades.csv / nav.csv）；`orders/<交易日>/`：冻结订单；`reports/sim/latest.html`：每日报告；`reports/sim/dashboard.html`：资金看板（阶段收益、净值、回撤、月度收益、持仓）

@@ -74,9 +74,9 @@
 ### research（每天 19:00）
 - **复盘**：交易日复盘当天（净值以 20:00 结算为准，文中注明）；非交易日复盘 `state.json` 的 `last_settled`。`journal/daily/<L>.md` 已存在就跳过，因此手动重跑安全。
 - **归因**：仅当 main 当日有成交或任一持仓浮亏 >5% 时才委派 technical-flow / event-sentiment 子代理；否则不烧 token。
-- **草稿**：三层漏斗——`python -m sim pool` 全市场多路召回 100-200 只（6 个互不相关的选股通道 + 持仓 + 观察名单，产物 `data/pool/<日期>.md/.csv`，实测 2500 只全量约 3 分钟）→ 轻量点评挑 6-8 只 shortlist（不调子代理，至少 3 个通道、3 个行业，写 `journal/research/<日期>.md`）→ 深度研究 3-5 只，每只并行委派 fundamental + event-sentiment（必要时 technical-flow / valuation）；持仓逐只复核。研究过未买的进 `data/watchlist.json`，次日自动回池，研究跨天积累。`data/screen/` 只服务 quant / random 对照组。组合经理输出 `code / name / target_weight / reason（含置信度）/ 可选 stop_price、industry`；卖出用 `reason_type: "exit"`。
+- **草稿**：v1.1 分诊漏斗——`python -m sim pool` 全市场多路召回 100-200 只，产物 `data/pool/<日期>.md/.csv` 已按“今日可行动 / 等回调 / 等突破 / 观望 / 持仓复核 / 回避降权”分组，带 `stop_prob`、触发位、近 10 日进池次数（实测 2500 只全量约 3 分钟；旧格式会用 features 缓存重建）→ 按 regime 配额挑 6-8 只 shortlist（防守低波/回调 ≥50%，进攻突破/行业优先；写 `journal/research/<日期>.md`）→ 深度研究 3-5 只，结论三选一“现在买/等触发/放弃”，每只并行委派 fundamental + event-sentiment（必要时 technical-flow / valuation）；持仓逐只复核。另有 `python -m sim pool2` 影子池（读取同一 features 缓存，多风格 + regime 配额，产物 `data/pool_v2/<日期>.md`，**只记录 5 只 shadow shortlist，不进入下单**）。研究过未买的进 `data/watchlist.json`，次日自动回池。`data/screen/` 只服务 quant / random 对照组。组合经理输出 `code / name / target_weight / reason（含置信度）/ 可选 stop_price、industry`；卖出用 `reason_type: "exit"`。
 - 没值得买的就写空 `orders` 列表——代码会自动补底仓停泊，**不要为了交易而交易**。
-- 只允许写 `orders/<目标日>/main.draft.json` 与 `journal/`；该日订单已冻结则跳过。
+- 只允许写 `orders/<目标日>/main.draft.json`、`journal/`、`data/pool/`、`data/pool_v2/` 与 `data/watchlist.json`；该日订单已冻结则跳过。
 - 指令第 12 步负责重建看板、尽力发布、git 提交（`web/ dist/ journal/ orders/`）。
 
 ### evening（交易日 20:00）
@@ -91,19 +91,21 @@
 | 路径 | 作用 | 是否入库 |
 |---|---|---|
 | `sim/` | 确定性内核（日历、撮合、账本、风控、初筛、报告） | 是 |
-| `sim/pool.py` | main 候选池：全市场多路召回（6 通道 + 持仓 + 观察名单） | 是 |
+| `sim/pool.py` | main 候选池：全市场多路召回 + 分诊（action/触发位/stop_prob/persist） | 是 |
+| `sim/pool_v2.py` | 影子候选池 v2：多风格 + regime 配额（只读，不进入 main 下单链路） | 是 |
 | `tools/ashare.py` | AKShare 取数 | 是 |
 | `tools/runlog.py` | 执行日志追加/查看（`reports/sim/runlog.json`） | 是（日志本身不入库） |
 | `tools/build_dashboard.py` | 生成 `web/index.html` 与 `dist/index.html` | 是 |
 | `config/broker.yaml` | 账户、费率、执行时点、滑点 | 是 |
 | `config/risk.yaml` | 风控规则，**只有用户能改** | 是 |
-| `config/strategy.yaml` | quant / random 参数 | 是 |
+| `config/strategy.yaml` | quant / random / pool / pool_v2 参数与策略版本 | 是 |
 | `accounts/<账户>/` | `state.json` / `nav.csv` / `trades.csv`，**只能由 `python -m sim` 写** | 是 |
 | `orders/<交易日>/` | 冻结订单 + MANIFEST，**冻结后不可改** | 是 |
 | `orders/<交易日>/main.draft.json` | Agent 草稿（未冻结，可覆盖） | 是 |
 | `journal/daily/<日期>.md` | 每日复盘 | 是 |
 | `data/screen/<日期>.csv` | quant / random 对照组的初筛快照 | 是 |
-| `data/pool/<日期>.csv｜.md` | main 候选池（按通道分组，供研究漏斗） | 是 |
+| `data/pool/<日期>.csv｜.md` | main 候选池（v1.1 分诊分组，供研究漏斗） | 是 |
+| `data/pool_v2/<日期>.csv｜.md` | 影子候选池 v2（只读实验，不进下单） | 是 |
 | `data/watchlist.json` | main 观察名单（研究过未买 / 已否决） | 是 |
 | `reports/sim/` | 日报、资金看板、`runlog.json` | 否（.gitignore） |
 | `web/`、`dist/` | 看板源码与发布目录 | 是 |

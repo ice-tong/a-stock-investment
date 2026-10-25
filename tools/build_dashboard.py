@@ -410,17 +410,44 @@ def main() -> int:
     def pool_block() -> str:
         if not pool_date or not pool_rows:
             return "<p class='small muted'>暂无候选池（下次 19:00 研究任务生成）。</p>"
-        multi = sorted([r for r in pool_rows if int(float(r.get("n_channels") or 0)) >= 2],
-                       key=lambda r: (-int(float(r["n_channels"])), -float(r["ret_20"])))[:8]
-        rows = ""
-        for r in multi:
-            ind = r.get("industry") if r.get("industry") and str(r.get("industry")) != "nan" else "—"
-            rows += (f"<tr><td>{esc(r['name'])} <span class='muted small num'>{esc(r['code'])}</span></td>"
-                     f"<td>{esc(ind)}</td><td class='small'>{esc(str(r['channels']).replace('|', ' / '))}</td>"
-                     f"<td class='num'>{float(r['ret_20']) * 100:+.1f}%</td>"
-                     f"<td class='num'>{float(r['ret_120']) * 100:+.1f}%</td>"
-                     f"<td class='num'>{float(r['avg_amount']) / 1e8:.1f}</td></tr>")
-        rows = rows or "<tr><td colspan=6 class='muted'>本日没有多通道共振标的</td></tr>"
+        has_triage = any("action" in r for r in pool_rows)
+        if has_triage:
+            ready = sorted([r for r in pool_rows if str(r.get("action")) == "ready"],
+                           key=lambda r: -float(r.get("priority") or 0))[:8]
+            rows = ""
+            for r in ready:
+                ind = r.get("industry") if r.get("industry") and str(r.get("industry")) != "nan" else "—"
+                style = {"lowvol": "低波", "pullback": "回调", "breakout": "突破", "trend": "趋势",
+                         "sector": "行业", "momentum": "动量", "holding": "持仓", "watchlist": "观察"}.get(
+                             str(r.get("style")), str(r.get("style") or "—"))
+                rows += (f"<tr><td>{esc(r['name'])} <span class='muted small num'>{esc(r['code'])}</span></td>"
+                         f"<td>{style}</td><td>{esc(ind)}</td>"
+                         f"<td class='num'>{float(r['ret_20']) * 100:+.1f}%</td>"
+                         f"<td class='small'>{esc(str(r.get('trigger') or ''))}</td>"
+                         f"<td class='num'>{float(r.get('stop_prob') or 0) * 100:.0f}%</td></tr>")
+            rows = rows or "<tr><td colspan=6 class='muted'>今日没有 action=ready 的标的（等触发/防守储备见下）</td></tr>"
+            n_ready = sum(1 for r in pool_rows if str(r.get("action")) == "ready")
+            title = "今日可行动（v1.1 分诊）"
+            headers = "<tr><th>标的</th><th>风格</th><th>行业</th><th>20日</th><th>触发位</th><th>触损概率</th></tr>"
+            note = (f"<p class='small muted'>data/pool/{esc(pool_date)}.csv · 召回 {len(pool_rows)} 只"
+                    f"（可行动 {n_ready} 只），按 regime 配额 + 可行动性排序；不再按多通道共振优先。</p>")
+        else:
+            multi = sorted([r for r in pool_rows if int(float(r.get("n_channels") or 0)) >= 2],
+                           key=lambda r: (-int(float(r["n_channels"])), -float(r["ret_20"])))[:8]
+            rows = ""
+            for r in multi:
+                ind = r.get("industry") if r.get("industry") and str(r.get("industry")) != "nan" else "—"
+                rows += (f"<tr><td>{esc(r['name'])} <span class='muted small num'>{esc(r['code'])}</span></td>"
+                         f"<td>{esc(ind)}</td><td class='small'>{esc(str(r['channels']).replace('|', ' / '))}</td>"
+                         f"<td class='num'>{float(r['ret_20']) * 100:+.1f}%</td>"
+                         f"<td class='num'>{float(r['ret_120']) * 100:+.1f}%</td>"
+                         f"<td class='num'>{float(r['avg_amount']) / 1e8:.1f}</td></tr>")
+            rows = rows or "<tr><td colspan=6 class='muted'>本日没有多通道共振标的</td></tr>"
+            n_multi = sum(1 for r in pool_rows if int(float(r.get("n_channels") or 0)) >= 2)
+            title = "多通道共振标的（旧格式）"
+            headers = "<tr><th>标的</th><th>行业</th><th>通道</th><th>20日</th><th>120日</th><th>日均成交亿</th></tr>"
+            note = (f"<p class='small muted'>data/pool/{esc(pool_date)}.csv · 召回 {len(pool_rows)} 只"
+                    f"（多通道 {n_multi} 只）；这是旧格式，下次 19:00 会更新为 v1.1 分诊。</p>")
         active = [i for i in watch_items if i.get("status", "watching") in ("watching", "researched")]
         if active:
             items = "".join(
@@ -433,11 +460,8 @@ def main() -> int:
                           f"<tbody>{items}</tbody></table></div></details>")
         else:
             watch_html = "<p class='small muted'>观察名单为空。</p>"
-        n_multi = sum(1 for r in pool_rows if int(float(r.get("n_channels") or 0)) >= 2)
-        return (f"<p class='small muted'>data/pool/{esc(pool_date)}.csv · 召回 {len(pool_rows)} 只"
-                f"（多通道 {n_multi} 只），由每晚 19:00 研究任务生成；排序只决定进池，不代表买入。</p>"
-                f"<div class='table-card' style='margin-top:8px'><table>"
-                f"<thead><tr><th>多通道共振标的</th><th>行业</th><th>通道</th><th>20日</th><th>120日</th><th>日均成交亿</th></tr></thead>"
+        return (note + f"<h3 class='subhead'>{title}</h3>"
+                f"<div class='table-card' style='margin-top:8px'><table><thead>{headers}</thead>"
                 f"<tbody>{rows}</tbody></table></div>{watch_html}")
 
     tab_buttons, tab_panels = [], []

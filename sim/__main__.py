@@ -9,7 +9,7 @@ import argparse
 import datetime as dt
 import sys
 
-from . import attrib, broker, calendar as cal, config, dashboard, orders, pool, report, risk, screen, settle, strategies
+from . import attrib, broker, calendar as cal, config, dashboard, orders, pool, pool_v2, report, risk, screen, settle, strategies
 from .ledger import Account, all_accounts
 from .market import Market
 
@@ -164,9 +164,38 @@ def cmd_pool(a):
     bcfg, rcfg = config.load("broker"), config.load("risk")
     main = [n for n, s in bcfg["accounts"].items() if s == "agent"]
     holdings = [c for n in main for c in Account(n).stock_codes()] if config.accounts_dir().exists() else []
-    out = pool.run(date, Market(bcfg["exec_time"]), rcfg, config.load("strategy")["pool"],
-                   bcfg["initial_cash"] * rcfg["position"]["max_single"], holdings, log, force=a.force)
-    log(f"候选池 {len(out)} 只：{pool.pool_dir() / (date + '.md')}")
+    market = Market(bcfg["exec_time"])
+    regime = settle.regime(market, rcfg["regime"]["index"], date)
+    out = pool.run(date, market, rcfg, config.load("strategy")["pool"],
+                   bcfg["initial_cash"] * rcfg["position"]["max_single"], holdings, log,
+                   force=a.force, regime=regime)
+    log(f"候选池 {len(out)} 只（分诊排序，市场状态 {regime}）：{pool.pool_dir() / (date + '.md')}")
+
+
+def cmd_pool2(a):
+    """影子候选池 v2：只读影子，不进 main 下单链路。复用当天 features 缓存，不额外取数。"""
+    import pandas as pd
+    today = cal.today()
+    latest = today if cal.is_trading_day(today) else cal.prev_day(today)
+    date = a.date or latest
+    if date != latest:
+        log(f"警告：全市场快照是 {latest} 的，不是 {date} 的；影子池只能生成最近交易日")
+        return
+    bcfg, rcfg, scfg = config.load("broker"), config.load("risk"), config.load("strategy")
+    market = Market(bcfg["exec_time"])
+    regime = settle.regime(market, rcfg["regime"]["index"], date)
+    cache = config.cache_dir() / "pool" / f"{date}_features.csv"
+    holdings = [c for n, s in bcfg["accounts"].items() if s == "agent"
+                for c in Account(n).stock_codes()] if config.accounts_dir().exists() else []
+    if not cache.exists():
+        log("未找到当天 features 缓存，先生成 v1 候选池（会联网取数）")
+        pool.run(date, market, rcfg, scfg["pool"], bcfg["initial_cash"] * rcfg["position"]["max_single"],
+                 holdings, log, regime=regime)
+    feat = pd.read_csv(cache, dtype={"code": str})
+    chans = pool.channels(feat, scfg["pool"])
+    out = pool_v2.run(date, feat, chans, regime, holdings, pool.load_watchlist(),
+                      scfg.get("pool_v2", {}), log, force=a.force)
+    log(f"影子候选池 v2：{len(out)} 只（市场状态 {regime}）：{pool_v2.pool2_dir() / (date + '.md')}")
 
 
 def cmd_attrib(a):
@@ -214,10 +243,14 @@ def main():
         sp = sub.add_parser(name, help=help_)
         sp.add_argument("--date", help="YYYY-MM-DD，默认今天")
         sp.set_defaults(fn=fn)
-    sp = sub.add_parser("pool", help="主策略候选池：全市场多路召回（收盘后运行，供 Agent 研究）")
+    sp = sub.add_parser("pool", help="主策略候选池：全市场多路召回 + 分诊（收盘后运行，供 Agent 研究）")
     sp.add_argument("--date", help="YYYY-MM-DD，默认最近交易日")
     sp.add_argument("--force", action="store_true", help="忽略当天缓存重新生成")
     sp.set_defaults(fn=cmd_pool)
+    sp = sub.add_parser("pool2", help="影子候选池 v2：多风格 + regime 配额（只读影子，不进 main 下单链路）")
+    sp.add_argument("--date", help="YYYY-MM-DD，默认最近交易日")
+    sp.add_argument("--force", action="store_true", help="忽略当天缓存重新生成")
+    sp.set_defaults(fn=cmd_pool2)
     sp = sub.add_parser("resume", help="系统暂停后人工恢复")
     sp.add_argument("account")
     sp.set_defaults(fn=cmd_resume)

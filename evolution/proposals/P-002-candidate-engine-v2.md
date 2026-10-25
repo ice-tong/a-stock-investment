@@ -1,7 +1,7 @@
 # P-002 候选引擎 v2：从“技术面多路召回”到“状态感知的多风格候选 + 组合槽位”（影子实验）
 
 - 类型：挑战者实验（影子候选池，不改 main 下单）＋流程修复（候选呈现、触发条件、漏斗记录）
-- 状态：**待批准**（批准、否决只由用户在对话中决定；本文件由首席研究员在交互会话提出，供用户与进化官审阅）
+- 状态：**已批准（2026-10-25 用户选择方案 2：先做 A 流程修复 + B 影子池）**；阶段 1/2 实施中；main 切换仍待影子结果与用户再次批准。本文件由首席研究员在交互会话提出。
 - 提出日期：2026-10-25；提出时策略版本：strategy-v1.0
 - 关联：P-001（新仓仓位分档，仍未决）；观察项 O-003（研究任务时间窗）
 
@@ -97,3 +97,17 @@
 
 - 失效判据：影子 20 日超额 ≤ v1 连续 20 个交易日；或 v2 池的行业/风格分布仍被单一风格占据（>50%）；或研究任务晚于 20:00 两次以上。
 - 回滚：阶段 0 只改 `sim/pool.py` 输出与 prompt，git revert 即可；阶段 1 是只读影子，删除 `data/pool_v2/` 和 prompt 中的影子步骤即可；`config/risk.yaml`、`accounts/`、`orders/` 全程不动。
+
+## 实施记录（2026-10-25）
+
+- 版本：`config/strategy.yaml` 升到 strategy-v1.1（首个冻结订单日 2026-10-27），记入 `evolution/CHANGELOG.md`。
+- 阶段 0/1（流程修复，已落地）：
+  - `sim/pool.py`：新增 `stop_prob` / `one_lot_value` / `dist_*` / `action` / `trigger` / `priority` / `persist_days`；`triage()` 按 regime 权重 + 可行动性 + 风险适配排序；markdown 改为“今日可行动 / 等回调 / 等突破 / 观望 / 持仓复核 / 回避降权”，多通道移到文末参考；旧版 CSV 会用当天 features 缓存重建，不重新联网。
+  - `docs/automation/prompts/research.md`：删除“多通道共振优先”，改为先定 regime 研究配额（防守低波/回调 ≥50%）、shortlist 必须带触发位/证伪条件、深度研究结论三选一（现在买/等触发/放弃）、观察名单结构化 trigger。
+  - `tools/build_dashboard.py`：main 标签改为展示“今日可行动（v1.1 分诊）”，不再以多通道为首屏。
+- 阶段 2（影子，已落地）：
+  - `sim/pool_v2.py` + `python -m sim pool2`：5 风格（lowvol/squeeze/pullback/breakout/reversal）+ regime 配额 + 每行业 ≤3 + 风险适配；输出 `data/pool_v2/<日期>.md/.csv`，只读，不进 main 下单。
+  - 研究 prompt 增加 5 只 v2 shadow shortlist 记录，不参与订单。
+- 测试：`SIM_HOME=$(mktemp -d) .venv/bin/python -m pytest tests -q` → 25 passed。
+- 未改：`config/risk.yaml`、`accounts/`、`orders/` 冻结文件、main 下单/风控链路。
+- 待办：每个交易日晚间记录 v1/v2 候选与 shadow shortlist；20–30 个交易日后按“20 日超额 ≥ v1 +1pp、60 日不劣、stop_prob 不升、研究不晚于 20:00”判据评估，达标才向用户提案切 main。
