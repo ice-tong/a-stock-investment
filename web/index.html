@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A 股模拟交易 · 项目状态看板</title>
+<meta name="description" content="A 股投研多智能体模拟交易系统状态看板：四账户净值、冻结订单、风控状态、定时任务与项目进度">
+<style>
+  :root {
+    --bg: #0b0f17;
+    --panel: #121826;
+    --panel-2: #0f1522;
+    --border: #1f2a3d;
+    --text: #dce4f1;
+    --muted: #7d8aa0;
+    --accent: #4f8cff;
+    --up: #f0524f;      /* A 股习惯：红涨 */
+    --down: #2fbf71;    /* 绿跌 */
+    --warn: #e8b34b;
+    --chip: #1a2436;
+    font-size: 15px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    line-height: 1.55;
+    padding-bottom: 48px;
+  }
+  .num { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #101828 0%, var(--bg) 100%);
+    padding: 28px 0 22px;
+    margin-bottom: 24px;
+  }
+  .head-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; }
+  h1 { font-size: 1.45rem; font-weight: 700; letter-spacing: .5px; }
+  .sub { color: var(--muted); font-size: .85rem; }
+  .badges { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--chip); border: 1px solid var(--border);
+    border-radius: 999px; padding: 3px 12px; font-size: .78rem; color: var(--text);
+  }
+  .badge .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-defense { background: var(--warn); }
+  .dot-normal { background: var(--down); }
+  .dot-idle { background: var(--muted); }
+
+  section { margin-bottom: 28px; }
+  h2 {
+    font-size: .95rem; color: var(--muted); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+  .grid { display: grid; gap: 14px; }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 860px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } }
+  @media (max-width: 520px) { .grid-4 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px;
+  }
+  .card .label { color: var(--muted); font-size: .78rem; margin-bottom: 4px; }
+  .card .value { font-size: 1.5rem; font-weight: 700; }
+  .card .foot { font-size: .75rem; color: var(--muted); margin-top: 6px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th { text-align: left; color: var(--muted); font-weight: 500; font-size: .78rem; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .table-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow-x: auto; }
+
+  .tag { display: inline-block; padding: 1px 9px; border-radius: 6px; font-size: .75rem; border: 1px solid var(--border); background: var(--chip); }
+  .tag-approved { color: var(--down); border-color: rgba(47,191,113,.35); background: rgba(47,191,113,.08); }
+  .tag-rejected { color: var(--up); border-color: rgba(240,82,79,.35); background: rgba(240,82,79,.08); }
+  .tag-park { color: var(--accent); border-color: rgba(79,140,255,.35); background: rgba(79,140,255,.08); }
+  .tag-entry { color: var(--warn); border-color: rgba(232,179,75,.35); background: rgba(232,179,75,.08); }
+  .muted { color: var(--muted); }
+  .small { font-size: .78rem; }
+
+  .acct-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .acct-head h3 { font-size: 1rem; }
+  .strat { font-size: .75rem; color: var(--accent); background: rgba(79,140,255,.1); border: 1px solid rgba(79,140,255,.3); padding: 1px 8px; border-radius: 6px; }
+
+  .phase { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .phase:last-child { border-bottom: none; }
+  .phase .mark {
+    flex: 0 0 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: .78rem; font-weight: 700; margin-top: 2px;
+  }
+  .mark-done { background: rgba(47,191,113,.15); color: var(--down); border: 1px solid rgba(47,191,113,.4); }
+  .mark-doing { background: rgba(79,140,255,.15); color: var(--accent); border: 1px solid rgba(79,140,255,.4); }
+  .mark-todo { background: var(--chip); color: var(--muted); border: 1px solid var(--border); }
+  .phase h4 { font-size: .92rem; margin-bottom: 2px; }
+  .phase p { font-size: .8rem; color: var(--muted); }
+
+  .timeline { list-style: none; }
+  .timeline li { display: flex; gap: 14px; padding: 9px 0; border-bottom: 1px dashed var(--border); font-size: .86rem; }
+  .timeline li:last-child { border-bottom: none; }
+  .timeline .when { flex: 0 0 150px; color: var(--accent); font-weight: 600; }
+  @media (max-width: 520px) { .timeline li { flex-direction: column; gap: 2px; } }
+
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; font-size: .84rem; }
+  .kv dt { color: var(--muted); }
+  .kv dd { text-align: right; }
+
+  footer { color: var(--muted); font-size: .75rem; border-top: 1px solid var(--border); padding-top: 16px; margin-top: 8px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="head-row">
+      <div>
+        <h1>A 股模拟交易 · 项目状态看板</h1>
+        <div class="sub">a-stock-investment · 多智能体投研 + 确定性模拟盘</div>
+      </div>
+      <div class="badges">
+        <span class="badge"><span class="dot dot-defense"></span>市场状态：防守 defense</span>
+        <span class="badge"><span class="dot dot-normal"></span>风控：正常 normal</span>
+        <span class="badge"><span class="dot dot-idle"></span>今日休市（周六）</span>
+      </div>
+    </div>
+    <div class="sub" style="margin-top:10px">
+      数据快照：账本结算至 <b class="num">2026-10-23</b>（模拟启动日）· 订单冻结于 <span class="num">2026-10-24 22:17</span> · 看板生成于 <span class="num">2026-10-25</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 总览 KPI -->
+  <section>
+    <h2>总览</h2>
+    <div class="grid grid-4">
+      <div class="card">
+        <div class="label">四账户合计净值</div>
+        <div class="value num">¥400,000</div>
+        <div class="foot">初始 4 × ¥100,000</div>
+      </div>
+      <div class="card">
+        <div class="label">累计盈亏</div>
+        <div class="value num">0.00%</div>
+        <div class="foot">尚未发生成交</div>
+      </div>
+      <div class="card">
+        <div class="label">当前持仓</div>
+        <div class="value num">0</div>
+        <div class="foot">全部空仓 · 现金 100%</div>
+      </div>
+      <div class="card">
+        <div class="label">已冻结订单</div>
+        <div class="value num">12</div>
+        <div class="foot">2026-10-26 生效 · 10 批准 / 2 风控拒绝</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 账户状态 -->
+  <section>
+    <h2>账户状态（结算至 2026-10-23）</h2>
+    <div class="table-card">
+      <table>
+        <thead><tr><th>账户</th><th>策略</th><th class="num">净值</th><th class="num">现金</th><th class="num">回撤</th><th>持仓</th><th>风控状态</th></tr></thead>
+        <tbody>
+          <tr><td><b>main</b></td><td>agent（主策略）</td><td class="num">100,000.00</td><td class="num">100,000.00</td><td class="num">0.0%</td><td class="muted">空仓</td><td><span class="tag tag-approved">normal</span></td></tr>
+          <tr><td><b>quant</b></td><td>纯量化初筛</td><td class="num">100,000.00</td><td class="num">100,000.00</td><td class="num">0.0%</td><td class="muted">空仓</td><td><span class="tag tag-approved">normal</span></td></tr>
+          <tr><td><b>random</b></td><td>随机对照</td><td class="num">100,000.00</td><td class="num">100,000.00</td><td class="num">0.0%</td><td class="muted">空仓</td><td><span class="tag tag-approved">normal</span></td></tr>
+          <tr><td><b>etf</b></td><td>只持有底仓 ETF</td><td class="num">100,000.00</td><td class="num">100,000.00</td><td class="num">0.0%</td><td class="muted">空仓</td><td><span class="tag tag-approved">normal</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted" style="margin-top:8px">净值曲线将在积累更多结算数据后展示；基准为沪深 300（sh000300），底仓 ETF 为 510300。</p>
+  </section>
+
+  <!-- 冻结订单 -->
+  <section>
+    <h2>2026-10-26（周一）冻结订单</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="acct-head"><h3>main</h3><span class="strat">agent</span></div>
+        <table>
+          <thead><tr><th>标的</th><th class="num">目标仓位</th><th>类型</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>沪深300ETF <span class="muted small num">sh510300</span></td><td class="num">50%</td><td><span class="tag tag-park">park 停泊</span></td><td><span class="tag tag-approved">批准</span></td></tr>
+          </tbody>
+        </table>
+        <p class="small muted" style="margin-top:8px">主策略仅底仓停泊；第二阶段起由 Agent 生成个股草稿。</p>
+      </div>
+      <div class="card">
+        <div class="acct-head"><h3>etf</h3><span class="strat">etf</span></div>
+        <table>
+          <thead><tr><th>标的</th><th class="num">目标仓位</th><th>类型</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>沪深300ETF <span class="muted small num">sh510300</span></td><td class="num">98%</td><td><span class="tag tag-park">park 停泊</span></td><td><span class="tag tag-approved">批准</span></td></tr>
+          </tbody>
+        </table>
+        <p class="small muted" style="margin-top:8px">对照组：满仓底仓 ETF，不做择时。</p>
+      </div>
+      <div class="card">
+        <div class="acct-head"><h3>quant</h3><span class="strat">quant</span></div>
+        <table>
+          <thead><tr><th>标的</th><th class="num">目标仓位</th><th>类型</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>新华传媒 <span class="muted small num">sh600825</span></td><td class="num">5%</td><td><span class="tag tag-entry">entry</span></td><td><span class="tag tag-approved">批准</span></td></tr>
+            <tr><td>九阳股份 <span class="muted small num">sz002242</span></td><td class="num">5%</td><td><span class="tag tag-entry">entry</span></td><td><span class="tag tag-approved">批准</span></td></tr>
+            <tr><td>中国石油 <span class="muted small num">sh601857</span></td><td class="num">5%</td><td><span class="tag tag-entry">entry</span></td><td><span class="tag tag-approved">批准</span></td></tr>
+            <tr><td>伊利股份 <span class="muted small num">sh600887</span></td><td class="num">5%</td><td><span class="tag tag-entry">entry</span></td><td><span class="tag tag-rejected">拒绝</span></td></tr>
+            <tr><td>沪深300ETF <span class="muted small num">sh510300</span></td><td class="num">35%</td><td><span class="tag tag-park">park</span></td><td><span class="tag tag-approved">批准</span></td></tr>
+          </tbody>
+        </table>
+        <p class="small muted" style="margin-top:8px">入选依据：20 日风险调整动量排名（新华传媒 2.10 / 九阳 1.47 / 中石油 0.88）。伊利被拒：<b>本周新开仓已达上限 3</b>。</p>
+      </div>
+      <div class="card">
+        <div class="acct-head"><h3>random</h3><span class="strat">random</span></div>
+        <table>
+          <thead><tr><th>标的</th><th class="num">目标仓位</th><th>类型</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>招商银行 <span class="muted small num">sh600036</span></td><td class="num">5%</td><td><span class="tag tag-entry">entry</span></td><td><span class="tag tag-approved">批准</span></td></tr>
+            <tr><td>交通银行 <span class="muted small num">sh601328</span></td><td class="num">5%</td><td><span class="tag tag-entry">entry</span></td><td><span class="tag tag-approved">批准</span></td></tr>
+            <tr><td>伊利股份 <span class="muted small num">sh600887</span></td><td class="num">5%</td><td><span class="tag tag-entry">entry</span></td><td><span class="tag tag-approved">批准</span></td></tr>
+            <tr><td>建设银行 <span class="muted small num">sh601939</span></td><td class="num">5%</td><td><span class="tag tag-entry">entry</span></td><td><span class="tag tag-rejected">拒绝</span></td></tr>
+            <tr><td>沪深300ETF <span class="muted small num">sh510300</span></td><td class="num">35%</td><td><span class="tag tag-park">park</span></td><td><span class="tag tag-approved">批准</span></td></tr>
+          </tbody>
+        </table>
+        <p class="small muted" style="margin-top:8px">随机抽取自初筛候选池；建设银行被拒：<b>本周新开仓已达上限 3</b>。</p>
+      </div>
+    </div>
+    <p class="small muted" style="margin-top:8px">仓位区间约束（defense）：总仓位 30%–50%，个股上限 20%。订单已冻结（含 SHA256 校验），执行时点为交易日 14:45 价格。</p>
+  </section>
+
+  <!-- 定时任务与下一步 -->
+  <section>
+    <h2>定时任务（Qoder cron · 均启用中）</h2>
+    <div class="card">
+      <ul class="timeline">
+        <li><span class="when num">交易日 15:10</span><span><b>sim execute</b> — 执行当日冻结订单，撮合入账（下次：10-26 周一）</span></li>
+        <li><span class="when num">交易日 20:00</span><span><b>sim evening</b> — 盘后结算 + 冻结下一交易日订单 + 日报与资金看板（下次：10-26 周一）</span></li>
+        <li><span class="when num">交易日 每 15 分钟</span><span><b>黄金做T条件提醒</b> — 518880/积存金关键位监控，静默运行、仅触发时通知（9:00–11:45 / 13:00–15:45 / 21:00–22:45，有效期至 2026-12-31）</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 项目阶段 -->
+  <section>
+    <h2>项目阶段进度</h2>
+    <div class="card">
+      <div class="phase"><span class="mark mark-done">✓</span><div><h4>第一阶段 · 确定性内核</h4><p>交易日历、撮合、账本、风控、初筛、对照组、日报与资金看板；16 项测试通过。2026-10-23 正式起跑。</p></div></div>
+      <div class="phase"><span class="mark mark-doing">▶</span><div><h4>正式模拟运行期</h4><p>四账户并行：agent 主策略 / quant 量化 / random 随机对照 / etf 底仓对照。当前为该阶段第 1 个结算日之后。</p></div></div>
+      <div class="phase"><span class="mark mark-todo">2</span><div><h4>第二阶段 · Agent 订单草稿</h4><p>Agent 生成主策略订单草稿写入 main.draft.json，由 sim plan 风控校验并冻结。未开始。</p></div></div>
+      <div class="phase"><span class="mark mark-todo">3</span><div><h4>第三阶段 · 定时任务深化</h4><p>未开始（execute / evening 基础 cron 已由 Qoder 承担）。</p></div></div>
+      <div class="phase"><span class="mark mark-todo">4</span><div><h4>第四阶段 · 策略进化</h4><p>未开始。</p></div></div>
+    </div>
+  </section>
+
+  <!-- 风控参数 -->
+  <section>
+    <h2>风控与成本参数</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <dl class="kv">
+          <dt>防守期总仓位区间</dt><dd class="num">30% – 50%</dd>
+          <dt>单只个股上限</dt><dd class="num">20%</dd>
+          <dt>最多同时持股</dt><dd class="num">6 只</dd>
+          <dt>每周新开仓上限</dt><dd class="num">3 只</dd>
+          <dt>默认止损</dt><dd class="num">-8%</dd>
+          <dt>时间止损</dt><dd class="num">20 个交易日仍亏损</dd>
+          <dt>回撤警戒 / 熔断 / 停机</dt><dd class="num">8% / 12% / 18%</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <dl class="kv">
+          <dt>佣金</dt><dd class="num">万 2.5（最低 5 元）</dd>
+          <dt>印花税</dt><dd class="num">0.05%（仅股票卖出）</dd>
+          <dt>过户费</dt><dd class="num">0.001%（仅股票，双向）</dd>
+          <dt>滑点</dt><dd class="num">0.1% – 0.5% 按流动性分档</dd>
+          <dt>ETF 滑点</dt><dd class="num">0.05%</dd>
+          <dt>成交量冲击上限</dt><dd class="num">当日成交量 1%</dd>
+          <dt>候选池排除</dt><dd class="num">科创板 / 北交所 / ST</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- 工作日志 -->
+  <section>
+    <h2>近期工作日志</h2>
+    <div class="table-card">
+      <table>
+        <thead><tr><th>日期</th><th>工具</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr><td class="num">2026-10-24</td><td>Qoder</td><td>定时任务归属落定：qoder_cron 创建 execute / evening 两任务；新增 docs/tools/ 分工具上下文</td></tr>
+          <tr><td class="num">2026-10-24</td><td>Qoder</td><td>接力补齐跨工具机制：《跨工具接力准则》入库、任务快照小节、AGENTS.md 入口链接</td></tr>
+          <tr><td class="num">2026-10-24</td><td>Claude Code</td><td>搭建提示词、子代理、取数脚本、模拟交易第一阶段与资金看板；启动正式模拟</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <p>本页为静态数据快照（生成于 2026-10-25），不随模拟盘每日结算自动更新；最新账本以本机 <span class="num">reports/sim/dashboard.html</span> 为准。</p>
+    <p style="margin-top:6px">本看板由 AI 生成，仅供研究参考，不构成投资建议。股市有风险，投资需谨慎。</p>
+  </footer>
+
+</div>
+</body>
+</html>
