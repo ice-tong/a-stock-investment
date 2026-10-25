@@ -98,6 +98,9 @@
 | `tools/ashare.py` | AKShare 取数 | 是 |
 | `tools/runlog.py` | 执行日志追加/查看（`reports/sim/runlog.json`） | 是（日志本身不入库） |
 | `tools/build_dashboard.py` | 生成 `web/index.html` 与 `dist/index.html` | 是 |
+| `tools/notify.py` | Bark 推送（结果通知） | 是 |
+| `config/notify.example.yaml` | Bark 配置模板 | 是 |
+| `config/notify.local.yaml` | 本机 Bark key（含密钥） | 否（.gitignore） |
 | `config/broker.yaml` | 账户、费率、执行时点、滑点 | 是 |
 | `config/risk.yaml` | 风控规则，**只有用户能改** | 是 |
 | `config/strategy.yaml` | quant / random / pool / pool_v2 参数与策略版本 | 是 |
@@ -121,6 +124,14 @@
 - 降级：cron 会话可能没有 sites 插件。此时任务只注明“看板已本地更新，站点待同步发布”，`dist/` 已是最新；任何带 sites 插件的会话用新 actionId 补发即可。
 - `runlog.json` 只保留最近 300 条，由 `tools/runlog.py` 维护；看板每次重建时把当前日志内嵌进 HTML，所以日志刷新依赖重建。
 - 看板的执行日志会同时显示黄金提醒的记录（若触发）；那是独立功能的旁路展示，不参与模拟盘流程。
+
+### 6.1 结果通知（Bark）
+
+- 工具：`tools/notify.py`，通过 Bark HTTP API 推送到 iPhone；不依赖第三方包（urllib）。
+- 配置：复制 `config/notify.example.yaml` 为 `config/notify.local.yaml` 并填入设备 key（已在 `.gitignore`）；也可用环境变量 `BARK_KEY` / `BARK_SERVER` / `BARK_GROUP`。未配置 key 时脚本打印一行说明并以 0 退出，不影响任务。
+- 触发范围：execute / evening / research 成功与失败各推一条；非交易日或无订单跳过不推送；黄金提醒仅在 `ALERT` 或取数失败时推送（`--level timeSensitive`）。
+- 测试：`.venv/bin/python tools/notify.py --title "测试" --body "hello" --dry-run`，去掉 `--dry-run` 即真实发送。
+- 通知内容只放账户摘要与站点发布状态，不放密钥；`notify.py` 的失败不会让定时任务标记失败。
 
 ## 7. 迁移到其他 Agent 工具
 

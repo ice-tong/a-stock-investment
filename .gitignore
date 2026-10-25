@@ -17,3 +17,6 @@ reports/sim/
 
 # 回测明细 CSV 可由 tools/backtest_pool.py 重生成，只留汇总 md 入库
 evolution/analysis/*.csv
+
+# Bark 设备 key 本地配置（含密钥，不入库）
+config/notify.local.yaml
