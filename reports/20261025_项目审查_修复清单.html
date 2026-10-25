@@ -1,0 +1,480 @@
+<title>模拟盘修复清单</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a single-column work order. Summary table first, then one card per fix, grouped by priority. */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --ink: #17202b;
+  --muted: #5a6573;
+  --line: #dde2e8;
+  --accent: #1f5fa8;
+  --p0: #b42318;
+  --p0-bg: #fdecea;
+  --p1: #a15c00;
+  --p1-bg: #fdf3e2;
+  --p2: #2f6b3a;
+  --p2-bg: #e8f3ea;
+  --code-bg: #eef1f5;
+  --font-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161d; --surface: #182029; --ink: #e4e9ef; --muted: #98a3b1; --line: #2a3441;
+    --accent: #6ea8ec; --p0: #ff8a7a; --p0-bg: #3a1c1a; --p1: #f0b35a; --p1-bg: #35281a;
+    --p2: #7fc98d; --p2-bg: #1b2e20; --code-bg: #212b36; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161d; --surface: #182029; --ink: #e4e9ef; --muted: #98a3b1; --line: #2a3441;
+  --accent: #6ea8ec; --p0: #ff8a7a; --p0-bg: #3a1c1a; --p1: #f0b35a; --p1-bg: #35281a;
+  --p2: #7fc98d; --p2-bg: #1b2e20; --code-bg: #212b36; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body);
+  font-size: 15px; line-height: 1.7;
+}
+.wrap {
+  max-width: 920px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 72px;
+  display: flex; flex-direction: column; gap: 40px;
+}
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.3; }
+h1 { font-size: 30px; font-weight: 900; letter-spacing: 0.01em; }
+h2 { font-size: 21px; font-weight: 700; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+h3 { font-size: 17px; font-weight: 700; }
+p { margin: 0; }
+code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; word-break: break-word; }
+.eyebrow { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+header { display: flex; flex-direction: column; gap: 12px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 20px; color: var(--muted); font-size: 13.5px; }
+.meta b { color: var(--ink); font-weight: 500; }
+.lede { max-width: 68ch; }
+
+.rules {
+  background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--p0);
+  border-radius: 6px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px;
+}
+.rules ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; }
+
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 500; color: var(--muted); font-size: 12.5px; letter-spacing: 0.04em; }
+tr:last-child td { border-bottom: 0; }
+td a { color: var(--accent); text-decoration: none; }
+td a:hover { text-decoration: underline; }
+td.id { font-family: var(--font-mono); white-space: nowrap; }
+
+.pill { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.p0 { color: var(--p0); background: var(--p0-bg); }
+.pill.p1 { color: var(--p1); background: var(--p1-bg); }
+.pill.p2 { color: var(--p2); background: var(--p2-bg); }
+.pill.gate { color: var(--accent); background: var(--code-bg); font-weight: 500; }
+
+section { display: flex; flex-direction: column; gap: 16px; }
+.section-note { color: var(--muted); max-width: 70ch; }
+.cards { display: flex; flex-direction: column; gap: 14px; }
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+  padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0;
+  scroll-margin-top: 16px;
+}
+.card-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.card-head .id { font-family: var(--font-mono); font-weight: 600; color: var(--muted); }
+.where { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); word-break: break-all; }
+dl { margin: 0; display: grid; grid-template-columns: 5.5em 1fr; gap: 8px 14px; }
+dt { color: var(--muted); font-size: 13px; font-weight: 500; padding-top: 2px; }
+dd { margin: 0; min-width: 0; }
+dd ul { margin: 0; padding-left: 1.1em; }
+@media (max-width: 560px) {
+  dl { grid-template-columns: 1fr; gap: 2px; }
+  dd { margin-bottom: 8px; }
+}
+
+.brief { display: flex; flex-direction: column; gap: 10px; }
+.brief-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+pre {
+  margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px;
+  padding: 16px; overflow-x: auto; font-family: var(--font-mono); font-size: 12.8px; line-height: 1.65;
+  white-space: pre-wrap; word-break: break-word;
+}
+button {
+  font: inherit; font-size: 13.5px; font-weight: 500; color: var(--surface); background: var(--accent);
+  border: 0; border-radius: 6px; padding: 7px 14px; cursor: pointer;
+}
+button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.status { font-size: 13px; color: var(--muted); }
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">代码审查 · 修复工单</div>
+    <h1>A 股模拟交易系统：修复清单</h1>
+    <div class="meta">
+      <span>审查日期 <b>2026-10-25</b></span>
+      <span>基线提交 <b class="mono">d9b42f8</b></span>
+      <span>仓库 <b class="mono">a-stock-investment</b></span>
+      <span>测试基线 <b>25 项全过</b></span>
+    </div>
+    <p class="lede">这份清单写给负责修复的 Agent。它把审查结论拆成可以逐条执行的工单：每条写明出问题的位置、触发场景、修法和验收标准。P0 必须在 main 账户 2026-10-26 产生首笔个股持仓之前修完；P1 会改变对照组口径或策略参数，动手前先跟用户确认；P2 是运维与时序改进。</p>
+  </header>
+
+  <div class="rules">
+    <h3>修复前必读的硬性约束</h3>
+    <ul>
+      <li>开工前读 <code>AGENTS.md</code>、<code>docs/跨工具接力准则.md</code>、<code>docs/进展与交接.md</code>。</li>
+      <li><b>禁止修改</b> <code>config/risk.yaml</code>、<code>accounts/</code> 下任何文件、<code>orders/</code> 下已冻结的订单与 <code>MANIFEST.json</code>。账本只能由 <code>python -m sim</code> 写入。</li>
+      <li>所有测试与演练设置 <code>SIM_HOME</code> 指向临时目录，复用 <code>tests/test_sim.py</code> 里的 <code>env</code> fixture 与 <code>FakeMarket</code>，不要在正式账户上试。</li>
+      <li>改 <code>config/strategy.yaml</code> 或选股、对照组逻辑时，<code>version</code> +0.1，并在 <code>evolution/CHANGELOG.md</code> 记一条。</li>
+      <li>不要改动 Qoder 上的 cron 配置；涉及定时任务的改动只改仓库里的 prompt 文件，并在交接文档里写明需要用户在 Qoder 同步的内容。</li>
+      <li>每组修复单独提交，提交信息以 <code>[deepseek]</code> 开头；完成后跑 <code>.venv/bin/python -m pytest -q</code>，并在 <code>docs/进展与交接.md</code> 工作日志追加一行。</li>
+    </ul>
+  </div>
+
+  <section>
+    <h2>总览</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>编号</th><th>优先级</th><th>问题</th><th>位置</th></tr></thead>
+        <tbody>
+          <tr><td class="id"><a href="#B1">B1</a></td><td><span class="pill p0">P0</span></td><td>复权因子取数失败时持股数被乘错倍数</td><td class="mono">sim/settle.py · sim/market.py</td></tr>
+          <tr><td class="id"><a href="#B2">B2</a></td><td><span class="pill p0">P0</span></td><td>除权除息后止损价未调整，会误触发止损</td><td class="mono">sim/settle.py</td></tr>
+          <tr><td class="id"><a href="#B3">B3</a></td><td><span class="pill p0">P0</span></td><td>行情缺失时市场状态退回中性，风控反而放松</td><td class="mono">sim/settle.py · sim/__main__.py</td></tr>
+          <tr><td class="id"><a href="#B4">B4</a></td><td><span class="pill p0">P0</span></td><td>坏草稿让 plan 崩溃，连累其他账户冻结不了</td><td class="mono">sim/strategies.py · sim/__main__.py</td></tr>
+          <tr><td class="id"><a href="#B5">B5</a></td><td><span class="pill p0">P0</span></td><td>止损价不低于现价时，单笔风险上限失效</td><td class="mono">sim/risk.py</td></tr>
+          <tr><td class="id"><a href="#B6">B6</a></td><td><span class="pill p1">P1</span></td><td>红利税未扣，比设计宽松</td><td class="mono">sim/settle.py</td></tr>
+          <tr><td class="id"><a href="#B7">B7</a></td><td><span class="pill p1">P1</span></td><td>execute 晚于结算补跑时，成交不进当天净值</td><td class="mono">sim/__main__.py</td></tr>
+          <tr><td class="id"><a href="#B8">B8</a></td><td><span class="pill p1">P1</span></td><td>git 提交失败无提示</td><td class="mono">sim/orders.py</td></tr>
+          <tr><td class="id"><a href="#S1">S1</a></td><td><span class="pill p1">P1</span> <span class="pill gate">需用户确认</span></td><td>新增同仓位区间 ETF 对照账户</td><td class="mono">config/broker.yaml · sim/strategies.py</td></tr>
+          <tr><td class="id"><a href="#S2">S2</a></td><td><span class="pill p1">P1</span> <span class="pill gate">需用户确认</span></td><td>random 对照组改为与 main 同股票池、同仓位</td><td class="mono">sim/strategies.py</td></tr>
+          <tr><td class="id"><a href="#S3">S3</a></td><td><span class="pill p1">P1</span></td><td>决策级前向收益记录</td><td class="mono">sim/attrib.py（新增模块）</td></tr>
+          <tr><td class="id"><a href="#S4">S4</a></td><td><span class="pill p1">P1</span></td><td>冻结订单记录模型与工具</td><td class="mono">sim/__main__.py · research.md</td></tr>
+          <tr><td class="id"><a href="#A1">A1</a></td><td><span class="pill p2">P2</span></td><td>研究超时后草稿被静默丢弃；复盘早于结算</td><td class="mono">sim/__main__.py · docs/automation/</td></tr>
+          <tr><td class="id"><a href="#A2">A2</a></td><td><span class="pill p2">P2</span></td><td>拒绝过期草稿，周末不做深度研究</td><td class="mono">sim/strategies.py · research.md</td></tr>
+          <tr><td class="id"><a href="#A3">A3</a></td><td><span class="pill p2">P2</span></td><td>冻结完整性检查与失败告警</td><td class="mono">tools/（新增脚本）</td></tr>
+          <tr><td class="id"><a href="#A4">A4</a></td><td><span class="pill p2">P2</span></td><td>evening 每天写交接文档，文档膨胀</td><td class="mono">docs/automation/prompts/evening.md</td></tr>
+          <tr><td class="id"><a href="#A5">A5</a></td><td><span class="pill p2">P2</span></td><td>设计文档与实现不一致</td><td class="mono">docs/模拟交易系统设计.md</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="pill p0">P0</span> 内核 bug：会直接让账本或风控出错</h2>
+    <p class="section-note">这一组每条都要配一个回归测试。测试放进 <code>tests/test_sim.py</code>，用 <code>FakeMarket</code> 模拟取数失败或除权。</p>
+    <div class="cards">
+
+      <article class="card" id="B1">
+        <div class="card-head"><span class="id">B1</span><h3>复权因子取数失败时持股数被乘错倍数</h3></div>
+        <div class="where">sim/market.py:149-164 hfq_factor() · sim/settle.py:42-49 · sim/broker.py:137</div>
+        <dl>
+          <dt>现状</dt>
+          <dd><code>hfq_factor()</code> 取数异常或没有数据时返回 <code>1.0</code>。结算把这个值当真实因子写回 <code>pos["hfq"]</code>，买入时也直接存入。</dd>
+          <dt>触发场景</dt>
+          <dd>持仓真实因子为 3.5。某天 AKShare 失败，返回 1.0，算出 <code>ratio = 1.0/3.5</code>，持股缩到 29%；第二天恢复，<code>ratio = 3.5/1.0</code>，持股放大 3.5 倍，并写入两笔假的 <code>corp_action</code>。AKShare 目前正频繁因代理失败，这个场景很可能发生。</dd>
+          <dt>修法</dt>
+          <dd><ul>
+            <li><code>hfq_factor()</code> 失败时返回 <code>None</code>，不再返回 1.0；ETF、指数仍返回 1.0。失败结果不要缓存进 <code>self._factor</code>，后续调用可以重试。</li>
+            <li>结算时 <code>f_now is None</code>：跳过除权处理，<b>保留原有 <code>pos["hfq"]</code></b>，在 notes 里写"复权因子取数失败，今日未检查除权"。</li>
+            <li>买入时取不到因子：<code>pos["hfq"] = None</code>，等下次结算拿到第一个有效值时只记录、不折算。</li>
+            <li>加一道合理性保护：单日 <code>ratio</code> 超出 [0.5, 3.0] 时不自动折算，记 note 并标记需人工复核（10 送 10 的 ratio 约为 2）。</li>
+          </ul></dd>
+          <dt>验收</dt>
+          <dd>新测试：因子序列 3.5 → 失败 → 3.5，持股数保持不变，<code>trades.csv</code> 里没有 <code>corp_action</code>。买入当天失败、次日正常，持股数也保持不变。</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="B2">
+        <div class="card-head"><span class="id">B2</span><h3>除权除息后止损价未调整</h3></div>
+        <div class="where">sim/settle.py:42-49（折算）· sim/settle.py:76（止损判断）</div>
+        <dl>
+          <dt>现状</dt>
+          <dd>除权时持股数按 <code>ratio</code> 放大，但 <code>stop_price</code> 是绝对价格，没有跟着调整。</dd>
+          <dt>触发场景</dt>
+          <dd>10 送 10 后股价从 20 元变成 10 元，原止损价 18.4 元保持不变，当天结算就把这只股票加入 <code>pending_exits</code>，次日被强制卖出。</dd>
+          <dt>修法</dt>
+          <dd>在折算持股数的同一分支里，执行 <code>pos["stop_price"] = round(pos["stop_price"] / ratio, 3)</code>（仅当 <code>stop_price</code> 存在时）。</dd>
+          <dt>验收</dt>
+          <dd>新测试：ratio = 2、收盘价减半，持股翻倍，止损价减半，<code>pending_exits</code> 为空。</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="B3">
+        <div class="card-head"><span class="id">B3</span><h3>行情缺失时市场状态退回中性，风控放松</h3></div>
+        <div class="where">sim/settle.py:10, 18 regime() · sim/settle.py:39 · sim/__main__.py do_plan()</div>
+        <dl>
+          <dt>现状</dt>
+          <dd><ul>
+            <li>指数日线取不到或不足 125 行时，<code>regime()</code> 返回 <code>neutral</code>，仓位区间从防守的 30%-50% 放宽到 50%-80%。</li>
+            <li>持仓收盘价取不到时，按"停牌"用旧价估值，照常写净值、冻结订单。</li>
+            <li>设计文档第八节要求"数据日期不是最新交易日时，当天不交易"，代码里没有这道闸。</li>
+          </ul></dd>
+          <dt>修法</dt>
+          <dd><ul>
+            <li><code>regime()</code> 数据不足时返回 <code>defense</code>，并让调用方能拿到"数据缺失"的标记（例如返回 <code>(regime, ok)</code> 或在 log 里写明）。</li>
+            <li>增加数据新鲜度闸门：结算前检查基准指数（<code>sh000300</code>）的最后一根日线日期是否等于结算日。不等于时：<b>不结算、不冻结</b>，退出码非 0，日志写清原因，交给 cron 重试。</li>
+            <li>持仓取不到价格的比例超过一半时，视为数据源故障而不是停牌，同样中止。</li>
+          </ul></dd>
+          <dt>验收</dt>
+          <dd>新测试：<code>FakeMarket.daily</code> 对指数返回 None，regime 为 <code>defense</code>；指数最后日期早于结算日，<code>evening</code> 不写 <code>nav.csv</code>、不生成 <code>orders/</code> 目录。</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="B4">
+        <div class="card-head"><span class="id">B4</span><h3>坏草稿让 plan 崩溃，连累其他账户</h3></div>
+        <div class="where">sim/strategies.py:22 · sim/risk.py:70 · sim/__main__.py:62 do_plan() 账户循环</div>
+        <dl>
+          <dt>现状</dt>
+          <dd><code>drafts()</code> 直接 <code>json.loads(...)["orders"]</code>，不做任何校验。账户按字母顺序处理（etf → main → quant → random），main 抛异常时 quant 和 random 当天都不会冻结。</dd>
+          <dt>触发场景</dt>
+          <dd>Agent 写了半截 JSON、缺 <code>orders</code> 键、某笔缺 <code>code</code>、<code>target_weight</code> 写成 <code>"5%"</code>，或代码写成 <code>600887</code> 而不是 <code>sh600887</code>。</dd>
+          <dt>修法</dt>
+          <dd><ul>
+            <li>新增 <code>validate_draft()</code>：JSON 可解析；<code>orders</code> 是列表；每笔 <code>code</code> 匹配 <code>^(sh|sz)\d{6}$</code>；<code>target_weight</code> 是 0 到 1 之间的数字；<code>stop_price</code> 可选，有值时必须为正数。</li>
+            <li>整份草稿不合格就当作空草稿（只停泊底仓），单笔不合格就剔除这一笔；两种情况都在冻结订单的 <code>risk_notes</code> 或文档级 <code>draft_errors</code> 字段里留痕。</li>
+            <li><code>do_plan</code> 的账户循环里每个账户单独 try/except，一个账户失败不影响其他账户冻结；有失败时命令结束返回非 0 退出码。</li>
+          </ul></dd>
+          <dt>验收</dt>
+          <dd>新测试：main 草稿分别为非法 JSON、缺 orders、<code>target_weight="5%"</code>，四个账户都能冻结；main 只有底仓订单且带错误说明。</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="B5">
+        <div class="card-head"><span class="id">B5</span><h3>止损价不低于现价时，单笔风险上限失效</h3></div>
+        <div class="where">sim/risk.py:103</div>
+        <dl>
+          <dt>现状</dt>
+          <dd><code>dist = max((price - stop) / price, 1e-6)</code>。止损价不低于现价时，距离被截到 1e-6，<code>cap</code> 退化为单票上限 20%，1% 单笔风险约束失效；买入后当天结算又会立刻触发止损。</dd>
+          <dt>修法</dt>
+          <dd>买入单的 <code>stop_price &gt;= price</code> 时直接拒绝，原因写"止损价不低于现价"。止损距离小于 1% 时也拒绝，防止仓位被算得过大。</dd>
+          <dt>验收</dt>
+          <dd>新测试：价格 10、止损价 10.5 时订单被拒绝；止损价 9.2 时仓位上限按 1% 风险计算为 12.5%。</dd>
+        </dl>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="pill p1">P1</span> 次要 bug 与评估口径</h2>
+    <p class="section-note">S1、S2 会改变对照组的定义。现在还没有任何成交，改起来最便宜，但对照组口径属于策略设计，动手前请用户在对话里确认。</p>
+    <div class="cards">
+
+      <article class="card" id="B6">
+        <div class="card-head"><span class="id">B6</span><h3>红利税未扣</h3></div>
+        <div class="where">sim/settle.py:42-49</div>
+        <dl>
+          <dt>现状</dt>
+          <dd>除息时用后复权因子把分红近似为红利再投资，没有扣红利税。设计文档第三节要求按持有期扣税：1 个月内 20%，1 个月到 1 年 10%，1 年以上免税。</dd>
+          <dt>修法</dt>
+          <dd>保持现有的折算方式，额外按持有天数从现金里扣一笔税：近似分红金额 = 除权前市值 × (ratio − 1)，税 = 分红金额 × 税率，记一笔 <code>side="tax"</code>。对送转（无现金分红）要能区分；数据不足以区分时只记 note，不扣税。</dd>
+          <dt>验收</dt>
+          <dd>测试：持有 10 天、ratio = 1.02，现金减少 2% × 市值 × 20%。</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="B7">
+        <div class="card-head"><span class="id">B7</span><h3>execute 晚于结算补跑时，成交不进当天净值</h3></div>
+        <div class="where">sim/__main__.py cmd_execute() · cmd_evening()</div>
+        <dl>
+          <dt>修法</dt>
+          <dd><ul>
+            <li><code>cmd_execute</code>：账户的 <code>last_settled &gt;= date</code> 时拒绝执行，并提示"已结算，不能补执行"。</li>
+            <li><code>cmd_evening</code>：结算前检查当日有冻结订单的账户是否已执行（<code>date in state["executed"]</code>）；没执行就先自动调用一次 execute 逻辑，再结算。</li>
+          </ul></dd>
+          <dt>验收</dt>
+          <dd>测试：有冻结订单、未执行就跑 evening，成交先发生，<code>nav.csv</code> 当天行反映持仓。</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="B8">
+        <div class="card-head"><span class="id">B8</span><h3>git 提交失败无提示</h3></div>
+        <div class="where">sim/orders.py:55-63 git_commit()</div>
+        <dl>
+          <dt>修法</dt>
+          <dd>遇到 <code>index.lock</code> 时等几秒重试 3 次。区分"没有改动"（正常）和真正失败，失败时打印 stderr 并让命令返回非 0 退出码，让 cron 的 runlog 记成 failed。</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="S1">
+        <div class="card-head"><span class="id">S1</span><h3>新增同仓位区间 ETF 对照账户</h3><span class="pill gate">需用户确认</span></div>
+        <div class="where">config/broker.yaml · sim/strategies.py · sim/__main__.py（fixed_etf_weight）· sim/attrib.py</div>
+        <dl>
+          <dt>问题</dt>
+          <dd>etf 账户固定 98% 仓位，main 跟随市场状态区间（防守时上限 50%）。检查点条件 1（main 比 etf 多 2 个百分点）实际衡量的是代码按均线调的仓位，不是 Agent 选股。</dd>
+          <dt>修法</dt>
+          <dd>新增账户 <code>etf_band</code>（策略 <code>etf_band</code>）：不买个股，ETF 目标权重 = 当日 band 的 <code>max</code>，和 main 无草稿时的停泊逻辑完全一致。<code>Account.create</code> 时以 main 的起始日为起点、10 万初始资金；<code>attrib.py</code> 的 <code>CONTROLS</code> 加入它，并输出"main − etf_band"作为选股净贡献。</dd>
+          <dt>注意</dt>
+          <dd>新账户要从下一个冻结日开始参与，不要回填历史；在 <code>evolution/roadmap.md</code> 里只提建议，检查点标准本身由用户决定是否改。</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="S2">
+        <div class="card-head"><span class="id">S2</span><h3>random 对照组改为与 main 同股票池、同仓位</h3><span class="pill gate">需用户确认</span></div>
+        <div class="where">sim/strategies.py random 分支 · config/strategy.yaml random:</div>
+        <dl>
+          <dt>问题</dt>
+          <dd>random 从 <code>data/screen/</code>（成交额前 120 只里的趋势股）挑，main 从 <code>data/pool/</code>（全市场约 2500 只召回）挑；中性状态下 random 单只 12.5%，main 单只不超过 5%。"main &gt; random"因此不是干净的对照。</dd>
+          <dt>修法</dt>
+          <dd>random 改为从当日 <code>data/pool/&lt;日期&gt;.csv</code> 中 <code>action</code> 不为 <code>avoid</code> 的标的里随机抽取；单只权重与 main 当前规则一致（配置项 <code>random.weight: 0.05</code>）；持股数取 main 近 20 日的平均个股数（没有历史时取 4）。保留固定随机种子。pool 文件不存在时退回原 <code>data/screen/</code> 逻辑并写 note。</dd>
+          <dt>注意</dt>
+          <dd>quant 组保持现状，它回答的是另一个问题（简单量化排序是否够用）。版本号 +0.1。</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="S3">
+        <div class="card-head"><span class="id">S3</span><h3>决策级前向收益记录</h3></div>
+        <div class="where">新增 sim/decisions.py · python -m sim decisions · sim/attrib.py</div>
+        <dl>
+          <dt>问题</dt>
+          <dd>三个月约 15 笔平仓，单笔 20 日收益标准差按 10% 估，均值标准误约 2.6%，小于 5% 的选股优势测不出来。</dd>
+          <dt>修法</dt>
+          <dd><ul>
+            <li>研究草稿新增可选字段 <code>verdicts</code>：shortlist 里每只的 <code>{code, verdict: buy|wait|reject, confidence, style}</code>。research.md 第 9 步要求写入。</li>
+            <li>新命令 <code>python -m sim decisions</code>：读取每日 <code>data/pool/*.csv</code> 与草稿里的 verdicts，回填 5/20/60 日前向收益（前复权收盘价，T+1 收盘买入口径，和 <code>tools/backtest_pool.py</code> 一致），产出 <code>evolution/attribution/decisions.csv</code>。</li>
+            <li><code>attrib.py</code> 增加一节：按 verdict 分组的平均前向超额（相对当日候选池中位数）、buy 与 reject 的差、按置信度分组的校准情况。</li>
+          </ul></dd>
+          <dt>验收</dt>
+          <dd>测试：用合成的 pool csv 与价格序列，前向收益计算正确，未到期的样本标为空而不是 0。</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="S4">
+        <div class="card-head"><span class="id">S4</span><h3>冻结订单记录模型与工具</h3></div>
+        <div class="where">sim/__main__.py do_plan() · docs/automation/prompts/research.md 第 10 步</div>
+        <dl>
+          <dt>修法</dt>
+          <dd>草稿顶层新增 <code>meta: {tool, model, written_at, decided_on}</code>；research.md 要求 Agent 填写。<code>do_plan</code> 把 <code>meta</code> 原样写入冻结订单。<code>attrib.py</code> 增加按 model 分组。</dd>
+        </dl>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="pill p2">P2</span> 自动化与运维</h2>
+    <p class="section-note">cron 配置在 Qoder 里，修复者只改仓库文件。凡需用户在 Qoder 同步的改动，在交接文档"待用户决策"里列清楚。</p>
+    <div class="cards">
+
+      <article class="card" id="A1">
+        <div class="card-head"><span class="id">A1</span><h3>研究超时后草稿被静默丢弃；复盘早于结算</h3></div>
+        <div class="where">sim/__main__.py · docs/automation/README.md · docs/automation/prompts/*.md</div>
+        <dl>
+          <dt>问题</dt>
+          <dd>19:00 研究预算（pool 6 分钟、点评 10 分钟、深研 25 分钟，加持仓复核与发布）很容易超过 60 分钟；超时后第 10 步发现已冻结就跳过，当天白跑且没人知道。复盘时 20:00 结算还没跑，持仓复核看到的是前一天的状态。</dd>
+          <dt>修法</dt>
+          <dd><ul>
+            <li>拆分命令：新增 <code>python -m sim close</code>（只结算 + 日报），<code>plan</code> 保持独立。<code>evening</code> 保留为两者组合，兼容旧 cron。</li>
+            <li>研究完成后写标记文件 <code>orders/&lt;目标日&gt;/main.ready</code>。<code>plan</code> 新增 <code>--wait-ready MINUTES</code>：等待标记出现，超时就按无草稿冻结，并在冻结订单里写 <code>draft_status: "timeout"</code>。</li>
+            <li>在 <code>docs/automation/README.md</code> 里给出建议时间表：16:00 close → 19:00 research → 21:30 plan（带 <code>--wait-ready 30</code>），由用户决定是否在 Qoder 改。</li>
+          </ul></dd>
+        </dl>
+      </article>
+
+      <article class="card" id="A2">
+        <div class="card-head"><span class="id">A2</span><h3>拒绝过期草稿，周末不做深度研究</h3></div>
+        <div class="where">sim/strategies.py drafts() · docs/automation/prompts/research.md</div>
+        <dl>
+          <dt>问题</dt>
+          <dd>周六、周日都在为周二写草稿，周一会被覆盖，大约 2/7 的研究成本白花。周一研究失败时，基于周五数据的周日草稿会在周一晚被冻结，违背"研究失败就只放底仓"。</dd>
+          <dt>修法</dt>
+          <dd><ul>
+            <li>结合 S4 的 <code>meta.decided_on</code>：plan 时草稿的 <code>decided_on</code> 早于当前结算日就丢弃，按无草稿处理并留痕。</li>
+            <li>research.md：非交易日只做第一部分复盘（以及周六的进化任务），跳过第二部分。</li>
+          </ul></dd>
+        </dl>
+      </article>
+
+      <article class="card" id="A3">
+        <div class="card-head"><span class="id">A3</span><h3>冻结完整性检查与失败告警</h3></div>
+        <div class="where">新增 tools/healthcheck.py</div>
+        <dl>
+          <dt>修法</dt>
+          <dd>脚本检查：交易日晚上 <code>orders/&lt;下一交易日&gt;/</code> 下 4 份（加 S1 后为 5 份）冻结订单都在、MANIFEST 哈希一致；所有账户 <code>nav.csv</code> 最后一行等于当日；当日 15:10 后 <code>executed</code> 包含当日。任何一项不满足：<code>runlog.py add --task health --status failed</code>，退出码非 0。在 <code>docs/automation/README.md</code> 写明建议 22:00 由 cron 调用，并把推送通知作为可选步骤（由用户在 Qoder 配置）。</dd>
+          <dt>另外</dt>
+          <dd>仓库目前没有 remote，本地提交可以被改写，"冻结不可抵赖"不成立。在交接文档里建议用户配置私有远端；不要擅自添加 remote 或推送。</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="A4">
+        <div class="card-head"><span class="id">A4</span><h3>evening 每天写交接文档</h3></div>
+        <div class="where">docs/automation/prompts/evening.md 第 13d 步</div>
+        <dl>
+          <dt>修法</dt>
+          <dd>删掉"在 docs/进展与交接.md 工作日志追加一行"，结算记录只写 runlog；提交命令里去掉该文件。交接文档里注明 evening 的 Qoder cron 指令需要用户同步。</dd>
+        </dl>
+      </article>
+
+      <article class="card" id="A5">
+        <div class="card-head"><span class="id">A5</span><h3>设计文档与实现不一致</h3></div>
+        <div class="where">docs/模拟交易系统设计.md</div>
+        <dl>
+          <dt>修法</dt>
+          <dd>文首加一行"实现细节以代码与 docs/automation/README.md 为准"。同步这些过时描述：订单路径应为 <code>orders/&lt;交易日&gt;/&lt;账户&gt;.json</code>；账本在 <code>accounts/</code> 而非 <code>ledger/</code>；没有 <code>challenger/</code> 账户；进化改为每周；执行时间改为 15:10 跑、取 14:45 价格。只改描述，不改第四节风控与第七节实盘标准的数字。</dd>
+        </dl>
+      </article>
+    </div>
+  </section>
+
+  <section class="brief">
+    <div class="brief-bar">
+      <h2>给修复 Agent 的启动指令</h2>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="status" id="copy-status" aria-live="polite"></span>
+        <button type="button" id="copy-btn">复制指令</button>
+      </div>
+    </div>
+    <pre id="brief-text">你在仓库 /Users/yancong/agent-workspace/a-stock-investment 工作，按「模拟盘修复清单」逐条修复。
+
+顺序：B1 → B2 → B3 → B4 → B5（P0，每条一个回归测试、一个提交）→ B6 → B7 → B8 → S3 → S4 → A1 → A2 → A3 → A4 → A5。
+S1、S2 先不要实施，等用户在对话里确认后再做。
+
+约束：
+- 开工前读 AGENTS.md、docs/跨工具接力准则.md、docs/进展与交接.md。
+- 不得修改 config/risk.yaml、accounts/ 下任何文件、orders/ 下已冻结订单与 MANIFEST.json。
+- 测试一律用 SIM_HOME 指向临时目录，复用 tests/test_sim.py 的 env fixture 与 FakeMarket。
+- 不改 Qoder cron；需要用户同步的 cron 改动写进 docs/进展与交接.md 的"待用户决策"。
+- 不添加 git remote、不推送。
+- 提交信息以 [deepseek] 开头；全部完成后 .venv/bin/python -m pytest -q 必须全过，并在 docs/进展与交接.md 工作日志追加一行。
+
+完成后汇报：每条的改动文件、新增测试名、是否全过，以及没做或有疑问的条目。</pre>
+  </section>
+
+  <footer>审查基线 d9b42f8，2026-10-25。行号以该提交为准，修复过程中行号可能漂移，以函数名定位为准。</footer>
+</div>
+
+<script>
+(function () {
+  var btn = document.getElementById('copy-btn');
+  var status = document.getElementById('copy-status');
+  var pre = document.getElementById('brief-text');
+  function selectText() {
+    var r = document.createRange();
+    r.selectNodeContents(pre);
+    var s = window.getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+  }
+  btn.addEventListener('click', function () {
+    var text = pre.innerText;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        status.textContent = '已复制';
+      }, function () {
+        selectText();
+        status.textContent = '已选中，按 Cmd/Ctrl+C 复制';
+      });
+    } else {
+      selectText();
+      status.textContent = '已选中，按 Cmd/Ctrl+C 复制';
+    }
+  });
+})();
+</script>
