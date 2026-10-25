@@ -86,7 +86,8 @@
 - `sim/`：确定性内核（交易日历、撮合、账本、风控、初筛、对照组、报告），命令 `.venv/bin/python -m sim -h`
 - `config/`：`broker.yaml` 费率与账户、`risk.yaml` 风控规则、`strategy.yaml` 代码策略参数
 - `accounts/<账户>/`：账本（state.json / trades.csv / nav.csv）；`orders/<交易日>/`：冻结订单；`reports/sim/latest.html`：每日报告；`reports/sim/dashboard.html`：资金看板（阶段收益、净值、回撤、月度收益、持仓）
-- 日常运行：交易日 15:10 后 `python -m sim execute`；20:00 后 `python -m sim evening`
+- 日常运行：交易日 15:10 后 `python -m sim execute`；每天 19:00 复盘+草稿；交易日 20:00 后 `python -m sim evening`
+- 自动化任务的时间表、数据流、prompt 原文快照与迁移到其他工具的方法见 `docs/automation/README.md`
 - 第二阶段起，Agent 只能把主策略订单草稿写到 `orders/<交易日>/main.draft.json`，由 `python -m sim plan` 风控校验并冻结
 
 ## 硬性约束
