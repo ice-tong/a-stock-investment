@@ -200,8 +200,8 @@
 | 项目 | 内容 |
 |---|---|
 | 脚本 | `tools/gold_alert.py` |
-| cron | `*/15 9-11,13-15,21-22 * * 1-5`（Asia/Shanghai），2026-12-31 到期 |
-| 任务 ID（Qoder） | `dbfeb064-b2bf-4ae9-8170-7cafc1888cb6` |
+| cron | `0 1,10,14,22 * * 1-6`（Asia/Shanghai，约每 3 小时：10:00 / 14:00 / 22:00 / 次日 01:00），2026-12-31 到期 |
+| 任务 ID（Qoder CN） | `5c74d6a0-c23e-42c0-b8af-e895c0837509` |
 | 指令原文 | [extras/gold-alert.md](extras/gold-alert.md) |
 | 行为 | `NO_ALERT` 静默结束；`ALERT` 才发消息并写一条 runlog；不重建看板、不发布站点 |
 | 冷却 | 脚本内置 2 小时，避免同一信号重复提醒 |
