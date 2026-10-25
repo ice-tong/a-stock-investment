@@ -139,6 +139,7 @@ def load_account(name):
         "drawdown": float(last["drawdown"]) if last else 0.0,
         "stock_w": float(last["stock_weight"]) if last else 0.0,
         "etf_w": float(last["etf_weight"]) if last else 0.0,
+        "active_w": float(last.get("active_etf_weight") or 0) if last else 0.0,
         "last_settled": state.get("last_settled", ""),
         "positions": state.get("positions", {}),
     }
@@ -387,7 +388,7 @@ def main() -> int:
       <div class="card hero"><div class="label">当日盈亏</div><div class="value num {cls(a['day_pnl'])}">{money(a['day_pnl'])}</div>
         <div class="foot">相对上一结算日</div></div>
       <div class="card hero"><div class="label">回撤 / 仓位</div><div class="value num">{pct(a['drawdown'], signed=False)}</div>
-        <div class="foot">个股 {pct(a['stock_w'], signed=False)} · ETF {pct(a['etf_w'], signed=False)} · 其余现金</div></div>
+        <div class="foot">个股 {pct(a['stock_w'], signed=False)} · 主动ETF {pct(a['active_w'], signed=False)} · 底仓ETF {pct(max(a['etf_w'] - a['active_w'], 0), signed=False)} · 现金</div></div>
     </div>"""
 
     def plan_block(name) -> str:
