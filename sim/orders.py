@@ -57,7 +57,7 @@ def git_commit(message: str):
     home = config.home()
     if not (home / ".git").exists():
         return False
-    subprocess.run(["git", "-C", str(home), "add", "orders", "accounts", "data/screen"], check=False,
-                   capture_output=True)
+    paths = [p for p in ("orders", "accounts", "data/screen", "data/pool", "data/watchlist.json") if (home / p).exists()]
+    subprocess.run(["git", "-C", str(home), "add", *paths], check=False, capture_output=True)
     r = subprocess.run(["git", "-C", str(home), "commit", "-m", message], check=False, capture_output=True)
     return r.returncode == 0

@@ -8,6 +8,8 @@ __pycache__/
 data/*
 !data/.gitkeep
 !data/screen/
+!data/pool/
+!data/watchlist.json
 
 # 日报和资金看板可随时由账本重新生成
 reports/sim/

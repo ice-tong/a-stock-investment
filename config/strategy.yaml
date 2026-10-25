@@ -12,3 +12,15 @@ quant:
 random:
   n_stocks: 4
   rotate_days: 20             # 持有满 N 个交易日换一只
+
+pool:                         # 主策略候选池（sim/pool.py）：全市场多路召回，供 Agent 研究漏斗使用；不影响量化/随机对照组
+  prefilter_min_amount: 50000000  # 当日成交额 ≥ 5000 万才拉日线（风控要求近 20 日日均 ≥1 亿，这里放宽一档防漏）
+  prefilter_max: 2500         # 预过滤后最多拉取多少只的日线（按当日成交额降序）
+  history_days: 400           # 拉取的日历天数（约 270 个交易日）
+  workers: 6                  # 并发取数线程
+  per_channel: 25             # 每个通道召回数量
+  defensive_max_pe: 25        # 低波低估通道的 PE 上限
+  breakout_amt_ratio: 1.5     # 放量突破通道：5 日/20 日成交额比下限
+  sector_top: 5               # 强势行业通道：取 20 日收益中位数前 N 个行业
+  sector_per: 4               # 每个强势行业取前 N 只
+  sector_min_size: 8          # 行业至少有 N 只合规股票才参与排名

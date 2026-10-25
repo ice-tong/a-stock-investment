@@ -84,6 +84,7 @@
 
 ## 模拟交易系统（设计见 docs/模拟交易系统设计.md）
 - `sim/`：确定性内核（交易日历、撮合、账本、风控、初筛、对照组、报告），命令 `.venv/bin/python -m sim -h`
+- 主策略候选池：`python -m sim pool` 全市场多路召回（`sim/pool.py`，参数在 `config/strategy.yaml` 的 `pool:`），产物 `data/pool/<日期>.md`；Agent 维护的观察名单 `data/watchlist.json`。`data/screen/` 初筛只服务 quant / random 对照组
 - `config/`：`broker.yaml` 费率与账户、`risk.yaml` 风控规则、`strategy.yaml` 代码策略参数
 - `accounts/<账户>/`：账本（state.json / trades.csv / nav.csv）；`orders/<交易日>/`：冻结订单；`reports/sim/latest.html`：每日报告；`reports/sim/dashboard.html`：资金看板（阶段收益、净值、回撤、月度收益、持仓）
 - 日常运行：交易日 15:10 后 `python -m sim execute`；每天 19:00 复盘+草稿；交易日 20:00 后 `python -m sim evening`

@@ -9,7 +9,7 @@ import argparse
 import datetime as dt
 import sys
 
-from . import broker, calendar as cal, config, dashboard, orders, report, risk, screen, settle, strategies
+from . import broker, calendar as cal, config, dashboard, orders, pool, report, risk, screen, settle, strategies
 from .ledger import Account, all_accounts
 from .market import Market
 
@@ -152,6 +152,22 @@ def cmd_execute(a):
     orders.git_commit(f"sim: {date} 执行订单")
 
 
+def cmd_pool(a):
+    """主策略候选池。默认取今天或之前最近的交易日；全市场快照只有"当前"，所以只能当天收盘后跑当天。"""
+    today = cal.today()
+    latest = today if cal.is_trading_day(today) else cal.prev_day(today)
+    date = a.date or latest
+    if date != latest:
+        log(f"警告：全市场快照是 {latest} 的，不是 {date} 的；候选池只能生成最近交易日")
+        return
+    bcfg, rcfg = config.load("broker"), config.load("risk")
+    main = [n for n, s in bcfg["accounts"].items() if s == "agent"]
+    holdings = [c for n in main for c in Account(n).stock_codes()] if config.accounts_dir().exists() else []
+    out = pool.run(date, Market(bcfg["exec_time"]), rcfg, config.load("strategy")["pool"],
+                   bcfg["initial_cash"] * rcfg["position"]["max_single"], holdings, log, force=a.force)
+    log(f"候选池 {len(out)} 只：{pool.pool_dir() / (date + '.md')}")
+
+
 def cmd_report(a):
     date = resolve_date(a.date)
     bcfg = config.load("broker")
@@ -191,6 +207,10 @@ def main():
         sp = sub.add_parser(name, help=help_)
         sp.add_argument("--date", help="YYYY-MM-DD，默认今天")
         sp.set_defaults(fn=fn)
+    sp = sub.add_parser("pool", help="主策略候选池：全市场多路召回（收盘后运行，供 Agent 研究）")
+    sp.add_argument("--date", help="YYYY-MM-DD，默认最近交易日")
+    sp.add_argument("--force", action="store_true", help="忽略当天缓存重新生成")
+    sp.set_defaults(fn=cmd_pool)
     sp = sub.add_parser("resume", help="系统暂停后人工恢复")
     sp.add_argument("account")
     sp.set_defaults(fn=cmd_resume)

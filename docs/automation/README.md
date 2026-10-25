@@ -74,7 +74,7 @@
 ### research（每天 19:00）
 - **复盘**：交易日复盘当天（净值以 20:00 结算为准，文中注明）；非交易日复盘 `state.json` 的 `last_settled`。`journal/daily/<L>.md` 已存在就跳过，因此手动重跑安全。
 - **归因**：仅当 main 当日有成交或任一持仓浮亏 >5% 时才委派 technical-flow / event-sentiment 子代理；否则不烧 token。
-- **草稿**：初筛前 12 只里至多研究 3 只新候选，每只并行委派 fundamental + event-sentiment（必要时 technical-flow）；持仓逐只复核。组合经理输出 `code / name / target_weight / reason（含置信度）/ 可选 stop_price、industry`；卖出用 `reason_type: "exit"`。
+- **草稿**：三层漏斗——`python -m sim pool` 全市场多路召回 100-200 只（6 个互不相关的选股通道 + 持仓 + 观察名单，产物 `data/pool/<日期>.md/.csv`）→ 轻量点评挑 6-8 只 shortlist（不调子代理，至少 3 个通道、3 个行业，写 `journal/research/<日期>.md`）→ 深度研究 3-5 只，每只并行委派 fundamental + event-sentiment（必要时 technical-flow / valuation）；持仓逐只复核。研究过未买的进 `data/watchlist.json`，次日自动回池，研究跨天积累。`data/screen/` 只服务 quant / random 对照组。组合经理输出 `code / name / target_weight / reason（含置信度）/ 可选 stop_price、industry`；卖出用 `reason_type: "exit"`。
 - 没值得买的就写空 `orders` 列表——代码会自动补底仓停泊，**不要为了交易而交易**。
 - 只允许写 `orders/<目标日>/main.draft.json` 与 `journal/`；该日订单已冻结则跳过。
 - 指令第 12 步负责重建看板、尽力发布、git 提交（`web/ dist/ journal/ orders/`）。

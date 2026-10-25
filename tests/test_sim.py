@@ -265,3 +265,37 @@ def test_period_and_monthly_returns():
     m = monthly_returns(dates, values, 100)
     assert m["2026"][9] == pytest.approx(0.02) and m["2026"][10] == pytest.approx(110.25 / 102 - 1)
     assert m["2026"]["year"] == pytest.approx(0.1025)
+
+
+# ---------------- 主策略候选池 ----------------
+def _bars(closes, amounts=None):
+    import pandas as pd
+    n = len(closes)
+    idx = [f"d{i:03d}" for i in range(n)]
+    c = pd.Series(closes, index=idx, dtype=float)
+    return pd.DataFrame({"close": c, "high": c * 1.01, "amount": amounts or [2e8] * n}, index=idx)
+
+
+def test_pool_features_and_channels():
+    import pandas as pd
+    from sim import pool
+    up = _bars([10 * 1.004 ** i for i in range(200)])                                  # 稳步上涨
+    dip = _bars([10 * 1.006 ** i for i in range(192)] + [31.6 * 0.98 ** i for i in range(1, 9)])  # 上升趋势中回调
+    assert pool.features(_bars([10] * 100)) is None                                   # 数据不足
+    fu, fd = pool.features(up), pool.features(dip)
+    assert fu["ret_120"] > 0 and fu["near_high_60"] and fd["dd_60"] < -0.08 and fd["chg_5d"] < 0
+    feat = pd.DataFrame([{"code": "sh600001", "name": "甲", "industry": "A", "pe": 12.0} | fu,
+                         {"code": "sh600002", "name": "乙", "industry": "A", "pe": 80.0} | fd,
+                         {"code": "sh600003", "name": "丙", "industry": "B", "pe": 10.0} | fu])
+    feat["eligible"] = [True, True, False]
+    cfg = {"per_channel": 5, "defensive_max_pe": 25, "breakout_amt_ratio": 1.5,
+           "sector_top": 2, "sector_per": 2, "sector_min_size": 1}
+    ch = pool.channels(feat, cfg)
+    assert "sh600003" not in sum(ch.values(), [])                                     # 不合规的不召回
+    assert ch["momentum"] == ["sh600001"] and ch["pullback"] == ["sh600002"]
+    assert ch["defensive"] == ["sh600001"]                                             # 乙 PE 太高
+    out = pool.assemble(feat, ch, holdings=["sh600003"], watch=["sh600002"])
+    assert set(out["code"]) == {"sh600001", "sh600002", "sh600003"}                  # 持仓即使不合规也进池复核
+    assert "watchlist" in out.set_index("code").loc["sh600002", "channels"]
+    md = pool.to_markdown("2026-10-23", out, ch, {"spot": 3, "base": 3, "pre": 3, "feat": 3, "eligible": 2})
+    assert "多通道共振" in md and "（不合规）" in md
