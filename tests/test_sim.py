@@ -372,11 +372,42 @@ def test_etf_profile_and_limit_by_class():
     assert etf.profile("sh512400", "有色金属ETF")["class"] == "equity"      # 持有股票，不是商品
     assert etf.profile("sz159201", "自由现金流ETF")["class"] == "equity"    # 含"现金"但是因子 ETF
     assert etf.profile("sh513100", "纳指ETF")["class"] == "crossborder"
+    assert etf.profile("sh511360", "短融ETF海富通")["class"] == "money"      # 短债≈现金，不按权益止损
+    assert etf.profile("sh511380", "可转债ETF博时")["class"] == "convertible"  # 波动接近权益
     assert etf.profile("sh600000", "")["class"] == "equity"  # 未知名字兜底
     assert limit_prices("sh588000", "科创50ETF", 1.0) == (1.2, 0.8)   # 20% 涨跌幅
     assert limit_prices("sz159915", "创业板ETF", 1.0) == (1.2, 0.8)
     assert limit_prices("sh511010", "国债ETF", 100.0) == (110.0, 90.0)
     assert limit_prices("sh510300", "沪深300ETF", 4.0) == (4.4, 3.6)  # 10%
+    assert limit_prices("sh511380", "可转债ETF", 10.0) == (11.0, 9.0)
+    assert etf.profile("sh511380", "可转债ETF")["stop"] == pytest.approx(0.08)  # 不再按债券 3%
+
+
+def test_etf_select_keeps_defensive_names():
+    """防守型 ETF 不能被宽基/科创债按成交额挤出：equity 与 bond 各有保底名额。"""
+    import pandas as pd
+    from sim import etf
+
+    def row(code, name, amount):
+        return {"code": code, "name": name, "close": 1.0, "amount": amount}
+
+    spot = pd.DataFrame(
+        [row(f"sh5103{i:02d}", f"宽基{i}ETF", 1000 - i) for i in range(12)]
+        + [row("sh510880", "红利ETF华泰柏瑞", 50),                 # 防守：红利
+           row("sh512890", "红利低波ETF华泰柏瑞", 40),             # 防守：红利低波
+           row("sz159201", "自由现金流ETF华夏", 30),              # 防守：现金流
+           row("sh511010", "国债ETF", 45)]                        # 防守：国债（bond 类）
+        + [row(f"sh5515{i:02d}", f"科创债{i}ETF", 2000 - i) for i in range(12)]
+        + [row("sh511360", "短融ETF海富通", 5000)]                 # 短融≈货币，不该占 equity 名额
+    )
+    picked = etf.select(spot)
+    codes = set(picked["code"])
+    assert {"sh510880", "sh512890", "sz159201", "sh511010"} <= codes
+    # 短融按 money 归类，不能占用 equity 的 12 个名额；equity = 12 宽基 + 3 防守
+    assert picked.loc[picked["code"] == "sh511360", "cls"].iloc[0] == "money"
+    assert (picked["cls"] == "equity").sum() == 15
+    assert picked["code"].is_unique
+
 
 
 def test_etf_check_rejects_illiquid_or_new_etf():

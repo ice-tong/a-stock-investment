@@ -11,13 +11,23 @@ pool:
   min_avg_amount: 30000000    # 近 20 日日均成交额 ≥ 3000 万
   min_listed_days: 60         # 上市 ≥ 60 个交易日
   top_per_class: 12           # 每个类别按成交额取前 N 只（债券 ETF 成交额极大，不分类会把权益类挤掉）
+  # 防守型保底名额：红利/低波/现金流 ETF 的成交额通常小于宽基，单靠 top-N 会被挤出；
+  # 债券类同理，国债/政金债常被科创债、公司债挤掉。保底只加不减，且仍需过上面的流动性门槛。
+  defensive_slots: 5
+  defensive_keywords: ["红利", "低波", "价值", "现金流", "央企", "国企"]
+  bond_defensive_slots: 3
+  bond_defensive_keywords: ["国债", "政金债", "地方债", "存单"]
 
-# 匹配顺序：money → bond → gold → crossborder → star → chinext → equity（先匹配先得）
+# 匹配顺序：money → convertible → bond → commodity → crossborder → star → chinext → equity（先匹配先得）
 classes:
   money:
     limit: 0.10
     stop: 0.02                # 货币 ETF 实质是现金，止损只为让风险公式可算，正常不会触发
-    names: ["货币", "日利", "添益", "快线", "理财"]
+    names: ["货币", "日利", "添益", "快线", "理财", "短融", "存单"]
+  convertible:
+    limit: 0.10
+    stop: 0.08                # 可转债 ETF：波动接近权益（20 日约 15%），不能按债券 3% 止损
+    names: ["可转债", "转债"]
   bond:
     limit: 0.10
     stop: 0.03

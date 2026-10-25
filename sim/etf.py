@@ -2,7 +2,7 @@
 
 与个股的区别：ETF 没有 ST、几乎不停牌，但流动性和规模差异极大（货币 ETF 与冷门行业 ETF
 差几个数量级），所以入池和下单都要过一道流动性门槛；涨跌幅与默认止损按品种类别给
-（科创板/创业板 ETF 是 20%，债券 ETF 波动小、止损更紧）。
+（科创板/创业板 ETF 是 20%，债券 ETF 波动小、止损更紧，可转债 ETF 按权益处理）。
 
 配置在 config/etf.yaml；本模块不读也不改 config/risk.yaml。
 """
@@ -80,6 +80,32 @@ def check(market, code: str, date: str, name: str = "") -> tuple:
     return True, ""
 
 
+def select(spot: pd.DataFrame, c: dict | None = None) -> pd.DataFrame:
+    """从 ETF 清单里挑入池候选：各类别按成交额取前 N，防守型品种另给保底名额。
+
+    单靠 top-N-by-amount 会系统性挤掉防守品种：equity 类里红利/低波/现金流因子 ETF 的
+    成交额通常小于宽基，bond 类里国债/政金债常被科创债、公司债挤掉。保底名额只加不减，
+    且最终仍要过 `check()` 的流动性门槛。返回按成交额降序排列，附带 `cls` 列。
+    """
+    c = c or cfg()["pool"]
+    s = spot.sort_values("amount", ascending=False).copy()
+    names = s["name"].fillna("")
+    s["cls"] = [profile(code, name)["class"] for code, name in zip(s["code"], names)]
+    picked = [s.groupby("cls", group_keys=False).head(c["top_per_class"])]
+    quotas = (
+        ("equity", c.get("defensive_slots", 0), c.get("defensive_keywords") or []),
+        ("bond", c.get("bond_defensive_slots", 0), c.get("bond_defensive_keywords") or []),
+    )
+    for cls, slots, keywords in quotas:
+        if not slots or not keywords:
+            continue
+        part = s[s["cls"] == cls]
+        part = part[part["name"].fillna("").str.contains("|".join(keywords), regex=True)]
+        picked.append(part.head(int(slots)))
+    return (pd.concat(picked).drop_duplicates(subset="code")
+            .sort_values("amount", ascending=False).reset_index(drop=True))
+
+
 def build_pool(date: str, market, log) -> pd.DataFrame:
     """全市场 ETF 候选池（新浪清单 + 逐只日线特征）。产物 data/pool/<日期>_etf.csv|.md。
 
@@ -96,11 +122,12 @@ def build_pool(date: str, market, log) -> pd.DataFrame:
         spot[col] = pd.to_numeric(spot[col], errors="coerce")
     c = cfg()["pool"]
     spot = spot[spot["code"].str.match(r"^(sh|sz)\d{6}$") & (spot["close"] > 0)]
-    spot = spot[spot["amount"] >= c["min_amount"]].sort_values("amount", ascending=False)
-    spot = spot.assign(cls=[profile(code, name)["class"] for code, name in zip(spot["code"], spot["name"])])
-    # 分类取前 N：债券 ETF 的成交额比权益类高一个量级，混在一起排会把权益类全部挤掉
-    spot = spot.groupby("cls", group_keys=False).head(c["top_per_class"])
-    log(f"ETF 清单 {len(spot)} 只达到门槛（当日成交额 ≥ {c['min_amount'] / 1e8:.1f} 亿，每个类别最多 {c['top_per_class']} 只），逐只取日线")
+    spot = spot[spot["amount"] >= c["min_amount"]]
+    # 分类取前 N + 防守型保底：债券 ETF 的成交额比权益类高一个量级，混排会把权益类挤掉；
+    # 同类里宽基/科创债又会把红利、国债这些防守品种挤掉。
+    spot = select(spot, c)
+    log(f"ETF 清单 {len(spot)} 只达到门槛（当日成交额 ≥ {c['min_amount'] / 1e8:.1f} 亿，"
+        f"每个类别最多 {c['top_per_class']} 只 + 防守保底），逐只取日线")
 
     rows = []
     for i, row in enumerate(spot.itertuples(), 1):
