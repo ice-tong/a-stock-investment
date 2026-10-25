@@ -13,3 +13,6 @@ data/*
 
 # 日报和资金看板可随时由账本重新生成
 reports/sim/
+
+# 回测明细 CSV 可由 tools/backtest_pool.py 重生成，只留汇总 md 入库
+evolution/analysis/*.csv
