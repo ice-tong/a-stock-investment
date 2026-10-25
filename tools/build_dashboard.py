@@ -207,10 +207,10 @@ def order_rows(orders_json, with_account=False) -> str:
         if notes and o.get("status") != "approved":
             basis += f"<br><span class='muted small'>风控：{esc('; '.join(notes))}</span>"
         acct = f"<td>{esc(orders_json.get('account', ''))}</td>" if with_account else ""
-        rows.append(f"{acct}<td>{esc(o.get('name'))} <span class='muted small num'>{esc(o.get('code'))}</span></td>"
+        rows.append(f"<tr>{acct}<td>{esc(o.get('name'))} <span class='muted small num'>{esc(o.get('code'))}</span></td>"
                     f"<td class='num'>{o.get('target_weight', 0) * 100:.0f}%</td>"
                     f"<td><span class='tag {ty}'>{esc(o.get('reason_type'))}</span></td>"
-                    f"<td><span class='tag {st}'>{stx}</span></td><td class='small'>{basis}</td>")
+                    f"<td><span class='tag {st}'>{stx}</span></td><td class='small'>{basis}</td></tr>")
     return "".join(rows) or f"<tr><td colspan={6 if with_account else 5} class='muted'>无订单</td></tr>"
 
 
