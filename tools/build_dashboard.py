@@ -16,6 +16,11 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 ACCOUNTS = [("main", "main · 主策略"), ("quant", "quant · 量化初筛"),
             ("random", "random · 随机对照"), ("etf", "etf · 底仓对照")]
 CONTROL_NOTE = {"main": "本看板主角", "quant": "对照组", "random": "对照组", "etf": "对照组"}
+REASON_CN = {"entry": "新开仓", "exit": "调仓卖出", "park": "底仓停泊",
+             "stop_loss": "止损卖出", "time_stop": "时间止损", "breaker": "熔断卖出", "halt": "停机卖出"}
+REASON_TAG = {"entry": "tag-entry", "park": "tag-park", "exit": "tag-skipped",
+              "stop_loss": "tag-rejected", "time_stop": "tag-rejected",
+              "breaker": "tag-rejected", "halt": "tag-rejected"}
 
 CSS = """
   :root {
@@ -201,7 +206,8 @@ def order_rows(orders_json, with_account=False) -> str:
     for o in orders_json.get("orders", []):
         st = "tag-approved" if o.get("status") == "approved" else "tag-rejected"
         stx = "批准" if o.get("status") == "approved" else "拒绝"
-        ty = "tag-park" if o.get("reason_type") == "park" else "tag-entry"
+        rt = o.get("reason_type", "")
+        ty = REASON_TAG.get(rt, "tag-skipped")
         notes = o.get("risk_notes") or []
         basis = esc(o.get("reason", ""))
         if notes and o.get("status") != "approved":
@@ -209,7 +215,7 @@ def order_rows(orders_json, with_account=False) -> str:
         acct = f"<td>{esc(orders_json.get('account', ''))}</td>" if with_account else ""
         rows.append(f"<tr>{acct}<td>{esc(o.get('name'))} <span class='muted small num'>{esc(o.get('code'))}</span></td>"
                     f"<td class='num'>{o.get('target_weight', 0) * 100:.0f}%</td>"
-                    f"<td><span class='tag {ty}'>{esc(o.get('reason_type'))}</span></td>"
+                    f"<td><span class='tag {ty}'>{esc(REASON_CN.get(rt, rt))}</span></td>"
                     f"<td><span class='tag {st}'>{stx}</span></td><td class='small'>{basis}</td></tr>")
     return "".join(rows) or f"<tr><td colspan={6 if with_account else 5} class='muted'>无订单</td></tr>"
 
@@ -263,7 +269,7 @@ def main() -> int:
             f"<td>{esc(t['name'])} <span class='muted small num'>{esc(t['code'])}</span></td>"
             f"<td class='num'>{float(t['shares']):.0f}</td><td class='num'>{float(t['price']):.3f}</td>"
             f"<td class='num'>{money(float(t['amount']))}</td><td class='num'>{fees:.2f}</td>"
-            f"<td class='small muted'>{esc(t.get('reason_type', ''))}</td></tr>")
+            f"<td class='small muted'>{esc(REASON_CN.get(t.get('reason_type', ''), t.get('reason_type', '')))}</td></tr>")
     trade_table = "".join(trade_rows) or "<tr><td colspan=8 class='muted'>尚无成交</td></tr>"
 
     nav_values = [float(r["equity"]) for r in m["nav"]]
