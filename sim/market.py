@@ -4,6 +4,7 @@
 """
 import datetime as dt
 import os
+import threading
 from typing import NamedTuple
 
 os.environ.setdefault("TQDM_DISABLE", "1")
@@ -31,7 +32,8 @@ def kind(code: str) -> str:
 def limit_pct(code: str, name: str = "") -> float:
     num = code[2:]
     if kind(code) == "etf":
-        return 0.10
+        from . import etf as etf_mod  # 延迟导入：etf 模块依赖本模块
+        return etf_mod.profile(code, name)["limit"]
     if "ST" in name.upper():
         return 0.05
     if code.startswith("bj"):
@@ -55,6 +57,7 @@ class Market:
         self._daily = {}
         self._minute = {}
         self._factor = {}
+        self._lock = threading.Lock()  # ETF 日线走 mini_racer（每次新建 V8 实例），并发会崩进程
 
     # ---------- 日线 ----------
     def daily(self, code: str, end: str | None = None) -> pd.DataFrame | None:
@@ -71,7 +74,8 @@ class Market:
         try:
             k = kind(code)
             if k == "etf":
-                df = ak.fund_etf_hist_sina(symbol=code)
+                with self._lock:
+                    df = ak.fund_etf_hist_sina(symbol=code)
             elif k == "index":
                 df = ak.stock_zh_index_daily(symbol=code)
             else:

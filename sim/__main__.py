@@ -10,8 +10,10 @@ import datetime as dt
 import sys
 
 from . import attrib, broker, calendar as cal, config, dashboard, orders, pool, pool_v2, report, risk, screen, settle, strategies
+from . import etf as etf_mod
 from .ledger import Account, all_accounts
 from .market import Market
+from .market import kind as code_kind
 
 
 def log(msg):
@@ -95,15 +97,16 @@ def do_plan(date, market, rcfg, bcfg, scfg, reg) -> int:
             if drafts and decided and decided < date:
                 draft_errors.append(f"草稿基于 {decided} 的数据，早于结算日 {date}，整份丢弃（不拿旧数据下单）")
                 drafts = []
-            for d in drafts:  # Agent 草稿里可能有初筛之外的股票
+            for d in drafts:  # Agent 草稿里可能有初筛之外的股票/ETF
                 if d["code"] not in prices and (px := market.close(d["code"], date)) is not None:
                     prices[d["code"]] = px
-                if d["code"] not in info and (row := screen.info_for(d["code"], date, market)):
+                if (code_kind(d["code"]) == "stock" and d["code"] not in info
+                        and (row := screen.info_for(d["code"], date, market))):
                     info[d["code"]] = row
             strategy = acct.state["strategy"]
             reviewed, band = risk.review(acct, drafts, {
                 "trade_date": trade_date, "settle_date": date, "regime": reg, "risk_state": state, "rcfg": rcfg,
-                "prices": prices, "info": info, "equity": equity, "base_etf": etf,
+                "prices": prices, "info": info, "equity": equity, "base_etf": etf, "market": market,
                 # etf 固定 98%；etf_band 跟当日仓位区间上沿，用来把"仓位控制"从"选股"里拆出来
                 "fixed_etf_weight": 0.98 if strategy == "etf" else (band["max"] if strategy == "etf_band" else None)})
             for i, o in enumerate(reviewed, 1):
@@ -245,6 +248,11 @@ def cmd_pool(a):
                    bcfg["initial_cash"] * rcfg["position"]["max_single"], holdings, log,
                    force=a.force, regime=regime)
     log(f"候选池 {len(out)} 只（分诊排序，市场状态 {regime}）：{pool.pool_dir() / (date + '.md')}")
+    try:
+        edf = etf_mod.build_pool(date, market, log)
+        log(f"ETF 候选池 {len(edf)} 只：{pool.pool_dir() / (date + '_etf.md')}")
+    except Exception as e:  # ETF 池失败不影响个股候选池与下单链路
+        log(f"ETF 候选池生成失败（不影响主流程）：{type(e).__name__}: {e}")
 
 
 def cmd_pool2(a):

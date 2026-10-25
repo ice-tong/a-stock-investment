@@ -4,6 +4,7 @@
 并自动补上强制卖出（止损、时间止损、熔断）和底仓 ETF 调整。
 """
 from . import calendar as cal
+from . import etf
 from . import market as mk
 
 TIERS = ["offense", "neutral", "defense"]
@@ -62,17 +63,18 @@ def review(acct, drafts: list, ctx: dict) -> tuple:
                     "risk_notes": ["强制卖出"]})
 
     # 2) 逐笔检查草稿
-    held_after = set(acct.stock_codes()) - set(pending)
+    held_after = {c for c, pos in acct.positions.items() if (pos.get("role") or "stock") != "park"} - set(pending)
     new_this_week = _new_positions_this_week(acct, date)
     for d in drafts:
         o = {"target_weight": 0.0, "reason_type": "entry", "risk_notes": []} | d
         o["status"] = "approved"
         code, name, tw = o["code"], o.get("name", ""), float(o["target_weight"])
         notes = o["risk_notes"]
+        kind = mk.kind(code)
         if code == etf_code:
             continue  # 底仓 ETF 由系统统一计算
-        if mk.kind(code) != "stock":
-            o.update(status="rejected"), notes.append("只允许交易个股和配置的底仓 ETF")
+        if kind not in ("stock", "etf"):
+            o.update(status="rejected"), notes.append("只允许交易个股与 ETF（底仓 ETF 由系统统一计算）")
             out.append(o)
             continue
         cur = w_now(code)
@@ -91,47 +93,56 @@ def review(acct, drafts: list, ctx: dict) -> tuple:
         if state == "halt":
             o["status"] = "rejected"; notes.append("系统已暂停，禁止买入")
         elif state == "breaker":
-            o["status"] = "rejected"; notes.append("熔断期间禁止新开或增加个股仓位")
+            o["status"] = "rejected"; notes.append("熔断期间禁止新开或增加个股/主动 ETF 仓位")
+        elif kind == "etf":
+            ok, why = etf.check(ctx["market"], code, ctx["settle_date"], name)
+            if not ok:
+                o["status"] = "rejected"; notes.append(why)
         elif (why := universe_check(code, name, ctx["info"].get(code), rcfg["universe"])):
             o["status"] = "rejected"; notes.append(why)
+        if o["status"] == "rejected":
+            out.append(o)
+            continue
+        price = prices.get(code)
+        if price is None:
+            o["status"] = "rejected"; notes.append("无最新价格")
         else:
-            price = prices.get(code)
-            if price is None:
-                o["status"] = "rejected"; notes.append("无最新价格")
+            stop_pct = etf.profile(code, name)["stop"] if kind == "etf" else p["stop_loss_pct"]
+            stop = o.get("stop_price") or round(price * (1 - stop_pct), 3)
+            dist = (price - stop) / price
+            if dist <= 0:
+                # 止损价不低于现价：距离被截断后单笔风险约束会退化成单票上限，且买入次日就触发止损
+                o["status"] = "rejected"; notes.append(f"止损价 {stop} 不低于现价 {price}，拒绝买入")
+            elif dist < p.get("min_stop_distance", 0.01):
+                o["status"] = "rejected"; notes.append(f"止损距离 {dist:.2%} 小于下限，仓位会被算得过大")
             else:
-                stop = o.get("stop_price") or price * (1 - p["stop_loss_pct"])
-                dist = (price - stop) / price
-                if dist <= 0:
-                    # 止损价不低于现价：距离被截断后单笔风险约束会退化成单票上限，且买入次日就触发止损
-                    o["status"] = "rejected"; notes.append(f"止损价 {stop} 不低于现价 {price}，拒绝买入")
-                elif dist < p.get("min_stop_distance", 0.01):
-                    o["status"] = "rejected"; notes.append(f"止损距离 {dist:.2%} 小于下限，仓位会被算得过大")
-                else:
-                    cap = min(p["max_single"], p["max_risk_per_trade"] / dist)
-                    if tw > cap + 1e-9:
-                        o["target_weight"], o["status"] = round(cap, 4), "adjusted"
-                        notes.append(f"按单票上限/单笔风险 {p['max_risk_per_trade']:.0%} 下调至 {cap:.1%}")
-                    if price * 100 > o["target_weight"] * equity:
-                        o["status"] = "rejected"; notes.append(f"一手 {price * 100:.0f} 元超过目标仓位金额")
-                    is_new = code not in acct.positions
-                    if o["status"] != "rejected" and is_new:
-                        if len(held_after) >= p["max_stocks"]:
-                            o["status"] = "rejected"; notes.append(f"持股数已达上限 {p['max_stocks']}")
-                        elif new_this_week >= p["max_new_per_week"]:
-                            o["status"] = "rejected"; notes.append(f"本周新开仓已达上限 {p['max_new_per_week']}")
-                        else:
-                            new_this_week += 1
-                            held_after.add(code)
+                cap = min(p["max_single"], p["max_risk_per_trade"] / dist)
+                if tw > cap + 1e-9:
+                    o["target_weight"], o["status"] = round(cap, 4), "adjusted"
+                    notes.append(f"按单票上限/单笔风险 {p['max_risk_per_trade']:.0%} 下调至 {cap:.1%}")
+                if price * 100 > o["target_weight"] * equity:
+                    o["status"] = "rejected"; notes.append(f"一手 {price * 100:.0f} 元超过目标仓位金额")
+                if kind == "etf" and o["status"] != "rejected":
+                    o["stop_price"] = stop  # ETF 没有成本价重算，直接把类别止损写进订单
+                is_new = code not in acct.positions
+                if o["status"] != "rejected" and is_new:
+                    if len(held_after) >= p["max_stocks"]:
+                        o["status"] = "rejected"; notes.append(f"持股数已达上限 {p['max_stocks']}")
+                    elif new_this_week >= p["max_new_per_week"]:
+                        o["status"] = "rejected"; notes.append(f"本周新开仓已达上限 {p['max_new_per_week']}")
+                    else:
+                        new_this_week += 1
+                        held_after.add(code)
 
         out.append(o)
 
-    # 3) 个股总仓位不超过上限：按比例压缩买入
-    def stock_weight_after():
+    # 3) 个股 + 主动 ETF 的总仓位不超过上限：按比例压缩买入
+    def risk_weight_after():
         targets = {o["code"]: o["target_weight"] for o in out if o["status"] != "rejected"}
-        return sum(targets.get(c, w_now(c)) for c in set(acct.stock_codes()) | set(targets)
-                   if mk.kind(c) == "stock")
+        codes = (set(acct.positions) | set(targets)) - {etf_code}
+        return sum(targets.get(c, w_now(c)) for c in codes if mk.kind(c) in ("stock", "etf"))
 
-    total = stock_weight_after()
+    total = risk_weight_after()
     if total > band["stock_max"] + 1e-9:
         buys = [o for o in out if o["status"] != "rejected" and o["target_weight"] > w_now(o["code"])]
         extra = sum(o["target_weight"] - w_now(o["code"]) for o in buys)
@@ -141,8 +152,8 @@ def review(acct, drafts: list, ctx: dict) -> tuple:
             base = w_now(o["code"])
             o["target_weight"] = round(base + (o["target_weight"] - base) * scale, 4)
             o["status"] = "adjusted" if o["target_weight"] > base else "rejected"
-            o["risk_notes"].append(f"个股总仓位上限 {band['stock_max']:.0%}，按比例压缩")
-        total = stock_weight_after()
+            o["risk_notes"].append(f"股票+主动 ETF 总仓位上限 {band['stock_max']:.0%}，按比例压缩")
+        total = risk_weight_after()
 
     # 4) 底仓 ETF：闲置资金停泊到 ETF，使总仓位达到区间上沿
     etf_target = ctx.get("fixed_etf_weight")

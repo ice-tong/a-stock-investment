@@ -54,12 +54,15 @@ class FakeMarket:
         return self.factors.get((code, date), self.factors.get(code, 1.0))
 
     def daily(self, code, end=None):
-        """只用于 regime / 数据新鲜度检查：按价格表拼出日线，没价格返回 None。"""
+        """只用于 regime / 数据新鲜度 / ETF 门槛检查：按价格表拼出日线。"""
         import pandas as pd
         dates = sorted(d for d, px in self.prices.items() if px.get(code) is not None and (end is None or d <= end))
         if not dates:
             return None
-        return pd.DataFrame({"close": [self.prices[d][code] for d in dates]}, index=dates)
+        close = [self.prices[d][code] for d in dates]
+        return pd.DataFrame({"close": close, "high": [c * 1.01 for c in close],
+                             "volume": [1e9] * len(close),
+                             "amount": [c * 1e9 for c in close]}, index=dates)
 
 
 def new_account(cash=100000, strategy="quant"):
@@ -347,6 +350,98 @@ def test_risk_cap_still_uses_one_percent_risk_for_valid_stop():
                          ctx())
     o = by_code(out)["sh600000"]
     assert o["status"] == "adjusted" and o["target_weight"] == pytest.approx(0.125)
+
+
+# ---------------- 主动 ETF ----------------
+def price_history(code, price, n=70, end=D1):
+    """给 FakeMarket 造 n 个交易日的日线，用于 ETF 上市天数/流动性门槛。"""
+    d, days = dt.date.fromisoformat(end), []
+    while len(days) < n:
+        if d.weekday() < 5:
+            days.append(d.isoformat())
+        d -= dt.timedelta(days=1)
+    return {day: {code: price} for day in reversed(days)}
+
+
+def test_etf_profile_and_limit_by_class():
+    from sim import etf
+    assert etf.profile("sh588000", "科创50ETF")["class"] == "star"
+    assert etf.profile("sz159915", "创业板ETF")["class"] == "chinext"
+    assert etf.profile("sh511010", "国债ETF")["class"] == "bond"
+    assert etf.profile("sh518880", "黄金ETF")["class"] == "commodity"
+    assert etf.profile("sh512400", "有色金属ETF")["class"] == "equity"      # 持有股票，不是商品
+    assert etf.profile("sz159201", "自由现金流ETF")["class"] == "equity"    # 含"现金"但是因子 ETF
+    assert etf.profile("sh513100", "纳指ETF")["class"] == "crossborder"
+    assert etf.profile("sh600000", "")["class"] == "equity"  # 未知名字兜底
+    assert limit_prices("sh588000", "科创50ETF", 1.0) == (1.2, 0.8)   # 20% 涨跌幅
+    assert limit_prices("sz159915", "创业板ETF", 1.0) == (1.2, 0.8)
+    assert limit_prices("sh511010", "国债ETF", 100.0) == (110.0, 90.0)
+    assert limit_prices("sh510300", "沪深300ETF", 4.0) == (4.4, 3.6)  # 10%
+
+
+def test_etf_check_rejects_illiquid_or_new_etf():
+    from sim import etf
+    m = FakeMarket(price_history("sh588000", 1.0, n=70))
+    assert etf.check(m, "sh588000", D1, "科创50ETF")[0] is True
+    assert etf.check(FakeMarket(price_history("sh588000", 1.0, n=10)), "sh588000", D1, "科创50ETF")[0] is False
+
+
+def test_active_etf_counts_toward_stock_budget_and_gets_class_stop():
+    """科创50ETF 买 10% + 个股 10%：两者共享 defense 的 stock_max=20%，底仓只能补 30%。"""
+    from sim import etf
+    acct = new_account(cash=100000)
+    m = FakeMarket({**price_history("sh588000", 1.0), D1: {"sh588000": 1.0, "sh600000": 10.0, ETF["code"]: 4.0}})
+    out, band = risk.review(acct, [
+        {"code": "sh588000", "name": "科创50ETF", "target_weight": 0.1},
+        {"code": "sh600000", "name": "浦发银行", "target_weight": 0.1},
+    ], ctx(regime="defense", market=m, equity=100000,
+           prices={"sh588000": 1.0, "sh600000": 10.0, ETF["code"]: 4.0}))
+    o = by_code(out)
+    assert o["sh588000"]["status"] == "approved" and o["sh588000"]["stop_price"] == pytest.approx(0.9)
+    assert o["sh588000"]["stop_price"] == pytest.approx(1.0 * (1 - etf.profile("sh588000", "科创50ETF")["stop"]))
+    total = sum(x["target_weight"] for x in out if x["code"] != ETF["code"] and x["status"] != "rejected")
+    assert total == pytest.approx(0.2)                                  # 共享 stock_max
+    assert o[ETF["code"]]["target_weight"] == pytest.approx(0.5 - 0.2)  # 底仓按剩余额度补
+
+
+def test_risk_bond_etf_uses_tighter_stop():
+    acct = new_account(cash=100000)
+    m = FakeMarket({**price_history("sh511010", 100.0), D1: {"sh511010": 100.0, ETF["code"]: 4.0}})
+    out, _ = risk.review(acct, [{"code": "sh511010", "name": "国债ETF", "target_weight": 0.1}],
+                         ctx(regime="defense", market=m, equity=100000,
+                             prices={"sh511010": 100.0, ETF["code"]: 4.0}, info={}))
+    o = by_code(out)["sh511010"]
+    assert o["status"] == "approved" and o["stop_price"] == pytest.approx(97.0)  # 债券 ETF 止损 3%
+
+
+def test_settle_stops_active_etf_but_not_park():
+    acct = new_account(cash=10000)
+    acct.state["peak"] = 25000
+    acct.positions["sh588000"] = {"name": "科创50ETF", "kind": "etf", "role": "active", "shares": 10000,
+                                  "cost": 10000, "first_buy_date": D0, "last_buy_date": D0,
+                                  "last_price": 1.0, "stop_price": 0.9}
+    acct.positions[ETF["code"]] = {"name": ETF["name"], "kind": "etf", "role": "park", "shares": 1000,
+                                   "cost": 4000, "first_buy_date": D0, "last_buy_date": D0, "last_price": 4.0}
+    r = settle.settle(acct, D1, FakeMarket({D1: {"sh588000": 0.89, ETF["code"]: 3.5}}), RCFG, "neutral")
+    assert r["pending_exits"] == {"sh588000": "stop_loss"}  # 底仓 ETF 没有止损
+    nav = acct.nav()[-1]
+    assert float(nav["active_etf_value"]) == pytest.approx(8900)
+    assert float(nav["active_etf_weight"]) == pytest.approx(8900 / 22400, abs=1e-4)
+
+
+def test_attrib_includes_active_etf_and_excludes_park():
+    from sim import attrib
+    acct = Account.create("main", "agent", 100000, "2026-10-01")
+    for t in [dict(date="2026-10-05", order_id="e1", code="sh588000", name="科创50ETF", side="buy", amount=10000),
+              dict(date="2026-10-12", order_id="e2", code="sh588000", name="科创50ETF", side="sell",
+                   realized_pnl=500, closed=True, reason_type="exit"),
+              dict(date="2026-10-05", order_id="p1", code=ETF["code"], name=ETF["name"], side="buy", amount=40000)]:
+        acct.append_trade(t)
+    acct.save()
+    eps = {e["code"]: e for e in attrib.episodes(Account("main"), {})}
+    assert set(eps) == {"sh588000"} and eps["sh588000"]["kind"] == "etf"
+    r = attrib.build("2026-10-12")
+    assert {g["group"] for g in r["by_kind"]} == {"ETF"}
 
 
 # ---------------- 数据新鲜度与命令层 ----------------

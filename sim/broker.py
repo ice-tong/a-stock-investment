@@ -133,19 +133,23 @@ def execute(acct, doc: dict, date: str, market, bcfg: dict, stop_loss_pct: float
             pos = acct.positions.get(code)
             new_position = pos is None
             if new_position:
-                pos = acct.positions[code] = {"name": res["name"], "kind": kind, "shares": 0.0, "cost": 0.0,
+                role = "park" if kind == "etf" and o.get("reason_type") == "park" else kind
+                pos = acct.positions[code] = {"name": res["name"], "kind": kind, "role": role,
+                                              "shares": 0.0, "cost": 0.0,
                                               "first_buy_date": date, "hfq": market.hfq_factor(code, date)}
             pos["shares"] += qty
             pos["cost"] += gross + c + s + t
             pos["last_buy_date"] = date
             pos["last_price"] = snap.price
-            if kind == "stock":  # 止损只对个股生效
+            if kind == "stock":  # 个股止损按成本价 −8%
+                pos["stop_price"] = o.get("stop_price") or round(pos["cost"] / pos["shares"] * (1 - stop_loss_pct), 3)
+            elif pos.get("role") == "active":  # 主动 ETF 用订单里的类别止损
                 pos["stop_price"] = o.get("stop_price") or round(pos["cost"] / pos["shares"] * (1 - stop_loss_pct), 3)
             acct.append_trade({"date": date, "order_id": res["order_id"], "code": code, "name": res["name"],
                                "side": "buy", "shares": qty, "price": fill, "amount": round(gross, 2),
                                "commission": c, "stamp_tax": s, "transfer_fee": t,
                                "slippage_cost": round((fill - snap.price) * qty, 2), "realized_pnl": "",
-                               "new_position": new_position and kind == "stock",
+                               "new_position": new_position and kind in ("stock", "etf"),
                                "reason_type": o.get("reason_type", ""), "fill_source": snap.source, "note": note})
             res.update(status="partial" if qty < delta else "filled", side="buy", shares=qty, price=fill, note=note)
 

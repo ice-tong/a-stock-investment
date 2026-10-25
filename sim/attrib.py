@@ -10,7 +10,7 @@
 import json
 import re
 
-from . import config, report
+from . import config, market as mk, report
 from .ledger import Account, all_accounts
 
 MIN_TRADES_FOR_PROPOSAL = 15  # 与 docs/模拟交易系统设计.md 5.2 一致：一条参数提案至少 15 笔相关交易
@@ -45,10 +45,14 @@ def confidence_of(o: dict) -> str:
 
 
 def episodes(acct, idx: dict) -> list:
-    """个股的完整持仓：首次买入开启，清仓关闭；未平仓的用最近结算价计浮动盈亏。"""
+    """个股与主动 ETF 的完整持仓：首次买入开启，清仓关闭；未平仓的用最近结算价计浮动盈亏。
+
+    底仓 ETF（base_etf）是现金停泊工具，不算一次选股，单独排除。
+    """
+    park = config.load("broker")["base_etf"]["code"]
     open_, done = {}, []
     for t in acct.trades():
-        if t["side"] not in ("buy", "sell") or not t["code"] or t["code"].startswith(("sh5", "sz15", "sz16")):
+        if t["side"] not in ("buy", "sell") or not t["code"] or t["code"] == park:
             continue
         code = t["code"]
         if t["side"] == "buy":
@@ -58,7 +62,7 @@ def episodes(acct, idx: dict) -> list:
                 ep = open_[code] = {"code": code, "name": t["name"], "entry_date": t["date"], "invested": 0.0,
                                     "realized": 0.0, "channels": o.get("channels") or "未标注",
                                     "confidence": confidence_of(o), "version": o.get("strategy_version") or "未标注",
-                                    "model": o.get("model") or "未标注",
+                                    "model": o.get("model") or "未标注", "kind": mk.kind(code),
                                     "entry_reason": o.get("reason", "")}
             ep["invested"] += float(t["amount"] or 0) + sum(float(t[k] or 0) for k in ("commission", "transfer_fee"))
         else:
@@ -136,6 +140,7 @@ def build(date: str) -> dict:
             "by_confidence": group_stats(eps, lambda e: e["confidence"]),
             "by_version": group_stats(eps, lambda e: e["version"]),
             "by_model": group_stats(eps, lambda e: e["model"]),
+            "by_kind": group_stats(eps, lambda e: "ETF" if e.get("kind") == "etf" else "个股"),
             "by_exit": group_stats(eps, lambda e: e["exit_reason"])}
 
 
@@ -159,7 +164,7 @@ def to_markdown(r: dict) -> str:
               f"main 已平仓个股 {r['n_closed']} 笔；参数类提案需 ≥{MIN_TRADES_FOR_PROPOSAL} 笔相关交易："
               + ("**已达到**" if r["gate"] else "**未达到**，只能记观察项或开挑战者账户做实验")]
     for title, key in (("按通道", "by_channel"), ("按置信度", "by_confidence"), ("按策略版本", "by_version"),
-                       ("按模型", "by_model"), ("按离场原因", "by_exit")):
+                       ("按模型", "by_model"), ("按品种", "by_kind"), ("按离场原因", "by_exit")):
         lines += ["", f"## {title}（仅已平仓）", ""]
         if not r[key]:
             lines.append("暂无已平仓交易。")

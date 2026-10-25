@@ -15,7 +15,8 @@ TRADE_FIELDS = ["date", "account", "order_id", "code", "name", "side", "shares",
                 "commission", "stamp_tax", "transfer_fee", "slippage_cost", "realized_pnl",
                 "new_position", "closed", "reason_type", "fill_source", "note"]
 NAV_FIELDS = ["date", "cash", "stock_value", "etf_value", "equity", "stock_weight", "etf_weight",
-              "peak", "drawdown", "regime", "risk_state"]
+              "peak", "drawdown", "regime", "risk_state",
+              "active_etf_value", "active_etf_weight"]  # 追加列，旧行缺值读作空串
 
 
 class Account:

@@ -1,0 +1,46 @@
+# 主动 ETF 的品种属性与入池门槛（2026-10-25）。
+#
+# 设计：品种不设白名单——任何 ETF 都能买，但必须过入池门槛（流动性、上市时长）；
+# 涨跌幅与默认止损按品种类别给（科创板/创业板 ETF 是 20%，债券 ETF 波动小、止损更紧）。
+#
+# 注意：`stop` 属于风控参数，按项目规矩本应写在 config/risk.yaml（只有用户能改）。
+# 先集中在这里，代码只读本文件、不碰 risk.yaml；你认可后可以自行搬过去。
+
+pool:
+  min_amount: 50000000        # 当日成交额 ≥ 5000 万
+  min_avg_amount: 30000000    # 近 20 日日均成交额 ≥ 3000 万
+  min_listed_days: 60         # 上市 ≥ 60 个交易日
+  top_per_class: 12           # 每个类别按成交额取前 N 只（债券 ETF 成交额极大，不分类会把权益类挤掉）
+
+# 匹配顺序：money → bond → gold → crossborder → star → chinext → equity（先匹配先得）
+classes:
+  money:
+    limit: 0.10
+    stop: 0.02                # 货币 ETF 实质是现金，止损只为让风险公式可算，正常不会触发
+    names: ["货币", "日利", "添益", "快线", "理财"]
+  bond:
+    limit: 0.10
+    stop: 0.03
+    names: ["债", "国债", "信用", "城投", "转债"]
+  commodity:
+    limit: 0.10
+    stop: 0.08
+    names: ["黄金", "白银", "豆粕", "原油", "能源化工", "商品"]
+  crossborder:
+    limit: 0.10
+    stop: 0.08
+    names: ["恒生", "港股", "H股", "纳指", "标普", "道琼斯", "日经", "德国", "法国",
+            "美国", "中概", "海外", "亚太", "东南亚", "沙特", "印度", "越南"]
+  star:
+    limit: 0.20
+    stop: 0.10
+    names: ["科创", "双创"]
+    prefixes: ["sh588"]
+  chinext:
+    limit: 0.20
+    stop: 0.10
+    names: ["创业板", "创50", "创成长"]
+  equity:
+    limit: 0.10
+    stop: 0.08
+    names: []

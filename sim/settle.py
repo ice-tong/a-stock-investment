@@ -112,20 +112,26 @@ def settle(acct, date: str, market, rcfg: dict, regime_name: str) -> dict:
     p = rcfg["position"]
     pending = {}
     for code, pos in acct.positions.items():
-        if pos["kind"] != "stock":
-            continue
+        role = pos.get("role") or ("park" if pos["kind"] == "etf" else "stock")
+        if role == "park":
+            continue  # 底仓 ETF 是现金停泊工具，不设止损
         if state_now in ("breaker", "halt"):
             pending[code] = state_now
-        elif prices[code] <= pos["stop_price"]:
+        elif pos.get("stop_price") and prices[code] <= pos["stop_price"]:
             pending[code] = "stop_loss"
-        elif (cal.count_between(pos["first_buy_date"], date) >= p["time_stop_days"]
+        elif (pos["kind"] == "stock" and cal.count_between(pos["first_buy_date"], date) >= p["time_stop_days"]
               and prices[code] * pos["shares"] < pos["cost"]):
             pending[code] = "time_stop"
     st["pending_exits"] = pending
 
+    # 主动 ETF 单列一格：它算风险仓位（占用 stock_max），底仓 ETF 是现金停泊，两者不能混着看
+    active_v = sum(pos["shares"] * prices[c] for c, pos in acct.positions.items()
+                   if pos["kind"] == "etf" and (pos.get("role") or "park") != "park")
+
     acct.append_nav({"date": date, "cash": round(acct.cash, 2), "stock_value": round(stock_v, 2),
                      "etf_value": round(etf_v, 2), "equity": round(equity, 2),
                      "stock_weight": round(stock_v / equity, 4), "etf_weight": round(etf_v / equity, 4),
+                     "active_etf_value": round(active_v, 2), "active_etf_weight": round(active_v / equity, 4),
                      "peak": round(st["peak"], 2), "drawdown": round(dd, 4), "regime": regime_name,
                      "risk_state": state_now})
     st["last_settled"] = date

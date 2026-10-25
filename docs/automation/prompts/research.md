@@ -22,6 +22,7 @@
    - `.venv/bin/python -m sim pool`（约 0-6 分钟；当天已生成则复用；若检测到 v1.0 旧格式会用当天 features 缓存重建 v1.1，不再联网重拉 2500 只日线）。
    - 产物 `data/pool/<日期>.md` 已按"今日可行动 / 等回调 / 等突破 / 观望 / 持仓复核 / 回避降权"分组，并带 `stop_prob`（按 -8% 止损、20 日持有估算的触损概率）、触发位、近 10 日进池次数；**多通道共振只在文末作参考，不再作为优先依据**。
    - 影子候选池：`.venv/bin/python -m sim pool2`（只读影子，不用于下单；复用当天 features，约 1 秒；产物 `data/pool_v2/<日期>.md`）。失败不影响主流程，注明即可。
+   - **ETF 候选池**：`sim pool` 同时生成 `data/pool/<日期>_etf.md`（全市场 ETF，按类别各取前 12，过滤当日成交额 ≥5000 万、近 20 日均额 ≥3000 万、上市 ≥60 日）。ETF 不设品种白名单，但**只能从这里选**；类别决定涨跌幅与默认止损：科创/创业板 20%、债券 3%、货币 2%、商品与权益 10%（止损 8%）。
    - 非交易日命令自动用最近交易日；v1 失败重试一次，仍失败则退回 `data/screen/` 最新初筛前 12 + 持仓 + 观察名单，并在汇报中注明。
 7. 轻量点评（你自己做，不调子代理，控制在 10 分钟内）：读 `data/pool/<日期>.md` 分诊表、`data/pool_v2/<日期>.md`、`accounts/main/state.json`、`data/watchlist.json`（不存在视为空）、最近 3 篇 `journal/daily` 和 `evolution/lessons.md`（「已确认」区可作决策依据，「候选」区只作提醒；在点评记录里写明用到了哪几条）。
    - **先定研究配额，再选股**（这是 v1.1 的核心变化，不要先看多通道）：
@@ -34,6 +35,7 @@
      - 回避/降权（`action=avoid`）不默认排除，但进 shortlist 必须给一句反方理由；
      - 可从池外补充至多 2 只（新闻/公告/行业线索），写明来源，并确认不在科创板/北交所、非 ST、日均成交额 ≥1 亿；
      - 观察名单里 `status=rejected` 且未到 `review_by` 的不重复研究，除非出现新事件。
+     - **ETF 可选**：从 `data/pool/<日期>_etf.md` 挑 0-2 只进 shortlist（例如没有科创板权限时用科创50ETF 补敞口、用黄金/债券 ETF 降波动）。写清类别、跟踪标的和选它的理由；不要同时买跟踪同一指数的多只 ETF。
    - 把点评写入 `journal/research/<日期>.md`：shortlist 每只一行（代码、名称、风格、行业、动作、触发位、进池理由、最大疑点、证伪条件），另列 5-10 只"看过但放弃"的及一句原因。
    - 另在同一文件写 **shadow shortlist**：从 v2 影子池选 5 只（不研究、不下单），逐只写风格/动作/理由，标注"影子 v2"；与 v1 shortlist 分开列。
 8. 深度研究（控制在 25 分钟内）：从 shortlist 选 3-5 只新候选（main 未持有），每只并行委派 fundamental-agent 与 event-sentiment-agent（必要时加 technical-flow-agent 或 valuation-agent），结论必须三选一：**现在买 / 等触发 / 放弃**。
@@ -42,7 +44,7 @@
    - 现有持仓每只并行委派 technical-flow-agent 与 event-sentiment-agent 复核：持有/减仓/卖出（止损与时间止损由代码自动处理，你只给主动观点）；结论矛盾时列出分歧，不要和稀泥。研究结论摘要追加到 `journal/research/<日期>.md`。
 8b. 维护观察名单 `data/watchlist.json`（格式 `{"items": [{"code","name","added","source","thesis","trigger","trigger_type","trigger_level","status","review_by","note"}]}`，status 取 watching / researched / rejected）：研究过但暂不买的写 researched，`trigger` 为人类可读描述，`trigger_type/trigger_level` 尽量给结构化值（pool 每晚在 md 的"观察名单触发状态"里评估）；被否决的写 rejected 与原因；`review_by` 不超过 20 个交易日，过期条目删除；总数控制在 30 条以内。观察名单下次会自动进入候选池，研究成果跨天积累。
 8c. 影子使用记录：v2 的 5 只 shadow shortlist 只记录，不进入 shortlist/订单；20-30 个交易日后由进化官比较 v1/v2 候选池与 shortlist 的前向 5/20/60 日收益，再决定是否替换 main。不要在每晚决策里用 v2 替代 v1。
-9. 组合经理决策（你自己做）：**先看组合槽位，再选股**——当前持仓行业暴露（单一行业 ≤35%）、最多 6 只、每周新开仓 ≤3 只、regime 总仓位区间；同一风格/行业不要扎堆。输出订单列表，每笔字段 code、name、target_weight（新仓单只 ≤0.05；个股合计+底仓 ETF 落在当前 regime 区间内）、reason（一句话：研究结论 + 置信度高/中/低）、confidence（"高"/"中"/"低"）、channels（买入单必填：该股在 `data/pool/<日期>.csv` 的 channels 原值，池外标的写 "池外:<来源>"）、可选 stop_price 与 industry；confidence 与 channels 会随订单冻结，供 `python -m sim attrib` 归因，不要省略；卖出用 reason_type "exit" 且 target_weight 低于当前权重。没有值得买的就输出空 orders 列表（代码会自动补底仓停泊），不要为了交易而交易。
+9. 组合经理决策（你自己做）：**先看组合槽位，再选股**——当前持仓行业暴露（单一行业 ≤35%）、最多 6 只（个股 + 主动 ETF 合计）、每周新开仓 ≤3 只、regime 总仓位区间（个股 + 主动 ETF 共用 `stock_max`，底仓 ETF 只补剩余额度）；同一风格/行业不要扎堆。输出订单列表，每笔字段 code、name、target_weight（个股与权益/商品类 ETF 新仓单只 ≤0.05；债券 ETF 可到 0.10、货币 ETF 可到 0.20，它们波动低、止损更紧；合计落在当前 regime 区间内）、reason（一句话：研究结论 + 置信度高/中/低）、confidence（"高"/"中"/"低"）、channels（买入单必填：个股填该股在 `data/pool/<日期>.csv` 的 channels 原值，池外标的写 "池外:<来源>"；ETF 写 "etf:<类别>"，如 etf:star）、可选 stop_price 与 industry（ETF 不用给 stop_price，风控按类别自动设）；confidence 与 channels 会随订单冻结，供 `python -m sim attrib` 归因，不要省略；卖出用 reason_type "exit" 且 target_weight 低于当前权重。没有值得买的就输出空 orders 列表（代码会自动补底仓停泊），不要为了交易而交易。
 10. 写草稿 `orders/<目标交易日>/main.draft.json`，格式 `{"meta": {"tool": "<你所在的工具：qoder / claude-code / kimi>", "model": "<模型名>", "written_at": "<ISO 时间，如 2026-10-26T19:42:00>", "decided_on": "<研究数据所属的交易日>"}, "orders": [...]}`；若该日 main.json 已冻结则跳过不写。
    - `decided_on` 必填且必须是研究数据所属的交易日（不是写文件的时刻）：plan 会丢弃 `decided_on` 早于结算日的整份草稿，写错等于放弃当天下单。
    - `meta` 会原样写进冻结订单，`python -m sim attrib` 按 model 分组统计，用来比较不同模型的决策质量。
