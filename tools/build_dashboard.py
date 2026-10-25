@@ -72,6 +72,7 @@ CSS = """
   .tag-alert { color: var(--warn); border-color: rgba(232,179,75,.35); background: rgba(232,179,75,.08); }
   .tag-park { color: var(--accent); border-color: rgba(79,140,255,.35); background: rgba(79,140,255,.08); }
   .tag-entry { color: var(--warn); border-color: rgba(232,179,75,.35); background: rgba(232,179,75,.08); }
+  .tag-pending { color: var(--warn); border-color: rgba(232,179,75,.55); background: rgba(232,179,75,.12); }
   .up { color: var(--up); } .down { color: var(--down); }
   .muted { color: var(--muted); } .small { font-size: .78rem; }
   .spark { width: 100%; height: auto; display: block; margin-top: 10px; }
@@ -180,19 +181,37 @@ def trades_table(account, limit=8) -> str:
 
 
 def load_orders():
+    """最近一个真正含冻结订单的目录（忽略只有 main.draft.json 的草稿目录）。"""
     orders_dir = ROOT / "orders"
     if not orders_dir.exists():
         return None, {}
-    dirs = sorted(d.name for d in orders_dir.iterdir() if d.is_dir())
-    if not dirs:
-        return None, {}
-    latest = dirs[-1]
-    out = {}
-    for name, _ in ACCOUNTS:
-        f = orders_dir / latest / f"{name}.json"
-        if f.exists():
-            out[name] = json.loads(f.read_text(encoding="utf-8"))
-    return latest, out
+    dirs = sorted((d for d in orders_dir.iterdir() if d.is_dir()), key=lambda d: d.name, reverse=True)
+    for d in dirs:
+        out = {}
+        for name, _ in ACCOUNTS:
+            f = d / f"{name}.json"
+            if f.exists():
+                out[name] = json.loads(f.read_text(encoding="utf-8"))
+        if out:
+            return d.name, out
+    return None, {}
+
+
+def load_draft():
+    """最近一份尚未冻结的 main.draft.json（下一交易日计划草稿）。"""
+    orders_dir = ROOT / "orders"
+    if not orders_dir.exists():
+        return None, None
+    dirs = sorted((d for d in orders_dir.iterdir() if d.is_dir()), key=lambda d: d.name, reverse=True)
+    for d in dirs:
+        f = d / "main.draft.json"
+        if not f.exists() or (d / "main.json").exists():
+            continue
+        try:
+            return d.name, json.loads(f.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            return d.name, None
+    return None, None
 
 
 def load_runlog():
@@ -248,6 +267,18 @@ def order_rows(orders_json, with_account=False) -> str:
     return "".join(rows) or f"<tr><td colspan={6 if with_account else 5} class='muted'>无订单</td></tr>"
 
 
+def draft_rows(draft_json) -> str:
+    rows = []
+    for o in draft_json.get("orders", []):
+        rt = o.get("reason_type", "entry")
+        ty = REASON_TAG.get(rt, "tag-skipped")
+        rows.append(f"<tr><td>{esc(o.get('name'))} <span class='muted small num'>{esc(o.get('code'))}</span></td>"
+                    f"<td class='num'>{o.get('target_weight', 0) * 100:.0f}%</td>"
+                    f"<td><span class='tag {ty}'>{esc(REASON_CN.get(rt, rt))}</span></td>"
+                    f"<td class='small'>{esc(o.get('reason', ''))}</td></tr>")
+    return "".join(rows) or "<tr><td colspan=4 class='muted'>空草稿：没有个股订单，evening 只会做底仓停泊</td></tr>"
+
+
 def load_screen():
     d = ROOT / "data" / "screen"
     if not d.exists():
@@ -268,6 +299,7 @@ def main() -> int:
     weekday = now.weekday()
     market = "休市（周末）" if weekday >= 5 else "交易日"
     order_date, orders = load_orders()
+    draft_date, draft = load_draft()
     runlog = load_runlog()
     worklog = load_worklog()
     risk, broker, strategy = load_config()
@@ -347,6 +379,20 @@ def main() -> int:
         orders_head = "冻结订单"
         orders_html = '<div class="card"><p class="muted">当前无冻结订单（等待下一次 evening 冻结）。</p></div>'
 
+    draft_html = ""
+    if draft_date and draft:
+        draft_html = f"""
+    <div class="card" style="margin-top:14px;border-color:rgba(232,179,75,.35)">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:8px">
+        <h3 style="font-size:1rem">{esc(draft_date)} 订单草稿</h3>
+        <span class="tag tag-pending">待冻结</span>
+        <span class="small muted">来源：每晚 19:00 研究任务（main）</span>
+      </div>
+      <table><thead><tr><th>标的</th><th>目标仓位</th><th>类型</th><th>理由 / 置信度</th></tr></thead>
+      <tbody>{draft_rows(draft)}</tbody></table>
+    </div>
+    <p class="small muted" style="margin-top:8px">草稿不是订单：交易日 20:00 evening 会逐条风控校验，被拒或缩量以冻结订单为准；无草稿时只做底仓停泊。</p>"""
+
     # ---- 策略依据与初筛快照 ----
     screen_date, screen_rows = load_screen()
     picked = {}
@@ -354,6 +400,9 @@ def main() -> int:
         for o in (orders.get(name) or {}).get("orders", []):
             if o.get("reason_type") == "entry":
                 picked.setdefault(o.get("code"), []).append(f"{name}{'✓' if o.get('status') == 'approved' else '✗'}")
+    for o in (draft or {}).get("orders", []):
+        if o.get("reason_type") == "entry":
+            picked.setdefault(o.get("code"), []).append("草稿")
     top = sorted([r for r in screen_rows if r.get("rank")], key=lambda r: int(r["rank"]))[:10]
     screen_table = ""
     for r in top:
@@ -474,6 +523,7 @@ def main() -> int:
   <section>
     <h2>{esc(orders_head)}</h2>
     {orders_html}
+    {draft_html}
   </section>
 
   <section>
