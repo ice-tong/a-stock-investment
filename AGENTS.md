@@ -90,9 +90,9 @@
 - 策略进化：`python -m sim attrib` 出归因（`sim/attrib.py`）；进化官每周六按 `docs/automation/prompts/evolution.md` 写 `evolution/`（周报、观察项、提案、路线图、CHANGELOG、经验库）。提案只有用户在对话中批准后才能实施，实施时 `config/strategy.yaml` 的 version +0.1
 - `config/`：`broker.yaml` 费率与账户、`risk.yaml` 风控规则、`strategy.yaml` 代码策略参数
 - `accounts/<账户>/`：账本（state.json / trades.csv / nav.csv）；`orders/<交易日>/`：冻结订单；`reports/sim/latest.html`：每日报告；`reports/sim/dashboard.html`：资金看板（阶段收益、净值、回撤、月度收益、持仓）
-- 日常运行：交易日 15:10 后 `python -m sim execute`；每天 19:00 复盘+草稿；交易日 20:00 后 `python -m sim evening`
+- 日常运行：交易日 15:10 后 `python -m sim execute`；每天 19:00 复盘+草稿（目标日是下一个交易日，周末也写）；每天 20:00 后 `python -m sim evening`（交易日结算并冻结次日；周末/节假日前夜只冻结下一交易日，让周末信息进订单）
 - 模拟盘自动化（execute / research / evening）的时间表、数据流、prompt 原文快照与迁移到其他工具的方法见 `docs/automation/README.md`；黄金做T提醒是独立分叉功能，说明见 `docs/automation/extras/gold-alert.md`
-- 第二阶段起，Agent 只能把主策略订单草稿写到 `orders/<交易日>/main.draft.json`，由 `python -m sim plan` 风控校验并冻结
+- 第二阶段起，Agent 只能把主策略订单草稿写到 `orders/<交易日>/main.draft.json`，由 `python -m sim plan` 风控校验并冻结（冻结时点 = 目标日前一晚；`decided_on` 缺失或早于结算日的草稿整份丢弃）
 
 ## 硬性约束
 - **禁止修改** `accounts/`、`orders/` 下已冻结的文件和 `config/risk.yaml`。账本只能由 `python -m sim` 写入；风控规则只有用户本人能改。

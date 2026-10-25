@@ -51,6 +51,16 @@ def prev_day(d: str) -> str:
     return dates[bisect.bisect_left(dates, d) - 1]
 
 
+def evening_before(today: str) -> str | None:
+    """今天若是某个交易日的前一自然日（前夜），返回那个交易日；否则 None。
+
+    前夜是日历概念：周日晚是周一的前夜，周五晚不是周一的前夜；节假日后首个交易日的
+    前夜可能是假期最后一晚。冻结时点用它，保证周末/节假日的信息能进订单。
+    """
+    tomorrow = (dt.date.fromisoformat(today) + dt.timedelta(days=1)).isoformat()
+    return tomorrow if is_trading_day(tomorrow) else None
+
+
 def offset(d: str, n: int) -> str:
     """d 之后第 n 个交易日（d 本身不计）。"""
     dates = trade_dates()

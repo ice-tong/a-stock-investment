@@ -530,7 +530,7 @@ def test_bad_draft_does_not_block_other_accounts(monkeypatch):
 
 
 def test_stale_draft_is_discarded(monkeypatch):
-    """decided_on 早于结算日的草稿不能用来下单（周末草稿周一才冻结的情况）。"""
+    """decided_on 早于结算日的草稿不能用来下单（拿旧数据下单）。"""
     import pandas as pd
     from sim import __main__ as cli, screen as screen_mod
     acct = Account.create("main", "agent", 100000, D0)
@@ -550,6 +550,74 @@ def test_stale_draft_is_discarded(monkeypatch):
     assert all(o["code"] == ETF["code"] for o in doc["orders"])
     assert any("早于结算日" in e for e in doc["draft_errors"])
     assert doc["meta"]["decided_on"] == "2026-10-20"
+
+
+def test_weekend_draft_is_accepted_for_next_trading_day(monkeypatch):
+    """前夜冻结时，周末写的草稿（decided_on 晚于结算日）必须能用，不能被当成过期数据。"""
+    import pandas as pd
+    from sim import __main__ as cli, screen as screen_mod
+    acct = Account.create("main", "agent", 100000, D0)
+    acct.state["last_settled"] = D1
+    acct.save()
+    d = config.orders_dir() / D2
+    d.mkdir(parents=True)
+    (d / "main.draft.json").write_text(json.dumps({
+        "meta": {"decided_on": "2026-10-25"},   # 周日，晚于周五结算日 D1
+        "orders": [{"code": "sh600000", "name": "浦发银行", "target_weight": 0.05}]}), "utf-8")
+    monkeypatch.setattr(screen_mod, "run", lambda *a, **k: pd.DataFrame())
+    monkeypatch.setattr(screen_mod, "info_map", lambda sc: {})
+    monkeypatch.setattr(cli.orders, "git_commit", lambda msg: True)
+    cli.do_plan(D1, FakeMarket({D1: {"sh510300": 4.0, "sh600000": 10.0, "sh000300": 4000.0}}), RCFG, BCFG,
+                config.load("strategy"), "defense")
+    doc = json.loads((d / "main.json").read_text(encoding="utf-8"))
+    assert doc["meta"]["decided_on"] == "2026-10-25"
+    assert not any("早于结算日" in e or "缺少 meta.decided_on" in e for e in doc["draft_errors"])
+    # 订单确实进了风控（本用例初筛为空，因此因缺行情被拒，而不是因草稿过期被整份丢弃）
+    assert any(o["code"] == "sh600000" for o in doc["orders"])
+
+
+def test_draft_without_decided_on_is_discarded(monkeypatch):
+    """有订单却漏了 meta.decided_on：无法确认数据日，整份丢弃（封住绕过守卫的漏洞）。"""
+    import pandas as pd
+    from sim import __main__ as cli, screen as screen_mod
+    acct = Account.create("main", "agent", 100000, D0)
+    acct.state["last_settled"] = D1
+    acct.save()
+    d = config.orders_dir() / D2
+    d.mkdir(parents=True)
+    (d / "main.draft.json").write_text(json.dumps({
+        "orders": [{"code": "sh600000", "name": "浦发银行", "target_weight": 0.05}]}), "utf-8")
+    monkeypatch.setattr(screen_mod, "run", lambda *a, **k: pd.DataFrame())
+    monkeypatch.setattr(screen_mod, "info_map", lambda sc: {})
+    monkeypatch.setattr(cli.orders, "git_commit", lambda msg: True)
+    cli.do_plan(D1, FakeMarket({D1: {"sh510300": 4.0, "sh600000": 10.0, "sh000300": 4000.0}}), RCFG, BCFG,
+                config.load("strategy"), "defense")
+    doc = json.loads((d / "main.json").read_text(encoding="utf-8"))
+    assert all(o["code"] == ETF["code"] for o in doc["orders"])
+    assert any("缺少 meta.decided_on" in e for e in doc["draft_errors"])
+
+
+def test_freshness_guard_only_applies_to_agent_drafts():
+    """quant/random 的订单由程序生成，没有 decided_on，不能被新鲜度校验误杀。"""
+    import pandas as pd
+    from sim import strategies
+    acct = Account.create("q", "quant", 100000, D0)
+    acct.state["last_settled"] = D1
+    acct.save()
+    sc = pd.DataFrame({"code": ["sh600000"], "name": ["浦发银行"], "close": [10.0],
+                       "rank": [1], "score": [1.0], "eligible": [True]})
+    orders, meta, errs = strategies.drafts(acct, D2, D1, sc, {"min": 0.3, "max": 0.5, "stock_max": 0.2},
+                                           config.load("strategy"))
+    assert [o["code"] for o in orders] == ["sh600000"] and meta == {} and errs == []
+
+
+def test_evening_before_next_trading_day():
+    """前夜是日历概念：周日晚是周一的前夜，周五晚不是周一的前夜。"""
+    from sim import calendar as cal
+    assert cal.evening_before("2026-10-25") == "2026-10-26"   # 周日 → 周一
+    assert cal.evening_before("2026-10-24") is None            # 周六，明天仍非交易日
+    assert cal.evening_before("2026-10-23") is None            # 周五晚不冻结周一
+    assert cal.evening_before("2026-10-26") == "2026-10-27"   # 周一 → 周二
 
 
 def test_catch_up_execute_before_settle():

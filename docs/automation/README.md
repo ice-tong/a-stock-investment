@@ -5,7 +5,7 @@
 
 ## 范围
 
-本手册只覆盖**模拟交易主 pipeline**：execute / research / evening 三个任务加状态看板。整条链路**不依赖云端状态**，所有事实都在本仓库文件里，因此可以整体搬到任何能跑本地 cron + shell 的 Agent 工具。
+本手册只覆盖**模拟交易主 pipeline**：execute / research / evening 三个每日任务、周六 evolution 任务，以及状态看板。整条链路**不依赖云端状态**，所有事实都在本仓库文件里，因此可以整体搬到任何能跑本地 cron + shell 的 Agent 工具。
 
 黄金做T提醒是**独立分叉功能**，与模拟盘没有任何数据或执行依赖，只额外借用同一个 cron 与执行日志展示。它不属于本 pipeline，单独说明见[第 9 节](#9-附独立分叉功能黄金做t提醒)，迁移时可独立决定去留。
 
@@ -19,7 +19,8 @@
 |---|---|---|---|---|
 | 15:10 | execute | 交易日（周一至周五，日历内部再判休市） | < 1 分钟 | 按当日冻结订单、以 14:45 分钟价成交 |
 | 19:00 | research | **每天** | 5–25 分钟 | 交易复盘（写 journal）+ 下一交易日订单草稿（写 main.draft.json） |
-| 20:00 | evening | 交易日 | 1–2 分钟 | 收盘结算 → 读草稿跑风控 → 冻结次日订单 → 日报/资金看板 |
+| 20:00 | evening | **每天** | 1–2 分钟 | 交易日：结算 → 读草稿跑风控 → 冻结次日订单 → 日报/看板；周末与节假日的最后一晚：只冻结下一交易日订单（前夜模式） |
+| 周六 10:00 | evolution | 每周六 | 5–15 分钟 | 周度进化复盘：归因、观察项、提案、路线图、周报 |
 
 配套 cron 表达式：
 
@@ -27,7 +28,8 @@
 |---|---|---|
 | execute | `10 15 * * 1-5` | `6a4defea-34b0-473e-9dbc-b5f694678021` |
 | research | `0 19 * * *` | `32e49144-4edf-496b-8630-f03165c72452` |
-| evening | `0 20 * * 1-5` | `5f8097de-a4be-4863-965d-184e414f54ec` |
+| evening | `0 20 * * *` | `5f8097de-a4be-4863-965d-184e414f54ec` |
+| evolution | `0 10 * * 6` | `425fec61-963d-443a-9ece-db2869a56025` |
 
 > Qoder 国际版的旧任务（`df6f6cb3…` / `acbf75d2…` / `377136b3…`）已在 2026-10-25 迁移到 CN，必须在国际版停用/删除，避免双跑。详见 `docs/tools/qoder.md`。
 
@@ -38,11 +40,12 @@
   ├─ 复盘 → journal/daily/<L>.md（幂等：存在即跳过）
   └─ 研究 → orders/<目标日>/main.draft.json        （只是草稿，随时可被覆盖）
 
-交易日 20:00 evening（python -m sim evening）
-  ├─ settle：收盘价结算 → accounts/*/nav.csv、state.json
-  ├─ plan：读 main.draft.json + 各组策略 → risk.review 一票否决/缩量
-  │        → orders.freeze：orders/<T+1>/{main,quant,random,etf}.json
-  │                         + MANIFEST.json（SHA256）
+每天 20:00 evening（python -m sim evening）
+  ├─ 交易日：settle：收盘价结算 → accounts/*/nav.csv、state.json
+  ├─ 交易日：plan：读 main.draft.json + 各组策略 → risk.review 一票否决/缩量
+  │           → orders.freeze：orders/<T+1>/{main,quant,random,etf_band,etf}.json
+  │                            + MANIFEST.json（SHA256）
+  ├─ 非交易日（前夜）：只 plan，冻结下一个交易日订单，不结算、不动账本
   ├─ report / dashboard：reports/sim/latest.html、reports/sim/dashboard.html
   └─ git：自动提交 orders/ accounts/ data/screen/
 
@@ -53,7 +56,7 @@
   └─ git：自动提交 orders/ accounts/ data/screen/
 ```
 
-**草稿目标日规则**：计划日 = 今天（交易日）或下一个交易日；目标日 = 计划日的下一个交易日。周末生成的草稿目标是下周二，周一 19:00 会用新数据覆盖它，属正常设计。
+**草稿目标日规则**：目标日 = `next_day(今天)`，不分交易日/非交易日——周六、周日晚都写周一。冻结发生在目标日的**前一自然日 20:00（前夜）**：周日晚冻结周一、周一晚冻结周二，长假同理，这样周末/节假日新增的政策、公告与海外信息能进订单。`decided_on` 填研究信息日（可以是周末），早于结算日或缺失的整份丢弃。周五晚不再冻结周一，留到周日晚；周日晚若失败，可在周一开盘前用 `python -m sim plan --date <上周五>` 补冻结。
 
 ## 3. 任务清单（迁移时逐条照抄）
 
@@ -62,8 +65,9 @@
 | execute | [prompts/execute.md](prompts/execute.md) | `python -m sim execute` | 成交、trades.csv、runlog、看板、git 提交 |
 | research | [prompts/research.md](prompts/research.md) | 复盘 + 子代理研究 + 写草稿；必要时刷新初筛 | journal、main.draft.json、runlog、看板、git 提交 |
 | evening | [prompts/evening.md](prompts/evening.md) | `python -m sim evening` | 结算、冻结订单、日报、runlog、看板、git 提交 |
+| evolution | [prompts/evolution.md](prompts/evolution.md) | `python -m sim attrib` + 周度诊断 | evolution/ 周报、观察项、提案、路线图、CHANGELOG、runlog、git 提交 |
 
-> research 由 cron 读取 `prompts/research.md` 执行（唯一指令源，改文件即生效）；execute / evening 的 cron 指令与对应文件保持一致。迁移时 research 只需在 cron 写“读取并严格执行 prompts/research.md”，其余任务整份粘贴；路径与任务 ID 按新工作区替换。
+> research 由 cron 读取 `prompts/research.md` 执行（唯一指令源，改文件即生效）；evolution 同样由独立 cron 读取 `prompts/evolution.md`；execute / evening 的 cron 指令与对应文件保持一致。迁移时 research / evolution 只需在 cron 写“读取并严格执行对应文件”，其余任务整份粘贴；路径与任务 ID 按新工作区替换。
 
 ## 4. 各任务要点
 
@@ -81,8 +85,10 @@
 - 只允许写 `orders/<目标日>/main.draft.json`、`journal/`、`data/pool/`、`data/pool_v2/` 与 `data/watchlist.json`；该日订单已冻结则跳过。
 - 指令第 12 步负责重建看板、尽力发布、git 提交（`web/ dist/ journal/ orders/`）。
 
-### evening（交易日 20:00）
+### evening（每天 20:00）
 - 一条命令完成结算、冻结、日报、资金看板；命令内部幂等，同一天重复跑不会重复结算/冻结。
+- 交易日：结算 + 冻结次日订单；周末与节假日的最后一晚（前夜）：只冻结下一个交易日订单，不结算、不动账本。周五晚不再冻结周一，留给周日晚。
+- 前夜失败可在下一个交易日开盘前补冻结：`python -m sim plan --date <目标日的前一交易日>`（例如周日晚挂了，周一 09:00 前跑 `--date 上周五`）。
 - **职责分工**：evening 负责每日结算与订单冻结，execute 只按冻结订单写成交；两者是账本的唯一写入路径，都只能通过 `python -m sim` 触发。
 - 严格来说 evening 必须与 research 分开跑：research 是 LLM + 网络 + 子代理，失败/超时不能拖累结算。
 - 订单冻结后不可修改；SHA256 写进 `orders/<日期>/MANIFEST.json`，execute 前会校验。
@@ -130,6 +136,7 @@
 - 工具：`tools/notify.py`，通过 Bark HTTP API 推送到 iPhone；不依赖第三方包（urllib）。
 - 配置：复制 `config/notify.example.yaml` 为 `config/notify.local.yaml` 并填入设备 key（已在 `.gitignore`）；也可用环境变量 `BARK_KEY` / `BARK_SERVER` / `BARK_GROUP`。未配置 key 时脚本打印一行说明并以 0 退出，不影响任务。
 - 触发范围：execute / evening / research 成功与失败各推一条；非交易日或无订单跳过不推送；黄金提醒仅在 `ALERT` 或取数失败时推送（`--level timeSensitive`）。
+- 看板链接（2026-10-25 起）：execute / evening / research 的成功与失败推送都在正文末尾附看板 URL，并传 `--url` 让点击通知直接打开；失败时链接内容可能仍是上一次发布的数据。
 - 测试：`.venv/bin/python tools/notify.py --title "测试" --body "hello" --dry-run`，去掉 `--dry-run` 即真实发送。
 - 通知内容只放账户摘要与站点发布状态，不放密钥；`notify.py` 的失败不会让定时任务标记失败。
 
@@ -155,7 +162,7 @@
    .venv/bin/python -m pytest -q
    .venv/bin/python -m sim status
    ```
-2. **先建账本链路**：创建 execute（`10 15 * * 1-5`）与 evening（`0 20 * * 1-5`），时区 `Asia/Shanghai`，工作目录指向新工作区，prompt 用 `prompts/execute.md`、`prompts/evening.md`。此时 main 只会做底仓与强制止损，安全。
+2. **先建账本链路**：创建 execute（`10 15 * * 1-5`）与 evening（`0 20 * * *`，每天运行，非交易日只冻结），时区 `Asia/Shanghai`，工作目录指向新工作区，prompt 用 `prompts/execute.md`、`prompts/evening.md`。此时 main 只会做底仓与强制止损，安全。
 3. **再建 research**（`0 19 * * *`）：cron 里写一句“读取并严格执行 `prompts/research.md`”，把完整规则留在文件里（当前 Qoder 就是这么配置的）；确认新工具能调用子代理（或改走角色提示词）。第一晚先手动 run 一次，检查 `data/pool/`、journal 与草稿。
 4. **避免双跑**：先在新工具建好但不要启用，等当天任务跑完后再停用旧工具的两个账本任务（execute/evening 错峰 30 分钟以上也不安全，最好直接停旧启新）。research 双跑只会覆盖草稿，风险较小，但同样建议停旧。
 5. **登记归属**：更新 `docs/tools/<新工具>.md` 的任务表，并把 `docs/进展与交接.md` 接手规则第 2 条改成新工具的归属与任务 ID。
@@ -172,7 +179,7 @@
 | research 手动跑 | 非交易日触发一次 | 新增/跳过 journal、写 `orders/<目标日>/main.draft.json`、runlog 有 research 行 |
 | 看板 | 看 `dist/index.html` mtime 与页面 | 执行日志出现本次运行；站点已发布或注明待同步 |
 | execute | 交易日 15:10 后看 runlog | `ok`，trades.csv 有成交，现金/持仓变化 |
-| evening | 交易日 20:00 后看 runlog | `ok`，nav.csv 新增一行，`orders/<次日>/MANIFEST.json` 存在 |
+| evening | 每天 20:00 后看 runlog | 交易日：`ok`、nav.csv 新增一行、`orders/<次日>/MANIFEST.json` 存在；前夜：`ok`、`orders/<下一交易日>/MANIFEST.json` 存在且 nav 不新增 |
 | 幂等 | 同日重复跑 evening | 不重复结算、不重复冻结 |
 | 失败隔离 | 手动制造 research 失败（如断网） | evening 仍照常结算并冻结底仓订单 |
 
@@ -200,7 +207,7 @@
 | 项目 | 内容 |
 |---|---|
 | 脚本 | `tools/gold_alert.py` |
-| cron | `0 1,10,14,22 * * 1-6`（Asia/Shanghai，约每 3 小时：10:00 / 14:00 / 22:00 / 次日 01:00），2026-12-31 到期 |
+| cron | `0 10,14,22 * * 1-5`（Asia/Shanghai，每 3 小时：10:00 / 14:00 / 22:00；23:00 后不推送），2026-12-31 到期 |
 | 任务 ID（Qoder CN） | `5c74d6a0-c23e-42c0-b8af-e895c0837509` |
 | 指令原文 | [extras/gold-alert.md](extras/gold-alert.md) |
 | 行为 | `NO_ALERT` 静默结束；`ALERT` 才发消息并写一条 runlog；不重建看板、不发布站点 |

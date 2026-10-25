@@ -2,8 +2,10 @@
 
 日常只需要两个定时任务：
   每个交易日 15:10 之后   python -m sim execute     按冻结订单、以 14:45 价格成交
-  每个交易日 20:00 之后   python -m sim evening     结算 → 初筛 → 生成并冻结次日订单 → 报告
-非交易日运行会自动跳过；同一天重复运行不会重复结算或下单。
+  每天 20:00 之后         python -m sim evening     交易日：结算 → 生成并冻结次日订单 → 报告
+                                                    非交易日：只按最近结算冻结明天的订单（前夜模式）
+冻结时点是"交易日前一晚"：周一单周日晚冻结，周二单周一晚冻结；周末/节假日新增的信息因此能进订单。
+同一天重复运行不会重复结算或下单。
 """
 import argparse
 import datetime as dt
@@ -93,10 +95,6 @@ def do_plan(date, market, rcfg, bcfg, scfg, reg) -> int:
             state = settle.risk_state(acct.state, trade_date)
             band = risk.band_for(rcfg, reg, state)
             drafts, draft_meta, draft_errors = strategies.drafts(acct, trade_date, date, sc, band, scfg)
-            decided = str(draft_meta.get("decided_on") or "")
-            if drafts and decided and decided < date:
-                draft_errors.append(f"草稿基于 {decided} 的数据，早于结算日 {date}，整份丢弃（不拿旧数据下单）")
-                drafts = []
             for d in drafts:  # Agent 草稿里可能有初筛之外的股票/ETF
                 if d["code"] not in prices and (px := market.close(d["code"], date)) is not None:
                     prices[d["code"]] = px
@@ -145,10 +143,18 @@ def cmd_settle(a):
 
 
 def cmd_plan(a):
-    date = resolve_date(a.date)
-    if not cal.is_trading_day(date):
-        return log(f"{date} 不是交易日，跳过")
     market, rcfg = Market(), config.load("risk")
+    if getattr(a, "for_tomorrow", False):
+        today = cal.today()
+        trade_date = cal.evening_before(today)
+        if not trade_date:
+            return log(f"{today} 不是任何交易日的前夜，跳过")
+        date = cal.prev_day(trade_date)
+        log(f"前夜模式：结算日 {date} → 交易日 {trade_date}")
+    else:
+        date = resolve_date(a.date)
+        if not cal.is_trading_day(date):
+            return log(f"{date} 不是交易日，跳过")
     try:
         reg = settle.regime(market, rcfg["regime"]["index"], date)
         return do_plan(date, market, rcfg, config.load("broker"), config.load("strategy"), reg)
@@ -159,15 +165,36 @@ def cmd_plan(a):
 
 def cmd_evening(a):
     date = resolve_date(a.date)
-    if not cal.is_trading_day(date):
-        return log(f"{date} 不是交易日，跳过")
     market, rcfg, bcfg, scfg = Market(config.load("broker")["exec_time"]), config.load("risk"), \
         config.load("broker"), config.load("strategy")
+    if not cal.is_trading_day(date):
+        # 前夜模式：周末/节假日的最后一晚，不结算，只冻结下一个交易日的订单
+        trade_date = cal.evening_before(date)
+        if not trade_date:
+            return log(f"{date} 非交易日，且明天不是交易日，跳过")
+        settle_date = cal.prev_day(trade_date)
+        try:
+            reg = settle.regime(market, rcfg["regime"]["index"], settle_date)
+            rc = do_plan(settle_date, market, rcfg, bcfg, scfg, reg)
+        except settle.StaleData as e:
+            log(f"中止：{e}")
+            return 1
+        log(f"前夜：不结算，只冻结 {trade_date} 的订单（数据日 {settle_date}）")
+        log(f"资金看板：{dashboard.build(settle_date, market, bcfg)}")
+        return rc
     try:
         # 先补执行再结算：execute 漏跑或晚跑时，成交必须先入账，否则当天净值漏掉成交
         catch_up_execute(date, market, bcfg, rcfg)
         reg = do_settle(date, market, rcfg, bcfg)
-        rc = do_plan(date, market, rcfg, bcfg, scfg, reg)
+        trade_date = cal.evening_before(date)
+        if trade_date:
+            rc = do_plan(date, market, rcfg, bcfg, scfg, reg)
+        else:
+            # 明天不是交易日：今天不冻结，等最后一个晚上（前夜）再冻结，让周末/节假日信息进来
+            nxt = cal.next_day(date)
+            eve = (dt.date.fromisoformat(nxt) - dt.timedelta(days=1)).isoformat()
+            log(f"明天不是交易日，本次不冻结订单；{eve} 晚（前夜）再冻结 {nxt}")
+            rc = 0
     except settle.StaleData as e:
         log(f"中止：{e}")
         return 1
@@ -317,6 +344,7 @@ def cmd_resume(a):
 def main():
     p = argparse.ArgumentParser(prog="python -m sim", description="A 股模拟交易")
     sub = p.add_subparsers(dest="cmd", required=True)
+    subs = {}
     for name, fn, help_ in [("init", cmd_init, "创建账户"), ("settle", cmd_settle, "盘后结算"),
                             ("plan", cmd_plan, "初筛并冻结下一交易日订单"),
                             ("evening", cmd_evening, "晚间任务：结算 + 生成订单 + 报告"),
@@ -326,6 +354,9 @@ def main():
         sp = sub.add_parser(name, help=help_)
         sp.add_argument("--date", help="YYYY-MM-DD，默认今天")
         sp.set_defaults(fn=fn)
+        subs[name] = sp
+    subs["plan"].add_argument("--for-tomorrow", action="store_true",
+                              help="前夜模式：按最近结算日冻结明天（交易日）的订单")
     sp = sub.add_parser("pool", help="主策略候选池：全市场多路召回 + 分诊（收盘后运行，供 Agent 研究）")
     sp.add_argument("--date", help="YYYY-MM-DD，默认最近交易日")
     sp.add_argument("--force", action="store_true", help="忽略当天缓存重新生成")

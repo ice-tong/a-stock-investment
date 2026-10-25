@@ -49,6 +49,23 @@ def validate_draft(doc) -> tuple:
     return good, meta, errors
 
 
+def fresh_enough(drafts: list, meta: dict, settle_date: str) -> tuple:
+    """草稿数据日校验。返回 (ok, reason)。
+
+    有订单却没有 meta.decided_on，或者 decided_on 早于结算日，都整份丢弃——前者无法
+    确认数据日，后者等于拿旧数据下单。decided_on 晚于结算日是允许的：前夜冻结时，周末
+    的研究信息日会晚于上一交易日的结算日。
+    """
+    if not drafts:
+        return True, ""
+    decided = str((meta or {}).get("decided_on") or "")
+    if not decided:
+        return False, "草稿有订单但缺少 meta.decided_on，整份丢弃（无法确认数据日）"
+    if decided < settle_date:
+        return False, f"草稿基于 {decided} 的数据，早于结算日 {settle_date}，整份丢弃（不拿旧数据下单）"
+    return True, ""
+
+
 def load_draft(path) -> tuple:
     try:
         doc = json.loads(path.read_text(encoding="utf-8"))
@@ -64,7 +81,12 @@ def drafts(acct, trade_date: str, settle_date: str, screen, band: dict, scfg: di
         path = config.orders_dir() / trade_date / f"{acct.name}.draft.json"
         if not path.exists():
             return [], {}, []
-        return load_draft(path)
+        orders, meta, errors = load_draft(path)
+        # 新鲜度只约束 Agent 草稿：程序生成的订单没有 decided_on 概念
+        ok, why = fresh_enough(orders, meta, settle_date)
+        if not ok:
+            return [], meta, errors + [why]
+        return orders, meta, errors
     if s in ("etf", "etf_band"):
         return [], {}, []
 

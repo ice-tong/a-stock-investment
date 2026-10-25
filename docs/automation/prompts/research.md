@@ -3,8 +3,8 @@
 工作目录：/Users/yancong/agent-workspace/a-stock-investment
 
 背景：
-- main 账户（agent 策略）的个股订单只能来自你写的草稿 orders/<目标交易日>/main.draft.json；交易日 20:00 的 evening 任务运行 sim plan 做风控校验并冻结次日订单，不合规订单会被自动拒绝或缩量，你不参与冻结。
-- 草稿目标交易日规则：T_plan = 今天（若今天是交易日）否则今天之后的下一个交易日；目标日 = T_plan 的下一个交易日（即下一次 evening plan 会冻结的那天）。用命令取：`.venv/bin/python -c "from sim import calendar as cal; t=cal.today(); tp=t if cal.is_trading_day(t) else cal.next_day(t); print(cal.next_day(tp))"`。**非交易日（周末、节假日）不做第二部分**：只做第一部分复盘（周六另按 `docs/automation/prompts/evolution.md` 做进化任务），草稿留到下一个交易日晚上再写——plan 会丢弃 `decided_on` 早于结算日的草稿，周末硬写等于白跑。
+- main 账户（agent 策略）的订单只能来自你写的草稿 orders/<目标交易日>/main.draft.json；冻结发生在**目标交易日的前一晚（前夜）**：交易日 20:00 的 evening 在结算后冻结次日订单，周末/节假日的最后一晚只冻结、不动账。不合规订单会被自动拒绝或缩量，你不参与冻结。
+- 草稿目标交易日 = **下一个交易日**，不分交易日/非交易日，一律取 `cal.next_day(today)`：`.venv/bin/python -c "from sim import calendar as cal; print(cal.next_day(cal.today()))"`。周六、周日晚都指向周一（周日晚覆盖周六版，把周末新增的政策/公告/海外信息带进订单）；冻结时点是目标日的**前一自然日 20:00**（周日晚冻结周一、周一晚冻结周二，长假同理）。`decided_on` 必填，填**今天**（研究信息日，可以是非交易日）。plan 会丢弃 `decided_on` 早于结算日、或有订单却没有 `decided_on` 的整份草稿。非交易日照常做第二部分；周六的进化任务由独立的「策略进化（周六）」定时任务在 10:00 按 `docs/automation/prompts/evolution.md` 执行，本任务不重复。
 - 风控红线（config/risk.yaml，禁止修改）：单只个股 ≤20%、同时持股 ≤6 只、每周新开仓 ≤3 只、默认止损 -8%；总仓位区间随市场状态变化，以最近一份冻结订单里的 band 为准。
 - 子代理定义在 .qoder/agents/，用 Agent 工具按 subagent_type 委派（fundamental-agent、event-sentiment-agent、technical-flow-agent 等）；委派 prompt 必须自包含。
 
@@ -46,13 +46,13 @@
 8c. 影子使用记录：v2 的 5 只 shadow shortlist 只记录，不进入 shortlist/订单；20-30 个交易日后由进化官比较 v1/v2 候选池与 shortlist 的前向 5/20/60 日收益，再决定是否替换 main。不要在每晚决策里用 v2 替代 v1。
 9. 组合经理决策（你自己做）：**先看组合槽位，再选股**——当前持仓行业暴露（单一行业 ≤35%）、最多 6 只（个股 + 主动 ETF 合计）、每周新开仓 ≤3 只、regime 总仓位区间（个股 + 主动 ETF 共用 `stock_max`，底仓 ETF 只补剩余额度）；同一风格/行业不要扎堆。输出订单列表，每笔字段 code、name、target_weight（个股与权益/商品类 ETF 新仓单只 ≤0.05；债券 ETF 可到 0.10、货币 ETF 可到 0.20，它们波动低、止损更紧；合计落在当前 regime 区间内）、reason（一句话：研究结论 + 置信度高/中/低）、confidence（"高"/"中"/"低"）、channels（买入单必填：个股填该股在 `data/pool/<日期>.csv` 的 channels 原值，池外标的写 "池外:<来源>"；ETF 写 "etf:<类别>"，如 etf:star）、可选 stop_price 与 industry（ETF 不用给 stop_price，风控按类别自动设）；confidence 与 channels 会随订单冻结，供 `python -m sim attrib` 归因，不要省略；卖出用 reason_type "exit" 且 target_weight 低于当前权重。没有值得买的就输出空 orders 列表（代码会自动补底仓停泊），不要为了交易而交易。
 10. 写草稿 `orders/<目标交易日>/main.draft.json`，格式 `{"meta": {"tool": "<你所在的工具：qoder / claude-code / kimi>", "model": "<模型名>", "written_at": "<ISO 时间，如 2026-10-26T19:42:00>", "decided_on": "<研究数据所属的交易日>"}, "orders": [...]}`；若该日 main.json 已冻结则跳过不写。
-   - `decided_on` 必填且必须是研究数据所属的交易日（不是写文件的时刻）：plan 会丢弃 `decided_on` 早于结算日的整份草稿，写错等于放弃当天下单。
+   - `decided_on` 必填且必须是研究信息所属的日期（可以是非交易日，例如周日晚写周一的单就填周日；不是写文件的时刻）：plan 会丢弃 `decided_on` 早于结算日、或有订单却没有 `decided_on` 的整份草稿。
    - `meta` 会原样写进冻结订单，`python -m sim attrib` 按 model 分组统计，用来比较不同模型的决策质量。
    - 只允许写这一个文件、`journal/`、`data/pool/`（由 sim pool 生成）、`data/pool_v2/`（由 sim pool2 生成）与 `data/watchlist.json`；不得改 orders/ 其他文件、accounts/、config/。
 11. 执行日志：`.venv/bin/python tools/runlog.py add --task research --status ok --line "复盘 <L>: <一句>" --line "草稿 <目标日>: <订单摘要或'无个股订单'>"`。
 12. 重建状态看板并尽力发布：运行 `.venv/bin/python tools/build_dashboard.py`（同时更新 web/index.html 与 dist/index.html）；若当前会话存在 sites 插件 MCP 工具（mcp__plugin_sites_qoder_sites__prepare_site / get_publish_status / publish_site）：生成一个新 UUID 作为 actionId，调用 prepare_site，参数 projectRoot="/Users/yancong/agent-workspace/a-stock-investment"、webDirectory="dist"、projectId="01a1728a-617c-708f-99f9-03e5934f09f3"；读 get_publish_status 至 canPublish=true 后调用 publish_site（同一 actionId），再确认 published=true。若工具缺失或任一步失败，最多重试一次；仍不行就放弃发布，并在汇报中注明“看板已本地更新，站点待同步发布”。然后提交：`git add web/index.html dist/index.html journal orders data && git commit -m "[qoder-cn-cron] research: <复盘日> 复盘与草稿，看板已同步"`（reports/sim/ 在 .gitignore 中，不要 add；无改动则跳过）。
 13. 用一小段中文汇报：复盘要点、草稿订单（标的/权重/理由/置信度）、分歧与数据缺口、提示 evening 将风控冻结。不得给“必涨”“稳赚”类确定性表述。
 13b. Bark 推送（用户要求）：`.venv/bin/python tools/notify.py --title "模拟盘研究 <日期>" --body "复盘: <一句>\n草稿 <目标日>: <订单摘要或'无个股订单'>\n观察名单: <新增/更新条数>\n看板: 已发布 / 站点待同步发布\nhttps://ashare-sim-dashboard-wv51upzp22k.qoder.zone" --url "https://ashare-sim-dashboard-wv51upzp22k.qoder.zone"`（正文末尾附看板 URL，并传 `--url` 让点击通知直接打开）。推送失败不影响任务，在汇报里注明即可。
-14. 失败处理：任一部分失败时 runlog add --task research --status failed --line "<摘要>" 并汇报一次，同时推送 `.venv/bin/python tools/notify.py --title "模拟盘 research 失败" --body "<摘要>"`；不要写半成品草稿——evening 会自动退回仅底仓订单。
+14. 失败处理：任一部分失败时 runlog add --task research --status failed --line "<摘要>" 并汇报一次，同时推送 `.venv/bin/python tools/notify.py --title "模拟盘 research 失败" --body "<摘要>\nhttps://ashare-sim-dashboard-wv51upzp22k.qoder.zone" --url "https://ashare-sim-dashboard-wv51upzp22k.qoder.zone"`（失败推送也附看板 URL，链接内容可能仍是上一次的数据）；不要写半成品草稿——evening 会自动退回仅底仓订单。
 
 硬性约束：不修改 accounts/、orders/ 已冻结文件和 config/risk.yaml；不替用户实盘下单；草稿只是建议，风控有一票否决。
