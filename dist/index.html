@@ -82,7 +82,7 @@
       </div>
     </div>
     <div class="sub" style="margin-top:10px">账本结算至 <b class="num">2026-10-23</b> ·
-      本页由定时任务在每次运行后自动重建并发布 · 生成于 <span class="num">2026-10-25 13:27</span></div>
+      本页由定时任务在每次运行后自动重建并发布 · 生成于 <span class="num">2026-10-25 13:37</span></div>
   </div>
 </header>
 <div class="wrap">
@@ -126,6 +126,41 @@
     <div class="table-card"><table>
       <thead><tr><th>账户</th><th>净值</th><th>累计盈亏</th><th>当日盈亏</th><th>与 main 差</th><th>角色</th></tr></thead>
       <tbody><tr><td><b>main · 主策略</b></td><td class='num'>100,000.00</td><td class='num muted'>+0.00%</td><td class='num muted'>0.00</td><td class='num'>—</td><td class='small muted'>本看板主角</td></tr><tr><td><b>quant · 量化初筛</b></td><td class='num'>100,000.00</td><td class='num muted'>+0.00%</td><td class='num muted'>0.00</td><td class='num'>+0.00%</td><td class='small muted'>对照组</td></tr><tr><td><b>random · 随机对照</b></td><td class='num'>100,000.00</td><td class='num muted'>+0.00%</td><td class='num muted'>0.00</td><td class='num'>+0.00%</td><td class='small muted'>对照组</td></tr><tr><td><b>etf · 底仓对照</b></td><td class='num'>100,000.00</td><td class='num muted'>+0.00%</td><td class='num muted'>0.00</td><td class='num'>+0.00%</td><td class='small muted'>对照组</td></tr></tbody></table></div>
+    <details style="margin-top:12px">
+      <summary>对照组持仓与成交明细（quant / random / etf）</summary>
+      <p class="small muted">上：当前持仓（空仓显示“空仓”）；下：最近 5 笔成交。对照组只做参照，不参与看板主结论。</p>
+      
+      <div style="margin-top:14px">
+        <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:6px">
+          <b>quant · 量化初筛</b>
+          <span class="small muted">净值 100,000.00 · 现金 100,000.00 · 结算至 2026-10-23</span>
+        </div>
+        <div class="table-card" style="margin-bottom:10px"><table><thead><tr><th>持仓</th><th>股数</th><th>成本价</th><th>现价</th><th>市值</th><th>盈亏</th><th>止损价</th><th>建仓日</th></tr></thead>
+        <tbody><tr><td colspan=8 class='muted'>空仓</td></tr></tbody></table></div>
+        <div class="table-card"><table><thead><tr><th>日期</th><th>方向</th><th>标的</th><th>股数</th><th>价格</th><th>金额</th><th>费用</th><th>类型</th></tr></thead>
+        <tbody><tr><td colspan=8 class='muted'>尚无成交</td></tr></tbody></table></div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:6px">
+          <b>random · 随机对照</b>
+          <span class="small muted">净值 100,000.00 · 现金 100,000.00 · 结算至 2026-10-23</span>
+        </div>
+        <div class="table-card" style="margin-bottom:10px"><table><thead><tr><th>持仓</th><th>股数</th><th>成本价</th><th>现价</th><th>市值</th><th>盈亏</th><th>止损价</th><th>建仓日</th></tr></thead>
+        <tbody><tr><td colspan=8 class='muted'>空仓</td></tr></tbody></table></div>
+        <div class="table-card"><table><thead><tr><th>日期</th><th>方向</th><th>标的</th><th>股数</th><th>价格</th><th>金额</th><th>费用</th><th>类型</th></tr></thead>
+        <tbody><tr><td colspan=8 class='muted'>尚无成交</td></tr></tbody></table></div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:6px">
+          <b>etf · 底仓对照</b>
+          <span class="small muted">净值 100,000.00 · 现金 100,000.00 · 结算至 2026-10-23</span>
+        </div>
+        <div class="table-card" style="margin-bottom:10px"><table><thead><tr><th>持仓</th><th>股数</th><th>成本价</th><th>现价</th><th>市值</th><th>盈亏</th><th>止损价</th><th>建仓日</th></tr></thead>
+        <tbody><tr><td colspan=8 class='muted'>空仓</td></tr></tbody></table></div>
+        <div class="table-card"><table><thead><tr><th>日期</th><th>方向</th><th>标的</th><th>股数</th><th>价格</th><th>金额</th><th>费用</th><th>类型</th></tr></thead>
+        <tbody><tr><td colspan=8 class='muted'>尚无成交</td></tr></tbody></table></div>
+      </div>
+    </details>
   </section>
 
   <section>
@@ -176,20 +211,20 @@
       <div class="small" style="margin-top:8px">
         <p>1 确定性内核 — 已完成（日历/撮合/账本/风控/初筛/对照/日报/看板，16 项测试）。</p>
         <p>正式模拟运行期 — 进行中（2026-10-23 起跑，四账户各 10 万）。</p>
-        <p>2 Agent 订单草稿 — 未开始（main.draft.json → sim plan 风控冻结）。</p>
-        <p>3 定时任务深化 — 未开始（execute/evening 基础 cron 已由 Qoder 承担）。</p>
+        <p>2 Agent 订单草稿 — 已接入（2026-10-25；每晚 19:00 复盘+草稿 → 20:00 风控冻结）。</p>
+        <p>3 定时任务深化 — 进行中（execute / research / evening 由 Qoder cron 承担，看板自动同步）。</p>
         <p>4 策略进化 — 未开始。</p>
       </div>
     </details>
     <details>
       <summary>近期工作日志（docs/进展与交接.md）</summary>
       <div class="table-card" style="margin-top:8px"><table>
-        <thead><tr><th>日期</th><th>工具</th><th>内容</th></tr></thead><tbody><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>晚间任务首次运行（19:00 研究 cron）：复盘 10-23（四账户无成交、均空仓）写入 `journal/daily/2026-10-23.md`；研究初筛前 3 只可负担候选（中石油/伊利/长电），草稿 10-27 仅伊利 3%（财报前底仓，临时目录 dry-run 风控通过：3% 个股 + 47% ETF = 50%），中石油（10-28 三季报）、长电（10-31 三季报）等财报后再说。数据侧：AKShare 多数接口代理失败，子代理改用 WebSearch 核实</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>晚间任务改为每天触发（按用户要求）：研究 cron 调整为每天 19:00（`0 19 * * *`，更名「模拟盘晚间复盘与研究」），任务分两步——交易复盘（交易日复盘当天、非交易日复盘最近已结算日，写 journal/daily/，幂等）+ 次日订单草稿（目标日=计划日的下一交易日）。看板文案与 docs/tools/qoder.md、本文档同步更新并重新发布</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>第二阶段接入：新增研究 cron（交易日 19:00，ID acbf75d2…）跑初筛→子代理研究→组合经理决策，写 orders/&lt;交易日&gt;/main.draft.json；evening 的 sim plan 照常风控冻结。首份草稿预计 10-26 晚生成、10-27 订单生效。runlog 增加 research 类型；看板 main 策略卡文案同步</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>看板 v2.1：订单表加「依据」列（reason + 风控拒绝原因），新增「策略依据」板块（四账户选股规则说明 + data/screen 初筛快照 Top10 含动量得分与被选标记）。已发布</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>看板升级 v2：改为主账户视角（main 盈亏/持仓/成交为主，对照组对比表），新增「定时任务执行日志」板块（reports/sim/runlog.json）。新增 tools/runlog.py 与 tools/build_dashboard.py（生成 web/+dist/）；execute/evening/gold 三个 cron 指令更新为：写执行日志 → 重建看板 → 尽力发布站点（cron 会话无 sites 插件时降级为本地更新并注明待同步）。已发布新版</td></tr></tbody></table></div>
+        <thead><tr><th>日期</th><th>工具</th><th>内容</th></tr></thead><tbody><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>重建 evening 任务（交易日 20:00，新 ID `377136b3-c3d5-4955-92c3-6a129f5b4e0c`；原 `80c52643…` 被误删）：配置与原任务一致（sim evening → runlog → 重建看板 → 尽力发布 → 提交），首次运行 2026-10-26 20:00，届时结算当日并冻结 10-27 订单</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>首跑后发现看板未刷新（research 任务原缺重建/发布步骤）：补重建并重新发布站点，执行日志已显示 research 记录；研究 cron 指令更新（revision 4）加入「重建看板 → 尽力发布 → 提交 web/dist/journal/orders」步骤，此后每天 19:00 自动跟新</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>晚间任务首次运行（19:00 研究 cron）：复盘 10-23（四账户无成交、均空仓）写入 `journal/daily/2026-10-23.md`；研究初筛前 3 只可负担候选（中石油/伊利/长电），草稿 10-27 仅伊利 3%（财报前底仓，临时目录 dry-run 风控通过：3% 个股 + 47% ETF = 50%），中石油（10-28 三季报）、长电（10-31 三季报）等财报后再说。数据侧：AKShare 多数接口代理失败，子代理改用 WebSearch 核实</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>晚间任务改为每天触发（按用户要求）：研究 cron 调整为每天 19:00（`0 19 * * *`，更名「模拟盘晚间复盘与研究」），任务分两步——交易复盘（交易日复盘当天、非交易日复盘最近已结算日，写 journal/daily/，幂等）+ 次日订单草稿（目标日=计划日的下一交易日）。看板文案与 docs/tools/qoder.md、本文档同步更新并重新发布</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>第二阶段接入：新增研究 cron（交易日 19:00，ID acbf75d2…）跑初筛→子代理研究→组合经理决策，写 orders/&lt;交易日&gt;/main.draft.json；evening 的 sim plan 照常风控冻结。首份草稿预计 10-26 晚生成、10-27 订单生效。runlog 增加 research 类型；看板 main 策略卡文案同步</td></tr></tbody></table></div>
     </details>
   </section>
 
   <footer>
-    <p>本页为静态快照，由定时任务（execute / evening）在每次成功运行后自动重建并发布；非交易日不更新。最新账本以本机 reports/sim/dashboard.html 为准。</p>
+    <p>本页为静态快照，由定时任务（execute / research / evening）在每次成功运行后自动重建并发布；非交易日仅研究任务更新。最新账本以本机 reports/sim/dashboard.html 为准。</p>
     <p style="margin-top:6px">本看板由 AI 生成，仅供研究参考，不构成投资建议。股市有风险，投资需谨慎。</p>
   </footer>
 </div>

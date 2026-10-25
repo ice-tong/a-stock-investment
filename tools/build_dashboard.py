@@ -151,6 +151,34 @@ def sparkline(values, initial) -> str:
             f'<text x="{pad}" y="{by - 5:.1f}" fill="#7d8aa0" font-size="11">初始 {money(initial)}</text></svg>')
 
 
+def positions_table(account) -> str:
+    rows = []
+    for code, p in account["positions"].items():
+        value = p["shares"] * p.get("last_price", 0)
+        pp = value / p["cost"] - 1 if p["cost"] else 0
+        rows.append(
+            f"<tr><td>{esc(p['name'])} <span class='muted small num'>{esc(code)}</span></td>"
+            f"<td class='num'>{p['shares']:.0f}</td><td class='num'>{p['cost'] / p['shares']:.3f}</td>"
+            f"<td class='num'>{p.get('last_price', 0)}</td><td class='num'>{money(value)}</td>"
+            f"<td class='num {cls(pp)}'>{pct(pp)}</td><td class='num'>{p.get('stop_price') or '—'}</td>"
+            f"<td class='num'>{esc(p.get('first_buy_date', ''))}</td></tr>")
+    return "".join(rows) or "<tr><td colspan=8 class='muted'>空仓</td></tr>"
+
+
+def trades_table(account, limit=8) -> str:
+    rows = []
+    for t in account["trades"][-limit:][::-1]:
+        fees = sum(float(t[k] or 0) for k in ("commission", "stamp_tax", "transfer_fee"))
+        side = "买入" if t["side"] == "buy" else "卖出"
+        rows.append(
+            f"<tr><td class='num'>{esc(t['date'])}</td><td>{side}</td>"
+            f"<td>{esc(t['name'])} <span class='muted small num'>{esc(t['code'])}</span></td>"
+            f"<td class='num'>{float(t['shares']):.0f}</td><td class='num'>{float(t['price']):.3f}</td>"
+            f"<td class='num'>{money(float(t['amount']))}</td><td class='num'>{fees:.2f}</td>"
+            f"<td class='small muted'>{esc(REASON_CN.get(t.get('reason_type', ''), t.get('reason_type', '')))}</td></tr>")
+    return "".join(rows) or "<tr><td colspan=8 class='muted'>尚无成交</td></tr>"
+
+
 def load_orders():
     orders_dir = ROOT / "orders"
     if not orders_dir.exists():
@@ -248,29 +276,8 @@ def main() -> int:
     band = (risk.get("bands") or {}).get(regime, {})
 
     # ---- 主账户 hero ----
-    pos_rows = []
-    for code, p in m["positions"].items():
-        value = p["shares"] * p.get("last_price", 0)
-        pp = value / p["cost"] - 1 if p["cost"] else 0
-        pos_rows.append(
-            f"<tr><td>{esc(p['name'])} <span class='muted small num'>{esc(code)}</span></td>"
-            f"<td class='num'>{p['shares']:.0f}</td><td class='num'>{p['cost'] / p['shares']:.3f}</td>"
-            f"<td class='num'>{p.get('last_price', 0)}</td><td class='num'>{money(value)}</td>"
-            f"<td class='num {cls(pp)}'>{pct(pp)}</td><td class='num'>{p.get('stop_price') or '—'}</td>"
-            f"<td class='num'>{esc(p.get('first_buy_date', ''))}</td></tr>")
-    pos_table = "".join(pos_rows) or "<tr><td colspan=8 class='muted'>空仓</td></tr>"
-
-    trade_rows = []
-    for t in m["trades"][-8:][::-1]:
-        fees = sum(float(t[k] or 0) for k in ("commission", "stamp_tax", "transfer_fee"))
-        side = "买入" if t["side"] == "buy" else "卖出"
-        trade_rows.append(
-            f"<tr><td class='num'>{esc(t['date'])}</td><td>{side}</td>"
-            f"<td>{esc(t['name'])} <span class='muted small num'>{esc(t['code'])}</span></td>"
-            f"<td class='num'>{float(t['shares']):.0f}</td><td class='num'>{float(t['price']):.3f}</td>"
-            f"<td class='num'>{money(float(t['amount']))}</td><td class='num'>{fees:.2f}</td>"
-            f"<td class='small muted'>{esc(REASON_CN.get(t.get('reason_type', ''), t.get('reason_type', '')))}</td></tr>")
-    trade_table = "".join(trade_rows) or "<tr><td colspan=8 class='muted'>尚无成交</td></tr>"
+    pos_table = positions_table(m)
+    trade_table = trades_table(m)
 
     nav_values = [float(r["equity"]) for r in m["nav"]]
     spark = sparkline(nav_values, m["state"]["initial_cash"])
@@ -286,6 +293,21 @@ def main() -> int:
             f"<td class='num {cls(a['day_pnl'])}'>{money(a['day_pnl'])}</td>"
             f"<td class='num'>{pct(gap) if name != 'main' else '—'}</td>"
             f"<td class='small muted'>{CONTROL_NOTE[name]}</td></tr>")
+
+    ctrl_details = ""
+    for name, label in ACCOUNTS[1:]:
+        a = accts[name]
+        ctrl_details += f"""
+      <div style="margin-top:14px">
+        <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:6px">
+          <b>{esc(label)}</b>
+          <span class="small muted">净值 {money(a['equity'])} · 现金 {money(a['cash'])} · 结算至 {esc(a['last_settled'])}</span>
+        </div>
+        <div class="table-card" style="margin-bottom:10px"><table><thead><tr><th>持仓</th><th>股数</th><th>成本价</th><th>现价</th><th>市值</th><th>盈亏</th><th>止损价</th><th>建仓日</th></tr></thead>
+        <tbody>{positions_table(a)}</tbody></table></div>
+        <div class="table-card"><table><thead><tr><th>日期</th><th>方向</th><th>标的</th><th>股数</th><th>价格</th><th>金额</th><th>费用</th><th>类型</th></tr></thead>
+        <tbody>{trades_table(a, 5)}</tbody></table></div>
+      </div>"""
 
     # ---- 执行日志 ----
     log_rows = []
@@ -434,6 +456,11 @@ def main() -> int:
     <div class="table-card"><table>
       <thead><tr><th>账户</th><th>净值</th><th>累计盈亏</th><th>当日盈亏</th><th>与 main 差</th><th>角色</th></tr></thead>
       <tbody>{''.join(cmp_rows)}</tbody></table></div>
+    <details style="margin-top:12px">
+      <summary>对照组持仓与成交明细（quant / random / etf）</summary>
+      <p class="small muted">上：当前持仓（空仓显示“空仓”）；下：最近 5 笔成交。对照组只做参照，不参与看板主结论。</p>
+      {ctrl_details}
+    </details>
   </section>
 
   <section>
@@ -476,8 +503,8 @@ def main() -> int:
       <div class="small" style="margin-top:8px">
         <p>1 确定性内核 — 已完成（日历/撮合/账本/风控/初筛/对照/日报/看板，16 项测试）。</p>
         <p>正式模拟运行期 — 进行中（2026-10-23 起跑，四账户各 10 万）。</p>
-        <p>2 Agent 订单草稿 — 未开始（main.draft.json → sim plan 风控冻结）。</p>
-        <p>3 定时任务深化 — 未开始（execute/evening 基础 cron 已由 Qoder 承担）。</p>
+        <p>2 Agent 订单草稿 — 已接入（2026-10-25；每晚 19:00 复盘+草稿 → 20:00 风控冻结）。</p>
+        <p>3 定时任务深化 — 进行中（execute / research / evening 由 Qoder cron 承担，看板自动同步）。</p>
         <p>4 策略进化 — 未开始。</p>
       </div>
     </details>
@@ -489,7 +516,7 @@ def main() -> int:
   </section>
 
   <footer>
-    <p>本页为静态快照，由定时任务（execute / evening）在每次成功运行后自动重建并发布；非交易日不更新。最新账本以本机 reports/sim/dashboard.html 为准。</p>
+    <p>本页为静态快照，由定时任务（execute / research / evening）在每次成功运行后自动重建并发布；非交易日仅研究任务更新。最新账本以本机 reports/sim/dashboard.html 为准。</p>
     <p style="margin-top:6px">本看板由 AI 生成，仅供研究参考，不构成投资建议。股市有风险，投资需谨慎。</p>
   </footer>
 </div>
