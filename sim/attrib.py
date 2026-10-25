@@ -14,7 +14,9 @@ from . import config, report
 from .ledger import Account, all_accounts
 
 MIN_TRADES_FOR_PROPOSAL = 15  # 与 docs/模拟交易系统设计.md 5.2 一致：一条参数提案至少 15 笔相关交易
-CONTROLS = ("etf", "random", "quant")
+CONTROLS = ("etf", "etf_band", "random", "quant")
+# 对照口径：etf 固定 98% 仓位，etf_band 跟当日仓位区间上沿（和 main 无草稿时的停泊逻辑一致）。
+# main − etf_band 是选股净贡献，etf_band − etf 是仓位控制贡献。
 
 
 def evolution_dir():
@@ -26,10 +28,12 @@ def order_index(account: str) -> dict:
     idx = {}
     for f in sorted(config.orders_dir().glob(f"*/{account}.json")):
         doc = json.loads(f.read_text(encoding="utf-8"))
+        meta = doc.get("meta") or {}
         for o in doc.get("orders", []):
             if o.get("id"):
                 idx[o["id"]] = o | {"trade_date": doc["trade_date"],
-                                    "strategy_version": o.get("strategy_version") or doc.get("strategy_version")}
+                                    "strategy_version": o.get("strategy_version") or doc.get("strategy_version"),
+                                    "model": o.get("model") or meta.get("model") or "未标注"}
     return idx
 
 
@@ -54,6 +58,7 @@ def episodes(acct, idx: dict) -> list:
                 ep = open_[code] = {"code": code, "name": t["name"], "entry_date": t["date"], "invested": 0.0,
                                     "realized": 0.0, "channels": o.get("channels") or "未标注",
                                     "confidence": confidence_of(o), "version": o.get("strategy_version") or "未标注",
+                                    "model": o.get("model") or "未标注",
                                     "entry_reason": o.get("reason", "")}
             ep["invested"] += float(t["amount"] or 0) + sum(float(t[k] or 0) for k in ("commission", "transfer_fee"))
         else:
@@ -116,11 +121,21 @@ def build(date: str) -> dict:
         for c in CONTROLS:
             if c in accts and accts[c]["total"] is not None and accts["main"]["total"] is not None:
                 excess[c] = accts["main"]["total"] - accts[c]["total"]
-    return {"date": date, "accounts": list(accts.values()), "excess": excess, "episodes": eps,
+    # 把"选股"和"仓位控制"拆开：main − etf_band 只看选股，etf_band − etf 只看按 regime 调仓位
+    selection = positioning = None
+    if main:
+        t = {k: v["total"] for k, v in accts.items()}
+        if t.get("main") is not None and t.get("etf_band") is not None:
+            selection = t["main"] - t["etf_band"]
+        if t.get("etf_band") is not None and t.get("etf") is not None:
+            positioning = t["etf_band"] - t["etf"]
+    return {"date": date, "accounts": list(accts.values()), "excess": excess,
+            "selection": selection, "positioning": positioning, "episodes": eps,
             "n_closed": len(closed), "gate": len(closed) >= MIN_TRADES_FOR_PROPOSAL,
             "by_channel": group_stats(eps, lambda e: e["channels"].split("|")),
             "by_confidence": group_stats(eps, lambda e: e["confidence"]),
             "by_version": group_stats(eps, lambda e: e["version"]),
+            "by_model": group_stats(eps, lambda e: e["model"]),
             "by_exit": group_stats(eps, lambda e: e["exit_reason"])}
 
 
@@ -135,11 +150,16 @@ def to_markdown(r: dict) -> str:
                      f"{report._num(a['calmar'])} | {pct(a['stock_weight'])} | {a['sells']} | {pct(a['win_rate'])} | "
                      f"{a['costs']:.0f} |")
     lines += ["", "**main 超额收益**：" + ("，".join(f"相对 {k} {pct(v, 2)}" for k, v in r["excess"].items()) or "暂无"),
+              "", "**选股与仓位拆解**：" + (
+                  f"选股净贡献（main − etf_band）{pct(r['selection'], 2)}；"
+                  f"仓位控制贡献（etf_band − etf）{pct(r['positioning'], 2)}"
+                  if r.get("selection") is not None and r.get("positioning") is not None
+                  else "etf_band 尚未产生净值，暂不可拆解"),
               "", f"## 证据门槛", "",
               f"main 已平仓个股 {r['n_closed']} 笔；参数类提案需 ≥{MIN_TRADES_FOR_PROPOSAL} 笔相关交易："
               + ("**已达到**" if r["gate"] else "**未达到**，只能记观察项或开挑战者账户做实验")]
     for title, key in (("按通道", "by_channel"), ("按置信度", "by_confidence"), ("按策略版本", "by_version"),
-                       ("按离场原因", "by_exit")):
+                       ("按模型", "by_model"), ("按离场原因", "by_exit")):
         lines += ["", f"## {title}（仅已平仓）", ""]
         if not r[key]:
             lines.append("暂无已平仓交易。")

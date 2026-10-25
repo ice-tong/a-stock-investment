@@ -10,7 +10,7 @@ from . import config
 from .ledger import all_accounts
 from .report import LABELS, metrics
 
-ORDER = ["main", "quant", "random", "etf"]
+ORDER = ["main", "quant", "random", "etf_band", "etf"]
 PERIODS = [("today", "今日"), ("week", "本周"), ("month", "本月"), ("quarter", "本季"), ("year", "本年"),
            ("d20", "近1月"), ("d60", "近3月"), ("d120", "近6月"), ("d250", "近1年"), ("all", "成立以来")]
 

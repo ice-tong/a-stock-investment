@@ -6,7 +6,8 @@ accounts:                     # 账户名: 策略
   main: agent                 # 主策略：第二阶段由 Agent 生成订单；第一阶段只做底仓与强制止损
   quant: quant                # 纯量化初筛组：直接买初筛排名靠前的股票
   random: random              # 随机选股对照组：同样风控，候选池里随机挑
-  etf: etf                    # 只持有底仓 ETF
+  etf: etf                    # 只持有底仓 ETF（固定 98% 仓位）
+  etf_band: etf_band          # 仓位对照组：不买个股，ETF 仓位跟当日仓位区间上沿，用于把"仓位控制"从"选股"里拆出来
 
 base_etf:                     # 底仓 ETF，同时作为"只持有底仓"对照组的标的
   code: sh510300

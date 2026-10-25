@@ -6,7 +6,8 @@ import math
 from . import config
 from .ledger import all_accounts
 
-LABELS = {"main": "主策略", "quant": "纯量化组", "random": "随机选股组", "etf": "只持底仓 ETF"}
+LABELS = {"main": "主策略", "quant": "纯量化组", "random": "随机选股组",
+          "etf_band": "仓位对照（ETF 跟区间上沿）", "etf": "只持底仓 ETF（固定 98%）"}
 COLORS = ["#2563eb", "#d97706", "#7c3aed", "#059669", "#6b7280"]
 
 
