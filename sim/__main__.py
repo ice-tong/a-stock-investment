@@ -9,7 +9,7 @@ import argparse
 import datetime as dt
 import sys
 
-from . import broker, calendar as cal, config, dashboard, orders, pool, report, risk, screen, settle, strategies
+from . import attrib, broker, calendar as cal, config, dashboard, orders, pool, report, risk, screen, settle, strategies
 from .ledger import Account, all_accounts
 from .market import Market
 
@@ -86,7 +86,8 @@ def do_plan(date, market, rcfg, bcfg, scfg, reg):
             "fixed_etf_weight": 0.98 if acct.state["strategy"] == "etf" else None})
         for i, o in enumerate(reviewed, 1):
             o["id"] = f"{trade_date.replace('-', '')}-{acct.name}-{i:02d}"
-        doc = {"account": acct.name, "strategy": acct.state["strategy"], "trade_date": trade_date,
+        doc = {"account": acct.name, "strategy": acct.state["strategy"], "strategy_version": scfg.get("version"),
+               "trade_date": trade_date,
                "decided_on": date, "frozen_at": dt.datetime.now().isoformat(timespec="seconds"),
                "regime": reg, "risk_state": state, "band": band, "equity_estimate": round(equity, 2),
                "orders": reviewed}
@@ -168,6 +169,11 @@ def cmd_pool(a):
     log(f"候选池 {len(out)} 只：{pool.pool_dir() / (date + '.md')}")
 
 
+def cmd_attrib(a):
+    date = resolve_date(a.date)
+    log(f"归因报告：{attrib.run(date)}")
+
+
 def cmd_report(a):
     date = resolve_date(a.date)
     bcfg = config.load("broker")
@@ -203,7 +209,8 @@ def main():
                             ("plan", cmd_plan, "初筛并冻结下一交易日订单"),
                             ("evening", cmd_evening, "晚间任务：结算 + 生成订单 + 报告"),
                             ("execute", cmd_execute, "执行当日冻结订单（14:45 之后任意时间）"),
-                            ("report", cmd_report, "生成日报和资金看板"), ("status", cmd_status, "查看账户")]:
+                            ("report", cmd_report, "生成日报和资金看板"),
+                            ("attrib", cmd_attrib, "策略归因（给策略进化官）：账户对照 + 按通道/置信度/版本分组"), ("status", cmd_status, "查看账户")]:
         sp = sub.add_parser(name, help=help_)
         sp.add_argument("--date", help="YYYY-MM-DD，默认今天")
         sp.set_defaults(fn=fn)

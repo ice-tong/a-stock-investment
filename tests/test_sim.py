@@ -299,3 +299,32 @@ def test_pool_features_and_channels():
     assert "watchlist" in out.set_index("code").loc["sh600002", "channels"]
     md = pool.to_markdown("2026-10-23", out, ch, {"spot": 3, "base": 3, "pre": 3, "feat": 3, "eligible": 2})
     assert "多通道共振" in md and "（不合规）" in md
+
+
+# ---------------- 策略归因 ----------------
+def test_attrib_episodes_link_to_frozen_orders(tmp_path):
+    from sim import attrib
+    acct = Account.create("main", "agent", 100000, "2026-10-01")
+    d = config.orders_dir() / "2026-10-05"
+    d.mkdir(parents=True)
+    (d / "main.json").write_text(json.dumps({"trade_date": "2026-10-05", "strategy_version": "strategy-v1.0", "orders": [
+        {"id": "o1", "code": "sh600001", "reason": "动量领先，置信度高", "channels": "momentum|trend"},
+        {"id": "o2", "code": "sh600002", "reason": "回调企稳", "confidence": "低", "channels": "pullback"}]}), "utf-8")
+    for t in [dict(date="2026-10-05", order_id="o1", code="sh600001", name="甲", side="buy", amount=10000),
+              dict(date="2026-10-05", order_id="o2", code="sh600002", name="乙", side="buy", amount=5000),
+              dict(date="2026-10-05", order_id="e1", code="sh510300", name="ETF", side="buy", amount=40000),
+              dict(date="2026-10-12", order_id="o3", code="sh600001", name="甲", side="sell", realized_pnl=800,
+                   closed=True, reason_type="exit")]:
+        acct.append_trade(t)
+    acct.state["positions"]["sh600002"] = {"name": "乙", "kind": "stock", "shares": 500, "cost": 5000.0, "last_price": 9.0}
+    acct.save()
+    eps = {e["code"]: e for e in attrib.episodes(Account("main"), attrib.order_index("main"))}
+    assert set(eps) == {"sh600001", "sh600002"}                                         # ETF 不算个股持仓
+    a, b = eps["sh600001"], eps["sh600002"]
+    assert a["closed"] and a["pnl_pct"] == pytest.approx(0.08) and a["confidence"] == "高"
+    assert a["version"] == "strategy-v1.0" and a["exit_reason"] == "exit"
+    assert not b["closed"] and b["pnl"] == pytest.approx(-500) and b["confidence"] == "低"
+    by_ch = {g["group"]: g for g in attrib.group_stats(list(eps.values()), lambda e: e["channels"].split("|"))}
+    assert set(by_ch) == {"momentum", "trend"} and by_ch["momentum"]["win_rate"] == 1.0  # 只统计已平仓
+    md = attrib.to_markdown(attrib.build("2026-10-12"))
+    assert "未达到" in md and "momentum" in md

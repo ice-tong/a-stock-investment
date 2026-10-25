@@ -57,7 +57,7 @@ def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     sub = p.add_subparsers(dest="cmd", required=True)
     a = sub.add_parser("add", help="追加一条执行记录")
-    a.add_argument("--task", required=True, choices=["execute", "evening", "research", "gold", "manual"])
+    a.add_argument("--task", required=True, choices=["execute", "evening", "research", "evolution", "gold", "manual"])
     a.add_argument("--status", required=True, choices=["ok", "skipped", "failed", "alert"])
     a.add_argument("--trade-date", default=None)
     a.add_argument("--line", action="append", default=[], help="汇报行，可重复")

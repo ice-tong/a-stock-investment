@@ -11,13 +11,20 @@ from . import config
 @functools.lru_cache(maxsize=1)
 def trade_dates() -> tuple:
     path = config.cache_dir() / "trade_dates.csv"
-    this_year = str(dt.date.today().year)
+    # 缓存要覆盖到今天之后至少 30 天，否则年末算"下一交易日"会越界（12-31 晚上要冻结次年首个交易日的订单）
+    horizon = (dt.date.today() + dt.timedelta(days=30)).isoformat()
+    cached = []
     if path.exists():
-        dates = pd.read_csv(path)["trade_date"].astype(str).tolist()
-        if dates and dates[-1][:4] >= this_year:
-            return tuple(dates)
+        cached = pd.read_csv(path)["trade_date"].astype(str).tolist()
+        if cached and cached[-1] >= horizon:
+            return tuple(cached)
     import akshare as ak
-    df = ak.tool_trade_date_hist_sina()
+    try:
+        df = ak.tool_trade_date_hist_sina()
+    except Exception:
+        if cached:  # 取不到新日历时沿用缓存；真的越界时由调用方报错，绝不臆造交易日
+            return tuple(cached)
+        raise
     dates = [str(d)[:10] for d in df["trade_date"]]
     path.parent.mkdir(parents=True, exist_ok=True)
     pd.DataFrame({"trade_date": dates}).to_csv(path, index=False)
