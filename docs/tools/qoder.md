@@ -11,19 +11,23 @@ Qoder 自动注入工作区根目录的 `AGENTS.md`，无需额外配置。
 - 委派 prompt 必须自包含（标的、日期、问题），子代理看不到主对话。
 
 ## 定时任务
-Qoder 内建 cron（MCP `builtin` 服务器的 `qoder_cron` 工具），**当前承担全局模拟盘定时任务**：
 
+### 模拟盘 pipeline（本工具承担）
 | 任务 | 计划（Asia/Shanghai） | 任务 ID |
 |---|---|---|
 | 模拟盘 execute | 交易日 15:10（`10 15 * * 1-5`） | `df6f6cb3-9585-4b22-a93e-b8c812769567` |
 | 模拟盘晚间复盘与研究（第二阶段） | **每天** 19:00（`0 19 * * *`） | `acbf75d2-160c-4377-9296-df43b078d61e` |
 | 模拟盘 evening | 交易日 20:00（`0 20 * * 1-5`） | `377136b3-c3d5-4955-92c3-6a129f5b4e0c`（2026-10-25 重建，原 `80c52643…` 已删除） |
-| 黄金做T条件提醒（与 sim 无关） | 交易时段每 15 分钟 | `dbfeb064-b2bf-4ae9-8170-7cafc1888cb6` |
+
+### 独立附加功能（不属于模拟盘 pipeline）
+| 任务 | 计划（Asia/Shanghai） | 任务 ID |
+|---|---|---|
+| 黄金做T条件提醒 | 交易时段每 15 分钟（`*/15 9-11,13-15,21-22 * * 1-5`，2026-12-31 到期） | `dbfeb064-b2bf-4ae9-8170-7cafc1888cb6` |
 
 - 创建时间：2026-10-24。cron 会在非交易日触发，但 `sim` 命令内部会判断交易日并空跑，无需外部过滤。
-- **移交方式**：其他工具要承担时，先在本工具里 `qoder_cron disable/remove` 上表两个 sim 任务，再到新工具创建，并更新 `docs/进展与交接.md` 接手规则第 2 条的归属记录。
-- 任务指令原文快照在 `docs/automation/prompts/`，完整 pipeline、数据流与迁移步骤见 `docs/automation/README.md`（迁移到其他工具时照它执行）。
-- 2026-10-25 起，execute / evening / research 任务成功后会：追加执行日志（`tools/runlog.py` → `reports/sim/runlog.json`）→ 重建状态看板（`tools/build_dashboard.py` → `web/`+`dist/`）→ 尽力发布站点；gold 任务仅在触发/失败时写日志。
+- **移交方式**：其他工具要承担模拟盘时，先在本工具里 `qoder_cron disable/remove` 上表三个 sim 任务，再到新工具创建，并更新 `docs/进展与交接.md` 接手规则第 2 条的归属记录。黄金提醒与模拟盘无依赖，可独立迁移或直接不迁移。
+- 任务指令原文快照在 `docs/automation/prompts/`，黄金提醒在 `docs/automation/extras/gold-alert.md`；完整 pipeline、数据流与迁移步骤见 `docs/automation/README.md`（迁移到其他工具时照它执行）。
+- 2026-10-25 起，execute / evening / research 任务成功后会：追加执行日志（`tools/runlog.py` → `reports/sim/runlog.json`）→ 重建状态看板（`tools/build_dashboard.py` → `web/`+`dist/`）→ 尽力发布站点；黄金提醒仅在触发/失败时写日志，不重建看板。
 - 复盘与研究任务（每天 19:00，含非交易日）分两步：① 交易复盘——交易日复盘当天、非交易日复盘最近一个已结算交易日，写 `journal/daily/<日期>.md`（已存在则跳过，保证幂等）；② 交易计划草稿——初筛 + 子代理研究 + 组合经理决策，写入 `orders/<目标交易日>/main.draft.json`（计划日 = 今天为交易日则今天、否则下一个交易日；目标日 = 计划日的下一个交易日，即当晚 20:00 evening 将冻结订单的那一天；已冻结则跳过）。只写草稿与 journal，不碰账本。
 
 ## 状态看板（Qoder Sites）

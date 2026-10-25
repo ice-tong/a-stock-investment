@@ -1,11 +1,17 @@
-# 自动化 Pipeline 与迁移手册
+# 模拟交易自动化 Pipeline 与迁移手册
 
 > 最后核对：2026-10-25（Asia/Shanghai）。`prompts/` 下是当时 cron 指令的原文快照。
 > 迁移前请用本工具的任务列表核对一次实际配置；改过指令就把对应文件一起更新。
 
+## 范围
+
+本手册只覆盖**模拟交易主 pipeline**：execute / research / evening 三个任务加状态看板。整条链路**不依赖云端状态**，所有事实都在本仓库文件里，因此可以整体搬到任何能跑本地 cron + shell 的 Agent 工具。
+
+黄金做T提醒是**独立分叉功能**，与模拟盘没有任何数据或执行依赖，只额外借用同一个 cron 与执行日志展示。它不属于本 pipeline，单独说明见[第 9 节](#9-附独立分叉功能黄金做t提醒)，迁移时可独立决定去留。
+
 ## 一句话
 
-四个定时任务共享一套本地账本：`execute` / `evening` 只能通过 `python -m sim` 写账本，`research` 只写复盘与订单草稿，`gold` 只发条件提醒；看板由任务重建后尽力发布到 Qoder Sites。整条链路**不依赖云端状态**，所有事实都在本仓库文件里，因此可以整体搬到任何能跑本地 cron + shell 的 Agent 工具。
+三个任务共享一套本地账本：`execute` / `evening` 只能通过 `python -m sim` 写账本，`research` 只写复盘与订单草稿；看板由任务重建后尽力发布到 Qoder Sites。
 
 ## 1. 时间线
 
@@ -14,7 +20,6 @@
 | 15:10 | execute | 交易日（周一至周五，日历内部再判休市） | < 1 分钟 | 按当日冻结订单、以 14:45 分钟价成交 |
 | 19:00 | research | **每天** | 5–25 分钟 | 交易复盘（写 journal）+ 下一交易日订单草稿（写 main.draft.json） |
 | 20:00 | evening | 交易日 | 1–2 分钟 | 收盘结算 → 读草稿跑风控 → 冻结次日订单 → 日报/资金看板 |
-| 交易时段每 15 分钟 | gold | 周一至周五 9–11 / 13–15 / 21–22 点 | < 1 分钟 | 518880/积存金条件提醒，无信号时不发消息 |
 
 配套 cron 表达式：
 
@@ -23,7 +28,6 @@
 | execute | `10 15 * * 1-5` | `df6f6cb3-9585-4b22-a93e-b8c812769567` |
 | research | `0 19 * * *` | `acbf75d2-160c-4377-9296-df43b078d61e` |
 | evening | `0 20 * * 1-5` | `377136b3-c3d5-4955-92c3-6a129f5b4e0c`（2026-10-25 重建） |
-| gold | `*/15 9-11,13-15,21-22 * * 1-5` | `dbfeb064-b2bf-4ae9-8170-7cafc1888cb6`（2026-12-31 到期） |
 
 ## 2. 数据流
 
@@ -56,9 +60,8 @@
 | execute | [prompts/execute.md](prompts/execute.md) | `python -m sim execute` | 成交、trades.csv、runlog、看板、git 提交 |
 | research | [prompts/research.md](prompts/research.md) | 复盘 + 子代理研究 + 写草稿；必要时刷新初筛 | journal、main.draft.json、runlog、看板、git 提交 |
 | evening | [prompts/evening.md](prompts/evening.md) | `python -m sim evening` | 结算、冻结订单、日报、runlog、看板、git 提交 |
-| gold | [prompts/gold.md](prompts/gold.md) | `python tools/gold_alert.py` | 仅触发时提醒 + runlog |
 
-> 这四份文件和 cron 里的指令应保持一致。迁移时直接整份粘贴，不要改写路径（`/Users/yancong/agent-workspace/a-stock-investment`）与任务 ID；换机器时先把路径批量替换成新工作区。
+> 这三份文件和 cron 里的指令应保持一致。迁移时直接整份粘贴，不要改写路径（`/Users/yancong/agent-workspace/a-stock-investment`）与任务 ID；换机器时先把路径批量替换成新工作区。
 
 ## 4. 各任务要点
 
@@ -83,11 +86,6 @@
 - 订单冻结后不可修改；SHA256 写进 `orders/<日期>/MANIFEST.json`，execute 前会校验。
 - 若项目是 git 仓库，`sim execute` / `sim evening` 结束时会自动 `git add orders accounts data/screen` 并提交，作为账本的不可抵赖时间记录；任务 prompt 只需再提交 `web/`、`dist/` 等衍生文件。
 
-### gold（交易时段每 15 分钟）
-- 只做条件提醒，不给买卖建议；脚本内有 2 小时冷却，避免重复。
-- `NO_ALERT` 时静默结束，不写日志、不重建看板。
-- 结果依赖 `tools/gold_alert.py` 的内部规则，本 pipeline 不解释价位。
-
 ## 5. 文件地图
 
 | 路径 | 作用 | 是否入库 |
@@ -96,7 +94,6 @@
 | `tools/ashare.py` | AKShare 取数 | 是 |
 | `tools/runlog.py` | 执行日志追加/查看（`reports/sim/runlog.json`） | 是（日志本身不入库） |
 | `tools/build_dashboard.py` | 生成 `web/index.html` 与 `dist/index.html` | 是 |
-| `tools/gold_alert.py` | 黄金条件提醒 | 是 |
 | `config/broker.yaml` | 账户、费率、执行时点、滑点 | 是 |
 | `config/risk.yaml` | 风控规则，**只有用户能改** | 是 |
 | `config/strategy.yaml` | quant / random 参数 | 是 |
@@ -116,6 +113,7 @@
 - 流程：`prepare_site`（新 actionId）→ `get_publish_status`（等 canPublish）→ 同参数重试 `prepare_site` 写描述符 → `publish_site` → 确认 `published: true`。
 - 降级：cron 会话可能没有 sites 插件。此时任务只注明“看板已本地更新，站点待同步发布”，`dist/` 已是最新；任何带 sites 插件的会话用新 actionId 补发即可。
 - `runlog.json` 只保留最近 300 条，由 `tools/runlog.py` 维护；看板每次重建时把当前日志内嵌进 HTML，所以日志刷新依赖重建。
+- 看板的执行日志会同时显示黄金提醒的记录（若触发）；那是独立功能的旁路展示，不参与模拟盘流程。
 
 ## 7. 迁移到其他 Agent 工具
 
@@ -123,7 +121,7 @@
 
 | 能力 | 用途 | 没有时 |
 |---|---|---|
-| 本地 cron + IANA 时区 | 四个定时任务 | 不能用云端任务替代：云任务没有本机文件与 `.venv` |
+| 本地 cron + IANA 时区 | 三个定时任务 | 不能用云端任务替代：云任务没有本机文件与 `.venv` |
 | 工作区 shell | 跑 `python -m sim`、git | 不可迁移 |
 | 会话重启后仍在的本地文件 | 账本、订单、journal | 不可迁移 |
 | 子代理（或按角色提示词执行） | research 的多角色研究 | 降级为单会话按 `prompts/agents/*.md` 依次执行，会慢 |
@@ -141,17 +139,18 @@
    ```
 2. **先建账本链路**：创建 execute（`10 15 * * 1-5`）与 evening（`0 20 * * 1-5`），时区 `Asia/Shanghai`，工作目录指向新工作区，prompt 用 `prompts/execute.md`、`prompts/evening.md`。此时 main 只会做底仓与强制止损，安全。
 3. **再建 research**（`0 19 * * *`）：prompt 用 `prompts/research.md`；确认新工具能调用子代理（或改走角色提示词）。第一晚先手动 run 一次，检查 journal 与草稿。
-4. **最后建 gold**（`*/15 9-11,13-15,21-22 * * 1-5`）：prompt 用 `prompts/gold.md`；确有到期日就设 `expiresAt`（当前 2026-12-31）。
-5. **避免双跑**：先在新工具建好但不要启用，等当天任务跑完后再停用旧工具的两个账本任务（execute/evening 错峰 30 分钟以上也不安全，最好直接停旧启新）。research 双跑只会覆盖草稿，风险较小，但同样建议停旧。
-6. **登记归属**：更新 `docs/tools/<新工具>.md` 的任务表，并把 `docs/进展与交接.md` 接手规则第 2 条改成新工具的归属与任务 ID。
-7. **验收**：按 7.3 逐项打勾，再删旧任务。
+4. **避免双跑**：先在新工具建好但不要启用，等当天任务跑完后再停用旧工具的两个账本任务（execute/evening 错峰 30 分钟以上也不安全，最好直接停旧启新）。research 双跑只会覆盖草稿，风险较小，但同样建议停旧。
+5. **登记归属**：更新 `docs/tools/<新工具>.md` 的任务表，并把 `docs/进展与交接.md` 接手规则第 2 条改成新工具的归属与任务 ID。
+6. **验收**：按 7.3 逐项打勾，再删旧任务。
+
+> 黄金提醒不在上述步骤内。要保留就按第 9 节单独迁移；不保留就不建。
 
 ### 7.3 验收清单
 
 | 检查项 | 做法 | 期望 |
 |---|---|---|
 | 环境 | `python -m pytest -q`、`python -m sim status` | 测试全绿；四个账户存在，`last_settled` 为最近已结算日 |
-| 任务配置 | 工具的任务列表 | 4 个任务时间/时区/工作目录正确 |
+| 任务配置 | 工具的任务列表 | 3 个模拟盘任务时间/时区/工作目录正确 |
 | research 手动跑 | 非交易日触发一次 | 新增/跳过 journal、写 `orders/<目标日>/main.draft.json`、runlog 有 research 行 |
 | 看板 | 看 `dist/index.html` mtime 与页面 | 执行日志出现本次运行；站点已发布或注明待同步 |
 | execute | 交易日 15:10 后看 runlog | `ok`，trades.csv 有成交，现金/持仓变化 |
@@ -172,6 +171,25 @@
 
 ## 8. Prompt 同步约定
 
-- `prompts/*.md` 是任务指令原文；cron 里保存的是运行副本。
+- `prompts/*.md` 是模拟盘任务指令原文；cron 里保存的是运行副本。黄金提醒的原文单独放在 `extras/gold-alert.md`。
 - 改任务指令时：先改 cron，再把同一段文本覆盖到对应文件，并更新本页顶部的“最后核对”日期。
 - 迁移时如需核对，逐字比对任务列表里的 `instruction.text` 与文件内容；不要只凭本手册的任务表重建 prompt。
+
+## 9. 附：独立分叉功能（黄金做T提醒）
+
+**定位**：个人附加的条件提醒，不是模拟交易 pipeline 的一部分。它与 `sim/` 零依赖：不读账户、不写订单、不结算、不参与风控，也不决定看板里的任何数字。
+
+| 项目 | 内容 |
+|---|---|
+| 脚本 | `tools/gold_alert.py` |
+| cron | `*/15 9-11,13-15,21-22 * * 1-5`（Asia/Shanghai），2026-12-31 到期 |
+| 任务 ID（Qoder） | `dbfeb064-b2bf-4ae9-8170-7cafc1888cb6` |
+| 指令原文 | [extras/gold-alert.md](extras/gold-alert.md) |
+| 行为 | `NO_ALERT` 静默结束；`ALERT` 才发消息并写一条 runlog；不重建看板、不发布站点 |
+| 冷却 | 脚本内置 2 小时，避免同一信号重复提醒 |
+
+**与 pipeline 的唯一交集**：共用执行日志的展示位置（看板“定时任务执行日志”里会出现 gold 行），以及同一个 cron 调度器。迁移时：
+
+- 想保留 → 在新工具单独建一个任务，粘贴 `extras/gold-alert.md`，与模拟盘三个任务没有先后顺序要求；
+- 不想保留 → 直接不建，模拟盘不受任何影响；
+- 停用黄金提醒也**不需要**改动 `docs/进展与交接.md` 里的账本归属记录。

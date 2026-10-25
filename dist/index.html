@@ -82,7 +82,7 @@
       </div>
     </div>
     <div class="sub" style="margin-top:10px">账本结算至 <b class="num">2026-10-23</b> ·
-      本页由定时任务在每次运行后自动重建并发布 · 生成于 <span class="num">2026-10-25 13:37</span></div>
+      本页由定时任务在每次运行后自动重建并发布 · 生成于 <span class="num">2026-10-25 13:43</span></div>
   </div>
 </header>
 <div class="wrap">
@@ -167,8 +167,8 @@
     <h2>定时任务执行日志</h2>
     <div class="table-card"><table>
       <thead><tr><th>时间</th><th>任务</th><th>状态</th><th>汇报</th></tr></thead>
-      <tbody><tr><td class='num'>2026-10-25 13:13</td><td>research</td><td><span class='tag tag-ok'>ok</span></td><td>复盘 2026-10-23：四账户无成交、均空仓，main 净值 10 万<br>草稿 2026-10-27：仅伊利股份 3%（初筛第5，三季报前底仓）；中石油/长电等财报后再议</td></tr><tr><td class='num'>2026-10-25 11:30</td><td>manual</td><td><span class='tag tag-ok'>ok</span></td><td>看板升级：主账户视角 + 定时任务执行日志启用（本站点此后由 cron 自动重建发布）</td></tr></tbody></table></div>
-    <p class="small muted" style="margin-top:8px">execute（交易日 15:10）/ research（每天 19:00，复盘+草稿）/ evening（交易日 20:00）/ 黄金提醒（仅触发或失败时记录）。非交易日 execute/evening 记为 skipped。</p>
+      <tbody><tr><td class='num'>2026-10-25 13:38</td><td>evening</td><td><span class='tag tag-skipped'>skipped</span></td><td>非交易日，未结算</td></tr><tr><td class='num'>2026-10-25 13:13</td><td>research</td><td><span class='tag tag-ok'>ok</span></td><td>复盘 2026-10-23：四账户无成交、均空仓，main 净值 10 万<br>草稿 2026-10-27：仅伊利股份 3%（初筛第5，三季报前底仓）；中石油/长电等财报后再议</td></tr><tr><td class='num'>2026-10-25 11:30</td><td>manual</td><td><span class='tag tag-ok'>ok</span></td><td>看板升级：主账户视角 + 定时任务执行日志启用（本站点此后由 cron 自动重建发布）</td></tr></tbody></table></div>
+    <p class="small muted" style="margin-top:8px">模拟盘 pipeline：execute（交易日 15:10）/ research（每天 19:00，复盘+草稿）/ evening（交易日 20:00）；非交易日 execute/evening 记为 skipped。黄金提醒为独立功能，仅触发或失败时记录，与模拟盘无关。</p>
   </section>
 
   <section>
@@ -219,7 +219,7 @@
     <details>
       <summary>近期工作日志（docs/进展与交接.md）</summary>
       <div class="table-card" style="margin-top:8px"><table>
-        <thead><tr><th>日期</th><th>工具</th><th>内容</th></tr></thead><tbody><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>重建 evening 任务（交易日 20:00，新 ID `377136b3-c3d5-4955-92c3-6a129f5b4e0c`；原 `80c52643…` 被误删）：配置与原任务一致（sim evening → runlog → 重建看板 → 尽力发布 → 提交），首次运行 2026-10-26 20:00，届时结算当日并冻结 10-27 订单</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>首跑后发现看板未刷新（research 任务原缺重建/发布步骤）：补重建并重新发布站点，执行日志已显示 research 记录；研究 cron 指令更新（revision 4）加入「重建看板 → 尽力发布 → 提交 web/dist/journal/orders」步骤，此后每天 19:00 自动跟新</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>晚间任务首次运行（19:00 研究 cron）：复盘 10-23（四账户无成交、均空仓）写入 `journal/daily/2026-10-23.md`；研究初筛前 3 只可负担候选（中石油/伊利/长电），草稿 10-27 仅伊利 3%（财报前底仓，临时目录 dry-run 风控通过：3% 个股 + 47% ETF = 50%），中石油（10-28 三季报）、长电（10-31 三季报）等财报后再说。数据侧：AKShare 多数接口代理失败，子代理改用 WebSearch 核实</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>晚间任务改为每天触发（按用户要求）：研究 cron 调整为每天 19:00（`0 19 * * *`，更名「模拟盘晚间复盘与研究」），任务分两步——交易复盘（交易日复盘当天、非交易日复盘最近已结算日，写 journal/daily/，幂等）+ 次日订单草稿（目标日=计划日的下一交易日）。看板文案与 docs/tools/qoder.md、本文档同步更新并重新发布</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>第二阶段接入：新增研究 cron（交易日 19:00，ID acbf75d2…）跑初筛→子代理研究→组合经理决策，写 orders/&lt;交易日&gt;/main.draft.json；evening 的 sim plan 照常风控冻结。首份草稿预计 10-26 晚生成、10-27 订单生效。runlog 增加 research 类型；看板 main 策略卡文案同步</td></tr></tbody></table></div>
+        <thead><tr><th>日期</th><th>工具</th><th>内容</th></tr></thead><tbody><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>按用户要求区分主 pipeline 与附加功能：`docs/automation/README.md` 只覆盖 execute / research / evening，黄金做T提醒移至 `docs/automation/extras/gold-alert.md`（与 sim 零依赖，可独立迁移或舍弃）；看板执行日志说明同步区分。已重新发布</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>梳理自动化 pipeline 并写成迁移手册：`docs/automation/README.md`（时间线、数据流、任务要点、文件地图、看板发布、迁移能力清单/步骤/验收/已知坑）+ `docs/automation/prompts/{execute,evening,research,gold}.md` 指令原文快照；`docs/tools/qoder.md` 与本文档加入口链接</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>看板 v2.2：对照组对比下方新增可折叠「对照组持仓与成交明细」（quant / random / etf 各账户净值/现金/结算日 + 当前持仓 + 最近 5 笔成交）；同时修正阶段说明（第二阶段已接入）与页脚更新范围。已发布</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>重建 evening 任务（交易日 20:00，新 ID `377136b3-c3d5-4955-92c3-6a129f5b4e0c`；原 `80c52643…` 被误删）：配置与原任务一致（sim evening → runlog → 重建看板 → 尽力发布 → 提交），首次运行 2026-10-26 20:00，届时结算当日并冻结 10-27 订单</td></tr><tr><td class='num'>2026-10-25</td><td>Qoder</td><td>首跑后发现看板未刷新（research 任务原缺重建/发布步骤）：补重建并重新发布站点，执行日志已显示 research 记录；研究 cron 指令更新（revision 4）加入「重建看板 → 尽力发布 → 提交 web/dist/journal/orders」步骤，此后每天 19:00 自动跟新</td></tr></tbody></table></div>
     </details>
   </section>
 

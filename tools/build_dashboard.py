@@ -468,7 +468,7 @@ def main() -> int:
     <div class="table-card"><table>
       <thead><tr><th>时间</th><th>任务</th><th>状态</th><th>汇报</th></tr></thead>
       <tbody>{log_table}</tbody></table></div>
-    <p class="small muted" style="margin-top:8px">execute（交易日 15:10）/ research（每天 19:00，复盘+草稿）/ evening（交易日 20:00）/ 黄金提醒（仅触发或失败时记录）。非交易日 execute/evening 记为 skipped。</p>
+    <p class="small muted" style="margin-top:8px">模拟盘 pipeline：execute（交易日 15:10）/ research（每天 19:00，复盘+草稿）/ evening（交易日 20:00）；非交易日 execute/evening 记为 skipped。黄金提醒为独立功能，仅触发或失败时记录，与模拟盘无关。</p>
   </section>
 
   <section>
