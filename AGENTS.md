@@ -11,7 +11,8 @@
 - `docs/`：接力准则、进展与交接、模拟交易系统设计；`docs/tools/`：各 Agent 工具的专属上下文（入口、子代理调度方式、定时任务归属、框架技巧）
 - `.claude/agents/`（Claude Code）、`.qoder/agents/`（Qoder）：同一套 8 个专业子代理，由 `bash tools/build_agents.sh` 从 `prompts/` 生成，不要直接改
 - `prompts/通用规则.md`、`prompts/agents/*.md`：提示词源文件
-- `tools/ashare.py`：AKShare 取数脚本，用 `.venv/bin/python tools/ashare.py -h` 查看命令
+- `tools/ashare.py`：AKShare 取数脚本（各工具通用的免费基线），用 `.venv/bin/python tools/ashare.py -h` 查看命令
+- 数据源分层：AKShare 为基线；Kimi Work 会话内 AKShare 失败或需更快更全数据时，可用宿主官方金融插件（iFinD / Wind / 东财妙想 / 财联社等，清单与用法见 [docs/tools/kimi-work.md](docs/tools/kimi-work.md)）；报告中注明实际数据来源
 - `data/`：临时数据（CSV 等）
 - `reports/`：最终报告，文件名 `YYYYMMDD_<代码或主题>_<任务类型>.md`
 
