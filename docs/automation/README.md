@@ -108,7 +108,7 @@
 
 ## 6. 状态看板与发布
 
-- 生成：`python tools/build_dashboard.py`，读账户、订单、runlog、初筛快照，输出主账户视角 + 对照组对比（含可折叠的持仓/成交明细）+ 执行日志 + 冻结订单 + 策略依据。
+- 生成：`python tools/build_dashboard.py`，读账户、订单、journal、runlog、初筛快照，输出「各策略收益对照」+ 按策略切换的详情标签页（净值/持仓/成交/交易计划/复盘）+ 执行日志 + 初筛快照。
 - 发布：Qoder Sites，projectId `01a17110-976d-72b4-bda2-73e3f45aa97a`，站点 `ashare-sim-dashboard-hnjfa46w01s.qoder.website`（私有），描述符 `.A股模拟交易状态看板.qoder.site`，输出目录 `dist/`。
 - 流程：`prepare_site`（新 actionId）→ `get_publish_status`（等 canPublish）→ 同参数重试 `prepare_site` 写描述符 → `publish_site` → 确认 `published: true`。
 - 降级：cron 会话可能没有 sites 插件。此时任务只注明“看板已本地更新，站点待同步发布”，`dist/` 已是最新；任何带 sites 插件的会话用新 actionId 补发即可。

@@ -73,6 +73,17 @@ CSS = """
   .tag-park { color: var(--accent); border-color: rgba(79,140,255,.35); background: rgba(79,140,255,.08); }
   .tag-entry { color: var(--warn); border-color: rgba(232,179,75,.35); background: rgba(232,179,75,.08); }
   .tag-pending { color: var(--warn); border-color: rgba(232,179,75,.55); background: rgba(232,179,75,.12); }
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tab { appearance: none; background: var(--panel); border: 1px solid var(--border); color: var(--muted);
+         padding: 7px 16px; border-radius: 999px; font: inherit; font-size: .86rem; cursor: pointer; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-color: rgba(79,140,255,.55); background: rgba(79,140,255,.12); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .subhead { font-size: .9rem; color: var(--muted); font-weight: 600; letter-spacing: .5px; margin: 22px 0 8px; }
+  pre.journal { white-space: pre-wrap; font-size: .8rem; line-height: 1.6; color: var(--text); background: var(--chip);
+                border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 8px;
+                max-height: 420px; overflow: auto; font-family: inherit; }
   .up { color: var(--up); } .down { color: var(--down); }
   .muted { color: var(--muted); } .small { font-size: .78rem; }
   .spark { width: 100%; height: auto; display: block; margin-top: 10px; }
@@ -130,7 +141,7 @@ def load_account(name):
     }
 
 
-def sparkline(values, initial) -> str:
+def sparkline(values, initial, label="净值曲线") -> str:
     if len(values) < 2:
         return ('<p class="small muted">净值曲线自第 2 个结算日起显示（当前仅 1 个数据点）。</p>')
     w, h, pad = 600, 150, 12
@@ -144,7 +155,7 @@ def sparkline(values, initial) -> str:
     pts = " ".join(f"{xy(i, v)[0]:.1f},{xy(i, v)[1]:.1f}" for i, v in enumerate(values))
     bx, by = xy(0, initial)
     lx, ly = xy(len(values) - 1, values[-1])
-    return (f'<svg class="spark" viewBox="0 0 {w} {h}" role="img" aria-label="主账户净值曲线">'
+    return (f'<svg class="spark" viewBox="0 0 {w} {h}" role="img" aria-label="{esc(label)}">'
             f'<line x1="{pad}" y1="{by:.1f}" x2="{w - pad}" y2="{by:.1f}" stroke="#39445a" stroke-width="1" stroke-dasharray="4 4"/>'
             f'<polyline points="{pts}" fill="none" stroke="#4f8cff" stroke-width="2"/>'
             f'<circle cx="{lx:.1f}" cy="{ly:.1f}" r="3.5" fill="#4f8cff"/>'
@@ -307,14 +318,7 @@ def main() -> int:
     rcfg = (strategy or {}).get("random", {})
     band = (risk.get("bands") or {}).get(regime, {})
 
-    # ---- 主账户 hero ----
-    pos_table = positions_table(m)
-    trade_table = trades_table(m)
-
-    nav_values = [float(r["equity"]) for r in m["nav"]]
-    spark = sparkline(nav_values, m["state"]["initial_cash"])
-
-    # ---- 对照组对比 ----
+    # ---- 各策略收益对照 ----
     cmp_rows = []
     for name, label in ACCOUNTS:
         a = accts[name]
@@ -324,23 +328,86 @@ def main() -> int:
             f"<td class='num {cls(a['pnl_pct'])}'>{pct(a['pnl_pct'])}</td>"
             f"<td class='num {cls(a['day_pnl'])}'>{money(a['day_pnl'])}</td>"
             f"<td class='num'>{pct(gap) if name != 'main' else '—'}</td>"
+            f"<td class='num'>{pct(a['drawdown'], signed=False)}</td>"
             f"<td class='small muted'>{CONTROL_NOTE[name]}</td></tr>")
 
-    ctrl_details = ""
-    for name, label in ACCOUNTS[1:]:
+    # ---- 复盘（main 每天 19:00 生成） ----
+    journal_html = ""
+    journal_dir = ROOT / "journal" / "daily"
+    if journal_dir.exists():
+        for jf in sorted(journal_dir.glob("*.md"), reverse=True)[:2]:
+            try:
+                txt = jf.read_text(encoding="utf-8")
+            except OSError:
+                continue
+            journal_html += (f"<details style='margin-top:10px'><summary>{esc(jf.stem)} 复盘</summary>"
+                             f"<pre class='journal'>{esc(txt)}</pre></details>")
+    journal_html = journal_html or "<p class='small muted'>暂无复盘记录（每天 19:00 生成）。</p>"
+
+    strategy_notes = {
+        "main": "agent 主策略：每天 19:00 复盘 + 子代理研究 → 订单草稿；交易日 20:00 风控冻结。无草稿时只做底仓停泊与强制止损。",
+        "quant": f"量化初筛：收盘 > 20 日线 > 60 日线；得分 = 20 日收益 ÷ 20 日波动，买前 {qcfg.get('n_stocks', 4)} 名；跌出前 {qcfg.get('keep_rank', 12)} 才卖。",
+        "random": f"随机对照：从初筛候选池随机抽取，持有满 {rcfg.get('rotate_days', 20)} 个交易日轮换。",
+        "etf": "底仓对照：只持有沪深300ETF（510300），不选股、不择时。",
+    }
+
+    def summary_cards(a) -> str:
+        return f"""<div class="grid grid-4">
+      <div class="card hero"><div class="label">净值</div><div class="value num">{money(a['equity'])}</div>
+        <div class="foot">现金 {money(a['cash'])} · 结算至 {esc(a['last_settled'])}</div></div>
+      <div class="card hero"><div class="label">累计盈亏</div><div class="value num {cls(a['pnl'])}">{money(a['pnl'])}</div>
+        <div class="foot {cls(a['pnl_pct'])}">{pct(a['pnl_pct'])}（初始 {money(a['state']['initial_cash'])}）</div></div>
+      <div class="card hero"><div class="label">当日盈亏</div><div class="value num {cls(a['day_pnl'])}">{money(a['day_pnl'])}</div>
+        <div class="foot">相对上一结算日</div></div>
+      <div class="card hero"><div class="label">回撤 / 仓位</div><div class="value num">{pct(a['drawdown'], signed=False)}</div>
+        <div class="foot">个股 {pct(a['stock_w'], signed=False)} · ETF {pct(a['etf_w'], signed=False)} · 其余现金</div></div>
+    </div>"""
+
+    def plan_block(name) -> str:
+        frozen = orders.get(name)
+        parts = []
+        if frozen:
+            parts.append(f"""<div class="table-card"><table>
+        <thead><tr><th>标的</th><th>目标仓位</th><th>类型</th><th>状态</th><th>依据 / 风控备注</th></tr></thead>
+        <tbody>{order_rows(frozen)}</tbody></table></div>
+        <p class="small muted" style="margin-top:8px">{esc(order_date)} 冻结订单（SHA256 校验，交易日 14:45 价格）。</p>""")
+        else:
+            parts.append("<div class='card'><p class='muted'>暂无冻结订单（等待下一次 evening 冻结）。</p></div>")
+        if name == "main" and draft_date and draft:
+            parts.append(f"""<div class="card" style="margin-top:14px;border-color:rgba(232,179,75,.35)">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:8px">
+          <b>{esc(draft_date)} 订单草稿</b><span class="tag tag-pending">待冻结</span>
+          <span class="small muted">来源：每晚 19:00 研究任务</span></div>
+        <table><thead><tr><th>标的</th><th>目标仓位</th><th>类型</th><th>理由 / 置信度</th></tr></thead>
+        <tbody>{draft_rows(draft)}</tbody></table></div>
+        <p class="small muted" style="margin-top:8px">草稿不是订单：20:00 evening 逐条风控校验，被拒或缩量以冻结订单为准。</p>""")
+        return "".join(parts)
+
+    tab_buttons, tab_panels = [], []
+    for name, label in ACCOUNTS:
         a = accts[name]
-        ctrl_details += f"""
-      <div style="margin-top:14px">
-        <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:6px">
-          <b>{esc(label)}</b>
-          <span class="small muted">净值 {money(a['equity'])} · 现金 {money(a['cash'])} · 结算至 {esc(a['last_settled'])}</span>
-        </div>
-        <div class="table-card" style="margin-bottom:10px"><table><thead><tr><th>持仓</th><th>股数</th><th>成本价</th><th>现价</th><th>市值</th><th>盈亏</th><th>止损价</th><th>建仓日</th></tr></thead>
+        active = " active" if name == "main" else ""
+        vals = [float(r["equity"]) for r in a["nav"]]
+        spark = sparkline(vals, a["state"]["initial_cash"], f"{label} 净值曲线")
+        review = journal_html if name == "main" else "<p class='small muted'>对照组不单独写复盘；每日复盘见 main 标签页。</p>"
+        tab_buttons.append(f"<button class='tab{active}' data-tab='{name}'>{esc(label)}</button>")
+        tab_panels.append(f"""
+    <div class="tab-panel{active}" id="tab-{name}">
+      <p class="small muted" style="margin-bottom:12px">{esc(strategy_notes[name])}</p>
+      {summary_cards(a)}
+      <div class="card" style="margin-top:14px">{spark}</div>
+      <div class="grid grid-2" style="margin-top:14px">
+        <div class="table-card"><table><thead><tr><th>持仓</th><th>股数</th><th>成本价</th><th>现价</th><th>市值</th><th>盈亏</th><th>止损价</th><th>建仓日</th></tr></thead>
         <tbody>{positions_table(a)}</tbody></table></div>
         <div class="table-card"><table><thead><tr><th>日期</th><th>方向</th><th>标的</th><th>股数</th><th>价格</th><th>金额</th><th>费用</th><th>类型</th></tr></thead>
-        <tbody>{trades_table(a, 5)}</tbody></table></div>
-      </div>"""
-
+        <tbody>{trades_table(a, 8)}</tbody></table></div>
+      </div>
+      <p class="small muted" style="margin-top:8px">左：当前持仓；右：最近成交（含佣金/印花税/过户费）。</p>
+      <h3 class="subhead">交易计划</h3>
+      {plan_block(name)}
+      <h3 class="subhead">复盘</h3>
+      {review}
+    </div>""")
     # ---- 执行日志 ----
     log_rows = []
     for e in runlog[::-1][:30]:
@@ -354,46 +421,7 @@ def main() -> int:
         "<tr><td colspan=4 class='muted'>暂无执行记录：日志自 2026-10-25 启用，之后每次定时任务运行（含非交易日跳过）"
         "都会自动追加一行。</td></tr>")
 
-    # ---- 冻结订单 ----
-    if order_date and orders.get("main"):
-        oj = orders["main"]
-        wd = "一二三四五六日"[datetime.date.fromisoformat(order_date).weekday()]
-        orders_head = f"{order_date}（周{wd}）冻结订单"
-        main_orders = order_rows(oj)
-        ctrl_table = ""
-        for name, label in ACCOUNTS[1:]:
-            oj2 = orders.get(name)
-            if oj2:
-                ctrl_table += order_rows(oj2, with_account=True)
-        ctrl_table = ctrl_table or "<tr><td colspan=6 class='muted'>无</td></tr>"
-        orders_html = f"""
-    <div class="card hero" style="margin-bottom:14px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><h3 style="font-size:1rem">main</h3>
-      <span class="tag tag-park">agent</span></div>
-      <table><thead><tr><th>标的</th><th>目标仓位</th><th>类型</th><th>状态</th><th>依据</th></tr></thead><tbody>{main_orders}</tbody></table>
-    </div>
-    <div class="table-card"><table><thead><tr><th>账户</th><th>标的</th><th>目标仓位</th><th>类型</th><th>状态</th><th>依据 / 风控备注</th></tr></thead>
-    <tbody>{ctrl_table}</tbody></table></div>
-    <p class="small muted" style="margin-top:8px">对照组订单明细；冻结含 SHA256 校验，执行时点为交易日 14:45 价格。</p>"""
-    else:
-        orders_head = "冻结订单"
-        orders_html = '<div class="card"><p class="muted">当前无冻结订单（等待下一次 evening 冻结）。</p></div>'
-
-    draft_html = ""
-    if draft_date and draft:
-        draft_html = f"""
-    <div class="card" style="margin-top:14px;border-color:rgba(232,179,75,.35)">
-      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:8px">
-        <h3 style="font-size:1rem">{esc(draft_date)} 订单草稿</h3>
-        <span class="tag tag-pending">待冻结</span>
-        <span class="small muted">来源：每晚 19:00 研究任务（main）</span>
-      </div>
-      <table><thead><tr><th>标的</th><th>目标仓位</th><th>类型</th><th>理由 / 置信度</th></tr></thead>
-      <tbody>{draft_rows(draft)}</tbody></table>
-    </div>
-    <p class="small muted" style="margin-top:8px">草稿不是订单：交易日 20:00 evening 会逐条风控校验，被拒或缩量以冻结订单为准；无草稿时只做底仓停泊。</p>"""
-
-    # ---- 策略依据与初筛快照 ----
+    # ---- 初筛快照 ----
     screen_date, screen_rows = load_screen()
     picked = {}
     for name, _ in ACCOUNTS:
@@ -443,7 +471,7 @@ def main() -> int:
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>A 股模拟交易 · 项目状态看板</title>
-<meta name="description" content="A 股模拟交易系统状态看板：主账户盈亏、对照组对比、冻结订单、定时任务执行日志与项目进度">
+<meta name="description" content="A 股模拟交易系统状态看板：四策略收益对照，按标签查看各策略持仓、成交、交易计划与复盘，以及定时任务执行日志">
 <style>{CSS}</style>
 </head>
 <body>
@@ -452,7 +480,7 @@ def main() -> int:
     <div class="head-row">
       <div>
         <h1>A 股模拟交易 · 项目状态看板</h1>
-        <div class="sub">主策略视角 · main 账户为研究主角，quant / random / etf 为对照组</div>
+        <div class="sub">四策略收益对照 · 点击标签查看各自的持仓、成交、交易计划与复盘</div>
       </div>
       <div class="badges">
         <span class="badge"><span class="dot dot-{esc(regime)}"></span>市场：{esc(regime)}</span>
@@ -467,49 +495,23 @@ def main() -> int:
 <div class="wrap">
 
   <section>
-    <h2>主账户 main（agent 策略）</h2>
-    <div class="grid grid-4">
-      <div class="card hero">
-        <div class="label">净值</div>
-        <div class="value num">{money(m['equity'])}</div>
-        <div class="foot">现金 {money(m['cash'])} · 结算至 {esc(m['last_settled'])}</div>
-      </div>
-      <div class="card hero">
-        <div class="label">累计盈亏</div>
-        <div class="value num {cls(m['pnl'])}">{money(m['pnl'])}</div>
-        <div class="foot {cls(m['pnl_pct'])}">{pct(m['pnl_pct'])}（初始 {money(m['state']['initial_cash'])}）</div>
-      </div>
-      <div class="card hero">
-        <div class="label">当日盈亏</div>
-        <div class="value num {cls(m['day_pnl'])}">{money(m['day_pnl'])}</div>
-        <div class="foot">相对上一结算日</div>
-      </div>
-      <div class="card hero">
-        <div class="label">回撤 / 仓位</div>
-        <div class="value num">{pct(m['drawdown'], signed=False)}</div>
-        <div class="foot">个股 {pct(m['stock_w'], signed=False)} · ETF {pct(m['etf_w'], signed=False)} · 其余现金</div>
-      </div>
-    </div>
-    <div class="card hero" style="margin-top:14px">{spark}</div>
-    <div class="grid grid-2" style="margin-top:14px">
-      <div class="table-card"><table><thead><tr><th>持仓</th><th>股数</th><th>成本价</th><th>现价</th><th>市值</th><th>盈亏</th><th>止损价</th><th>建仓日</th></tr></thead>
-      <tbody>{pos_table}</tbody></table></div>
-      <div class="table-card"><table><thead><tr><th>日期</th><th>方向</th><th>标的</th><th>股数</th><th>价格</th><th>金额</th><th>费用</th><th>类型</th></tr></thead>
-      <tbody>{trade_table}</tbody></table></div>
-    </div>
-    <p class="small muted" style="margin-top:8px">左：当前持仓；右：最近成交（含佣金/印花税/过户费）。主策略个股决策自第二阶段起由 Agent 出草稿、风控代码冻结。</p>
+    <h2>各策略收益对照</h2>
+    <div class="table-card"><table>
+      <thead><tr><th>账户</th><th>净值</th><th>累计盈亏</th><th>当日盈亏</th><th>与 main 差</th><th>回撤</th><th>角色</th></tr></thead>
+      <tbody>{''.join(cmp_rows)}</tbody></table></div>
+    <p class="small muted" style="margin-top:8px">净值曲线、持仓、成交、交易计划与复盘，在下方按策略切换查看。</p>
   </section>
 
   <section>
-    <h2>对照组对比</h2>
-    <div class="table-card"><table>
-      <thead><tr><th>账户</th><th>净值</th><th>累计盈亏</th><th>当日盈亏</th><th>与 main 差</th><th>角色</th></tr></thead>
-      <tbody>{''.join(cmp_rows)}</tbody></table></div>
-    <details style="margin-top:12px">
-      <summary>对照组持仓与成交明细（quant / random / etf）</summary>
-      <p class="small muted">上：当前持仓（空仓显示“空仓”）；下：最近 5 笔成交。对照组只做参照，不参与看板主结论。</p>
-      {ctrl_details}
-    </details>
+    <h2>策略详情</h2>
+    <div class="tabs" role="tablist">{''.join(tab_buttons)}</div>
+    {''.join(tab_panels)}
+  </section>
+
+  <section>
+    <h2>初筛快照</h2>
+    {screen_block or "<p class='muted'>暂无初筛数据。</p>"}
+    <p class="small muted" style="margin-top:8px">所有订单冻结前都要过风控代码一票否决（仓位区间、单票上限、每周新开仓上限等，见 config/risk.yaml）；被拒订单在「依据」列显示风控原因。</p>
   </section>
 
   <section>
@@ -518,28 +520,6 @@ def main() -> int:
       <thead><tr><th>时间</th><th>任务</th><th>状态</th><th>汇报</th></tr></thead>
       <tbody>{log_table}</tbody></table></div>
     <p class="small muted" style="margin-top:8px">模拟盘 pipeline：execute（交易日 15:10）/ research（每天 19:00，复盘+草稿）/ evening（交易日 20:00）；非交易日 execute/evening 记为 skipped。黄金提醒为独立功能，仅触发或失败时记录，与模拟盘无关。</p>
-  </section>
-
-  <section>
-    <h2>{esc(orders_head)}</h2>
-    {orders_html}
-    {draft_html}
-  </section>
-
-  <section>
-    <h2>策略依据</h2>
-    <div class="grid grid-2">
-      <div class="card"><div class="label">main · agent 主策略</div>
-        <p class="small">已接入（2026-10-25）：每天 19:00 晚间任务先做交易复盘（写 journal/daily），再跑「初筛 → 子代理研究 → 组合经理决策」，把订单草稿（含理由与置信度）写入次日交易日的 main.draft.json；交易日 20:00 evening 的 sim plan 逐条风控校验后冻结，被拒订单在「依据」列显示风控原因。无草稿的日子只做底仓停泊与强制止损。</p></div>
-      <div class="card"><div class="label">quant · 量化初筛</div>
-        <p class="small">初筛规则：收盘 &gt; 20 日线 &gt; 60 日线，且通过流动性与涨幅过滤；得分 = 20 日收益 ÷ 20 日波动（风险调整动量），按排名买入前 {qcfg.get('n_stocks', 4)} 只；持仓跌出排名前 {qcfg.get('keep_rank', 12)} 才卖，降低换手。每只票的排名与得分见订单「依据」列与下方初筛快照。</p></div>
-      <div class="card"><div class="label">random · 随机对照</div>
-        <p class="small">从同一初筛候选池随机抽取，持有满 {rcfg.get('rotate_days', 20)} 个交易日轮换；用来检验 quant 与未来的 Agent 是否真有超额收益。</p></div>
-      <div class="card"><div class="label">etf · 底仓对照</div>
-        <p class="small">只持有沪深300ETF（510300），不选股、不择时，作为"什么都不做"的基线。</p></div>
-    </div>
-    <p class="small muted" style="margin-top:8px">所有订单冻结前都要过风控代码一票否决（仓位区间、单票上限、每周新开仓上限等，见 config/risk.yaml）；被拒订单在「依据」列显示风控原因。</p>
-    {screen_block}
   </section>
 
   <section>
@@ -570,6 +550,16 @@ def main() -> int:
     <p style="margin-top:6px">本看板由 AI 生成，仅供研究参考，不构成投资建议。股市有风险，投资需谨慎。</p>
   </footer>
 </div>
+<script>
+  document.querySelectorAll('.tab').forEach(function (btn) {{
+    btn.addEventListener('click', function () {{
+      document.querySelectorAll('.tab').forEach(function (b) {{ b.classList.toggle('active', b === btn); }});
+      document.querySelectorAll('.tab-panel').forEach(function (p) {{
+        p.classList.toggle('active', p.id === 'tab-' + btn.dataset.tab);
+      }});
+    }});
+  }});
+</script>
 </body>
 </html>
 """

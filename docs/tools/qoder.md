@@ -32,7 +32,7 @@ Qoder 自动注入工作区根目录的 `AGENTS.md`，无需额外配置。
 
 ## 状态看板（Qoder Sites）
 - 站点：`ashare-sim-dashboard-hnjfa46w01s.qoder.website`（私有），描述符 `.A股模拟交易状态看板.qoder.site`，projectId `01a17110-976d-72b4-bda2-73e3f45aa97a`。
-- 页面由 `tools/build_dashboard.py` 生成（主账户视角 + 执行日志 + 冻结订单 + 风控参数），发布输出目录为 `dist/`。
+- 页面由 `tools/build_dashboard.py` 生成（四策略收益对照 + 标签页详情 + 执行日志 + 初筛快照），发布输出目录为 `dist/`。
 - cron 会话**可能没有 sites 插件**（qoder_cron 无法为任务挂插件）：发布失败时任务只注明"站点待同步发布"，本地 `dist/` 已是最新；任何带 sites 插件的会话用新 actionId 调 `prepare_site`（复用上述 projectId、webDirectory="dist"）+ `publish_site` 即可补发。
 
 ## 特有约束与技巧
