@@ -11,6 +11,9 @@ AKShare 接口依赖第三方网站，偶尔会失效：多数命令内置了备
 import os
 
 os.environ.setdefault("TQDM_DISABLE", "1")  # 关掉 AKShare 的进度条，避免污染 Agent 读到的输出
+# 数据源全在国内，Clash/mihomo 对国内域名本来就走 DIRECT；显式绕过系统代理，
+# 避免代理端口挂着但上游不通时整批取数变成 ProxyError（2026-10-25 实测踩到过）。
+os.environ.setdefault("NO_PROXY", "*")
 
 import argparse
 import datetime as dt
@@ -76,12 +79,13 @@ def c_info(a):
 def c_hist(a):
     start, end = a.start or ymd(365), a.end or ymd()
     sym = market_of(a.code) + a.code
+    # 新浪放在第一位：与 sim 内核（sim/market.py）同源，价格口径一致；东财 push2 的 CDN 节点
+    # 在部分网络下会被 DNS 解析到故障节点（表现为空响应），所以只作备用。
     return first_ok(
-        ("stock_zh_a_hist", lambda: ak.stock_zh_a_hist(symbol=a.code, period=a.period, start_date=start,
-                                                        end_date=end, adjust=a.adjust)),
-        # 备用源只有日线
         ("stock_zh_a_daily", lambda: ak.stock_zh_a_daily(symbol=sym, start_date=start, end_date=end,
                                                           adjust=a.adjust)),
+        ("stock_zh_a_hist", lambda: ak.stock_zh_a_hist(symbol=a.code, period=a.period, start_date=start,
+                                                        end_date=end, adjust=a.adjust)),
         ("stock_zh_a_hist_tx", lambda: ak.stock_zh_a_hist_tx(symbol=sym, start_date=start, end_date=end,
                                                               adjust=a.adjust)),
     )
@@ -161,9 +165,9 @@ def c_index(a):
         d = pd.to_datetime(df["date"])
         return df[(d >= pd.Timestamp(start)) & (d <= pd.Timestamp(end))]
     return first_ok(
+        ("stock_zh_index_daily", sina),  # 与 sim 内核同源；东财 push2 CDN 节点不稳，只作备用
         ("index_zh_a_hist", lambda: ak.index_zh_a_hist(symbol=a.code, period=a.period,
                                                         start_date=start, end_date=end)),
-        ("stock_zh_index_daily", sina),  # 备用源只有日线
     )
 
 
