@@ -21,6 +21,12 @@ Qoder 内建 cron（MCP `builtin` 服务器的 `qoder_cron` 工具），**当前
 
 - 创建时间：2026-10-24。cron 会在非交易日触发，但 `sim` 命令内部会判断交易日并空跑，无需外部过滤。
 - **移交方式**：其他工具要承担时，先在本工具里 `qoder_cron disable/remove` 上表两个 sim 任务，再到新工具创建，并更新 `docs/进展与交接.md` 接手规则第 2 条的归属记录。
+- 2026-10-25 起，execute / evening 任务成功后会：追加执行日志（`tools/runlog.py` → `reports/sim/runlog.json`）→ 重建状态看板（`tools/build_dashboard.py` → `web/`+`dist/`）→ 尽力发布站点；gold 任务仅在触发/失败时写日志。
+
+## 状态看板（Qoder Sites）
+- 站点：`ashare-sim-dashboard-hnjfa46w01s.qoder.website`（私有），描述符 `.A股模拟交易状态看板.qoder.site`，projectId `01a17110-976d-72b4-bda2-73e3f45aa97a`。
+- 页面由 `tools/build_dashboard.py` 生成（主账户视角 + 执行日志 + 冻结订单 + 风控参数），发布输出目录为 `dist/`。
+- cron 会话**可能没有 sites 插件**（qoder_cron 无法为任务挂插件）：发布失败时任务只注明"站点待同步发布"，本地 `dist/` 已是最新；任何带 sites 插件的会话用新 actionId 调 `prepare_site`（复用上述 projectId、webDirectory="dist"）+ `publish_site` 即可补发。
 
 ## 特有约束与技巧
 - MCP 工具懒加载：不在工具列表里的 MCP 工具用 `mcp_list` / `mcp_get` / `mcp_call` 发现和调用。
