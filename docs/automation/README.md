@@ -61,7 +61,7 @@
 | research | [prompts/research.md](prompts/research.md) | 复盘 + 子代理研究 + 写草稿；必要时刷新初筛 | journal、main.draft.json、runlog、看板、git 提交 |
 | evening | [prompts/evening.md](prompts/evening.md) | `python -m sim evening` | 结算、冻结订单、日报、runlog、看板、git 提交 |
 
-> 这三份文件和 cron 里的指令应保持一致。迁移时直接整份粘贴，不要改写路径（`/Users/yancong/agent-workspace/a-stock-investment`）与任务 ID；换机器时先把路径批量替换成新工作区。
+> research 由 cron 读取 `prompts/research.md` 执行（唯一指令源，改文件即生效）；execute / evening 的 cron 指令与对应文件保持一致。迁移时 research 只需在 cron 写“读取并严格执行 prompts/research.md”，其余任务整份粘贴；路径与任务 ID 按新工作区替换。
 
 ## 4. 各任务要点
 
@@ -74,7 +74,7 @@
 ### research（每天 19:00）
 - **复盘**：交易日复盘当天（净值以 20:00 结算为准，文中注明）；非交易日复盘 `state.json` 的 `last_settled`。`journal/daily/<L>.md` 已存在就跳过，因此手动重跑安全。
 - **归因**：仅当 main 当日有成交或任一持仓浮亏 >5% 时才委派 technical-flow / event-sentiment 子代理；否则不烧 token。
-- **草稿**：三层漏斗——`python -m sim pool` 全市场多路召回 100-200 只（6 个互不相关的选股通道 + 持仓 + 观察名单，产物 `data/pool/<日期>.md/.csv`）→ 轻量点评挑 6-8 只 shortlist（不调子代理，至少 3 个通道、3 个行业，写 `journal/research/<日期>.md`）→ 深度研究 3-5 只，每只并行委派 fundamental + event-sentiment（必要时 technical-flow / valuation）；持仓逐只复核。研究过未买的进 `data/watchlist.json`，次日自动回池，研究跨天积累。`data/screen/` 只服务 quant / random 对照组。组合经理输出 `code / name / target_weight / reason（含置信度）/ 可选 stop_price、industry`；卖出用 `reason_type: "exit"`。
+- **草稿**：三层漏斗——`python -m sim pool` 全市场多路召回 100-200 只（6 个互不相关的选股通道 + 持仓 + 观察名单，产物 `data/pool/<日期>.md/.csv`，实测 2500 只全量约 3 分钟）→ 轻量点评挑 6-8 只 shortlist（不调子代理，至少 3 个通道、3 个行业，写 `journal/research/<日期>.md`）→ 深度研究 3-5 只，每只并行委派 fundamental + event-sentiment（必要时 technical-flow / valuation）；持仓逐只复核。研究过未买的进 `data/watchlist.json`，次日自动回池，研究跨天积累。`data/screen/` 只服务 quant / random 对照组。组合经理输出 `code / name / target_weight / reason（含置信度）/ 可选 stop_price、industry`；卖出用 `reason_type: "exit"`。
 - 没值得买的就写空 `orders` 列表——代码会自动补底仓停泊，**不要为了交易而交易**。
 - 只允许写 `orders/<目标日>/main.draft.json` 与 `journal/`；该日订单已冻结则跳过。
 - 指令第 12 步负责重建看板、尽力发布、git 提交（`web/ dist/ journal/ orders/`）。
@@ -91,6 +91,7 @@
 | 路径 | 作用 | 是否入库 |
 |---|---|---|
 | `sim/` | 确定性内核（日历、撮合、账本、风控、初筛、报告） | 是 |
+| `sim/pool.py` | main 候选池：全市场多路召回（6 通道 + 持仓 + 观察名单） | 是 |
 | `tools/ashare.py` | AKShare 取数 | 是 |
 | `tools/runlog.py` | 执行日志追加/查看（`reports/sim/runlog.json`） | 是（日志本身不入库） |
 | `tools/build_dashboard.py` | 生成 `web/index.html` 与 `dist/index.html` | 是 |
@@ -101,14 +102,16 @@
 | `orders/<交易日>/` | 冻结订单 + MANIFEST，**冻结后不可改** | 是 |
 | `orders/<交易日>/main.draft.json` | Agent 草稿（未冻结，可覆盖） | 是 |
 | `journal/daily/<日期>.md` | 每日复盘 | 是 |
-| `data/screen/<日期>.csv` | 初筛快照 | 是 |
+| `data/screen/<日期>.csv` | quant / random 对照组的初筛快照 | 是 |
+| `data/pool/<日期>.csv｜.md` | main 候选池（按通道分组，供研究漏斗） | 是 |
+| `data/watchlist.json` | main 观察名单（研究过未买 / 已否决） | 是 |
 | `reports/sim/` | 日报、资金看板、`runlog.json` | 否（.gitignore） |
 | `web/`、`dist/` | 看板源码与发布目录 | 是 |
 | `docs/automation/` | 本手册与 prompt 原文 | 是 |
 
 ## 6. 状态看板与发布
 
-- 生成：`python tools/build_dashboard.py`，读账户、订单、journal、runlog、初筛快照，输出「各策略收益对照」+ 按策略切换的详情标签页（净值/持仓/成交/交易计划/复盘）+ 执行日志 + 初筛快照。
+- 生成：`python tools/build_dashboard.py`，读账户、订单、journal、runlog、`data/pool/`、`data/watchlist.json`、对照组初筛快照，输出「各策略收益对照」+ 按策略切换的详情标签页（净值/持仓/成交/交易计划/复盘；main 标签另含候选池与观察名单）+ 执行日志 + 量化初筛（对照组）。
 - 发布：Qoder Sites，projectId `01a17110-976d-72b4-bda2-73e3f45aa97a`，站点 `ashare-sim-dashboard-hnjfa46w01s.qoder.website`（私有），描述符 `.A股模拟交易状态看板.qoder.site`，输出目录 `dist/`。
 - 流程：`prepare_site`（新 actionId）→ `get_publish_status`（等 canPublish）→ 同参数重试 `prepare_site` 写描述符 → `publish_site` → 确认 `published: true`。
 - 降级：cron 会话可能没有 sites 插件。此时任务只注明“看板已本地更新，站点待同步发布”，`dist/` 已是最新；任何带 sites 插件的会话用新 actionId 补发即可。
@@ -138,7 +141,7 @@
    .venv/bin/python -m sim status
    ```
 2. **先建账本链路**：创建 execute（`10 15 * * 1-5`）与 evening（`0 20 * * 1-5`），时区 `Asia/Shanghai`，工作目录指向新工作区，prompt 用 `prompts/execute.md`、`prompts/evening.md`。此时 main 只会做底仓与强制止损，安全。
-3. **再建 research**（`0 19 * * *`）：prompt 用 `prompts/research.md`；确认新工具能调用子代理（或改走角色提示词）。第一晚先手动 run 一次，检查 journal 与草稿。
+3. **再建 research**（`0 19 * * *`）：cron 里写一句“读取并严格执行 `prompts/research.md`”，把完整规则留在文件里（当前 Qoder 就是这么配置的）；确认新工具能调用子代理（或改走角色提示词）。第一晚先手动 run 一次，检查 `data/pool/`、journal 与草稿。
 4. **避免双跑**：先在新工具建好但不要启用，等当天任务跑完后再停用旧工具的两个账本任务（execute/evening 错峰 30 分钟以上也不安全，最好直接停旧启新）。research 双跑只会覆盖草稿，风险较小，但同样建议停旧。
 5. **登记归属**：更新 `docs/tools/<新工具>.md` 的任务表，并把 `docs/进展与交接.md` 接手规则第 2 条改成新工具的归属与任务 ID。
 6. **验收**：按 7.3 逐项打勾，再删旧任务。
@@ -171,8 +174,8 @@
 
 ## 8. Prompt 同步约定
 
-- `prompts/*.md` 是模拟盘任务指令原文；cron 里保存的是运行副本。黄金提醒的原文单独放在 `extras/gold-alert.md`。
-- 改任务指令时：先改 cron，再把同一段文本覆盖到对应文件，并更新本页顶部的“最后核对”日期。
+- research 的完整指令以 `prompts/research.md` 为唯一源：cron 里只保留“读取并严格执行该文件”的短指令，改文件即生效。execute / evening 的 cron 指令与对应文件保持一致；黄金提醒在 `extras/gold-alert.md`。
+- 改 research 规则时只改文件，并更新本页顶部的“最后核对”日期；改 execute / evening 时先改 cron，再覆盖对应文件。
 - 迁移时如需核对，逐字比对任务列表里的 `instruction.text` 与文件内容；不要只凭本手册的任务表重建 prompt。
 
 ## 9. 附：独立分叉功能（黄金做T提醒）

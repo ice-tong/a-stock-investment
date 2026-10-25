@@ -21,6 +21,7 @@ REASON_CN = {"entry": "新开仓", "exit": "调仓卖出", "park": "底仓停泊
 REASON_TAG = {"entry": "tag-entry", "park": "tag-park", "exit": "tag-skipped",
               "stop_loss": "tag-rejected", "time_stop": "tag-rejected",
               "breaker": "tag-rejected", "halt": "tag-rejected"}
+WATCH_CN = {"watching": "观察中", "researched": "已研究", "rejected": "已否决"}
 
 CSS = """
   :root {
@@ -301,6 +302,27 @@ def load_screen():
     return date, read_csv(d / files[-1])
 
 
+def load_pool():
+    d = ROOT / "data" / "pool"
+    if not d.exists():
+        return None, []
+    files = sorted(f.name for f in d.glob("*.csv"))
+    if not files:
+        return None, []
+    return files[-1][:-4], read_csv(d / files[-1])
+
+
+def load_watchlist():
+    p = ROOT / "data" / "watchlist.json"
+    if not p.exists():
+        return []
+    try:
+        items = json.loads(p.read_text(encoding="utf-8")).get("items", [])
+        return items if isinstance(items, list) else []
+    except (json.JSONDecodeError, OSError):
+        return []
+
+
 def main() -> int:
     accts = {name: load_account(name) for name, _ in ACCOUNTS}
     m = accts["main"]
@@ -311,6 +333,8 @@ def main() -> int:
     market = "休市（周末）" if weekday >= 5 else "交易日"
     order_date, orders = load_orders()
     draft_date, draft = load_draft()
+    pool_date, pool_rows = load_pool()
+    watch_items = load_watchlist()
     runlog = load_runlog()
     worklog = load_worklog()
     risk, broker, strategy = load_config()
@@ -345,7 +369,7 @@ def main() -> int:
     journal_html = journal_html or "<p class='small muted'>暂无复盘记录（每天 19:00 生成）。</p>"
 
     strategy_notes = {
-        "main": "agent 主策略：每天 19:00 复盘 + 子代理研究 → 订单草稿；交易日 20:00 风控冻结。无草稿时只做底仓停泊与强制止损。",
+        "main": "agent 主策略：每天 19:00 复盘 + sim pool 全市场多路召回 → 轻量点评 → 深度研究 → 订单草稿；交易日 20:00 风控冻结。无草稿时只做底仓停泊与强制止损。",
         "quant": f"量化初筛：收盘 > 20 日线 > 60 日线；得分 = 20 日收益 ÷ 20 日波动，买前 {qcfg.get('n_stocks', 4)} 名；跌出前 {qcfg.get('keep_rank', 12)} 才卖。",
         "random": f"随机对照：从初筛候选池随机抽取，持有满 {rcfg.get('rotate_days', 20)} 个交易日轮换。",
         "etf": "底仓对照：只持有沪深300ETF（510300），不选股、不择时。",
@@ -383,6 +407,39 @@ def main() -> int:
         <p class="small muted" style="margin-top:8px">草稿不是订单：20:00 evening 逐条风控校验，被拒或缩量以冻结订单为准。</p>""")
         return "".join(parts)
 
+    def pool_block() -> str:
+        if not pool_date or not pool_rows:
+            return "<p class='small muted'>暂无候选池（下次 19:00 研究任务生成）。</p>"
+        multi = sorted([r for r in pool_rows if int(float(r.get("n_channels") or 0)) >= 2],
+                       key=lambda r: (-int(float(r["n_channels"])), -float(r["ret_20"])))[:8]
+        rows = ""
+        for r in multi:
+            ind = r.get("industry") if r.get("industry") and str(r.get("industry")) != "nan" else "—"
+            rows += (f"<tr><td>{esc(r['name'])} <span class='muted small num'>{esc(r['code'])}</span></td>"
+                     f"<td>{esc(ind)}</td><td class='small'>{esc(str(r['channels']).replace('|', ' / '))}</td>"
+                     f"<td class='num'>{float(r['ret_20']) * 100:+.1f}%</td>"
+                     f"<td class='num'>{float(r['ret_120']) * 100:+.1f}%</td>"
+                     f"<td class='num'>{float(r['avg_amount']) / 1e8:.1f}</td></tr>")
+        rows = rows or "<tr><td colspan=6 class='muted'>本日没有多通道共振标的</td></tr>"
+        active = [i for i in watch_items if i.get("status", "watching") in ("watching", "researched")]
+        if active:
+            items = "".join(
+                f"<tr><td>{esc(i.get('name', ''))} <span class='muted small num'>{esc(i.get('code', ''))}</span></td>"
+                f"<td>{esc(WATCH_CN.get(i.get('status'), i.get('status', '')))}</td>"
+                f"<td class='small'>{esc(i.get('trigger', ''))}</td></tr>" for i in active[:12])
+            watch_html = (f"<details style='margin-top:10px'><summary>观察名单（{len(active)} 只）</summary>"
+                          f"<div class='table-card' style='margin-top:8px'><table>"
+                          f"<thead><tr><th>标的</th><th>状态</th><th>触发条件</th></tr></thead>"
+                          f"<tbody>{items}</tbody></table></div></details>")
+        else:
+            watch_html = "<p class='small muted'>观察名单为空。</p>"
+        n_multi = sum(1 for r in pool_rows if int(float(r.get("n_channels") or 0)) >= 2)
+        return (f"<p class='small muted'>data/pool/{esc(pool_date)}.csv · 召回 {len(pool_rows)} 只"
+                f"（多通道 {n_multi} 只），由每晚 19:00 研究任务生成；排序只决定进池，不代表买入。</p>"
+                f"<div class='table-card' style='margin-top:8px'><table>"
+                f"<thead><tr><th>多通道共振标的</th><th>行业</th><th>通道</th><th>20日</th><th>120日</th><th>日均成交亿</th></tr></thead>"
+                f"<tbody>{rows}</tbody></table></div>{watch_html}")
+
     tab_buttons, tab_panels = [], []
     for name, label in ACCOUNTS:
         a = accts[name]
@@ -405,6 +462,7 @@ def main() -> int:
       <p class="small muted" style="margin-top:8px">左：当前持仓；右：最近成交（含佣金/印花税/过户费）。</p>
       <h3 class="subhead">交易计划</h3>
       {plan_block(name)}
+      {('<h3 class="subhead">候选池</h3>' + pool_block()) if name == "main" else ''}
       <h3 class="subhead">复盘</h3>
       {review}
     </div>""")
@@ -509,9 +567,9 @@ def main() -> int:
   </section>
 
   <section>
-    <h2>初筛快照</h2>
+    <h2>量化初筛（quant / random 对照组）</h2>
     {screen_block or "<p class='muted'>暂无初筛数据。</p>"}
-    <p class="small muted" style="margin-top:8px">所有订单冻结前都要过风控代码一票否决（仓位区间、单票上限、每周新开仓上限等，见 config/risk.yaml）；被拒订单在「依据」列显示风控原因。</p>
+    <p class="small muted" style="margin-top:8px">main 的候选池见上方 main 标签页（sim pool 全市场多路召回）；这里只展示 quant / random 对照组使用的初筛快照。所有订单冻结前都要过风控代码一票否决（仓位区间、单票上限、每周新开仓上限等，见 config/risk.yaml）。</p>
   </section>
 
   <section>

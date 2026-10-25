@@ -95,7 +95,10 @@ def assemble(feat: pd.DataFrame, chans: dict, holdings: list, watch: list) -> pd
     hits = {}
     for ch, codes in list(chans.items()) + [("holding", holdings), ("watchlist", watch)]:
         for c in codes:
-            hits.setdefault(c, []).append(ch)
+            if c not in hits:
+                hits[c] = []
+            if ch not in hits[c]:
+                hits[c].append(ch)
     rows = feat[feat["code"].isin(hits)].copy()
     rows["channels"] = rows["code"].map(lambda c: "|".join(hits[c]))
     rows["n_channels"] = rows["code"].map(lambda c: len(hits[c]))
@@ -185,8 +188,14 @@ def load_watchlist() -> list:
     p = watchlist_path()
     if not p.exists():
         return []
-    items = json.loads(p.read_text(encoding="utf-8")).get("items", [])
-    return [i["code"] for i in items if i.get("status", "watching") in ("watching", "researched")]
+    try:
+        items = json.loads(p.read_text(encoding="utf-8")).get("items", [])
+    except (json.JSONDecodeError, OSError, AttributeError):
+        return []
+    if not isinstance(items, list):
+        return []
+    return [i["code"] for i in items
+            if isinstance(i, dict) and "code" in i and i.get("status", "watching") in ("watching", "researched")]
 
 
 def run(date: str, market, rcfg: dict, pcfg: dict, max_lot_value: float, holdings: list,
@@ -204,8 +213,14 @@ def run(date: str, market, rcfg: dict, pcfg: dict, max_lot_value: float, holding
     bad |= spot["name"].str.contains("ST|退", regex=True) | spot["name"].str.match(r"^[NC]")
     spot = spot[~bad & (spot["price"] * 100 <= max_lot_value)]
     n_base = len(spot)
-    pre = spot[(spot["amount"] >= pcfg["prefilter_min_amount"]) | spot["code"].isin(holdings)]
+    watch = load_watchlist()
+    keep = set(holdings) | set(watch)
+    pre = spot[(spot["amount"] >= pcfg["prefilter_min_amount"]) | spot["code"].isin(keep)]
     pre = pre.sort_values("amount", ascending=False).head(pcfg["prefilter_max"])
+    # 持仓与观察名单无论成交额多少都必须进池复核，不能被 head 截断
+    rest = spot[spot["code"].isin(keep) & ~spot["code"].isin(pre["code"])]
+    if len(rest):
+        pre = pd.concat([pre, rest], ignore_index=True)
     log(f"候选池：全市场 {n_spot} 只，基础过滤后 {n_base} 只，流动性预过滤 {len(pre)} 只，开始拉取日线")
 
     start = (dt.date.fromisoformat(date) - dt.timedelta(days=pcfg["history_days"])).strftime("%Y%m%d")
@@ -231,7 +246,7 @@ def run(date: str, market, rcfg: dict, pcfg: dict, max_lot_value: float, holding
     feat.to_csv(cache / f"{date}_features.csv", index=False)
 
     chans = channels(feat, pcfg)
-    out = assemble(feat, chans, holdings, load_watchlist())
+    out = assemble(feat, chans, holdings, watch)
     stats = {"spot": n_spot, "base": n_base, "pre": len(pre), "feat": len(feat), "eligible": int(feat["eligible"].sum())}
     path.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(path, index=False)

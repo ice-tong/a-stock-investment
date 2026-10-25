@@ -26,13 +26,13 @@ Qoder 自动注入工作区根目录的 `AGENTS.md`，无需额外配置。
 
 - 创建时间：2026-10-24。cron 会在非交易日触发，但 `sim` 命令内部会判断交易日并空跑，无需外部过滤。
 - **移交方式**：其他工具要承担模拟盘时，先在本工具里 `qoder_cron disable/remove` 上表三个 sim 任务，再到新工具创建，并更新 `docs/进展与交接.md` 接手规则第 2 条的归属记录。黄金提醒与模拟盘无依赖，可独立迁移或直接不迁移。
-- 任务指令原文快照在 `docs/automation/prompts/`，黄金提醒在 `docs/automation/extras/gold-alert.md`；完整 pipeline、数据流与迁移步骤见 `docs/automation/README.md`（迁移到其他工具时照它执行）。
+- 任务指令：execute / evening 的原文快照在 `docs/automation/prompts/`；**research 任务以 `docs/automation/prompts/research.md` 为唯一指令源**（cron 里只保存“读取并严格执行该文件”的短指令，修改文件即生效）；黄金提醒在 `docs/automation/extras/gold-alert.md`。完整 pipeline、数据流与迁移步骤见 `docs/automation/README.md`。
 - 2026-10-25 起，execute / evening / research 任务成功后会：追加执行日志（`tools/runlog.py` → `reports/sim/runlog.json`）→ 重建状态看板（`tools/build_dashboard.py` → `web/`+`dist/`）→ 尽力发布站点；黄金提醒仅在触发/失败时写日志，不重建看板。
-- 复盘与研究任务（每天 19:00，含非交易日）分两步：① 交易复盘——交易日复盘当天、非交易日复盘最近一个已结算交易日，写 `journal/daily/<日期>.md`（已存在则跳过，保证幂等）；② 交易计划草稿——初筛 + 子代理研究 + 组合经理决策，写入 `orders/<目标交易日>/main.draft.json`（计划日 = 今天为交易日则今天、否则下一个交易日；目标日 = 计划日的下一个交易日，即当晚 20:00 evening 将冻结订单的那一天；已冻结则跳过）。只写草稿与 journal，不碰账本。
+- 复盘与研究任务（每天 19:00，含非交易日）：① 交易复盘——交易日复盘当天、非交易日复盘最近一个已结算交易日，写 `journal/daily/<日期>.md`（已存在则跳过）；② 三层选股漏斗——`python -m sim pool` 全市场多路召回（6 个通道 + 持仓 + 观察名单，约 3 分钟，产物 `data/pool/<日期>.md`）→ 轻量点评 6-8 只 shortlist → 深度研究 3-5 只 → 组合经理决策，写入 `orders/<目标交易日>/main.draft.json`，研究成果记入 `data/watchlist.json`。`data/screen/` 只服务 quant / random 对照组，不再是 main 的候选来源。
 
 ## 状态看板（Qoder Sites）
 - 站点：`ashare-sim-dashboard-hnjfa46w01s.qoder.website`（私有），描述符 `.A股模拟交易状态看板.qoder.site`，projectId `01a17110-976d-72b4-bda2-73e3f45aa97a`。
-- 页面由 `tools/build_dashboard.py` 生成（四策略收益对照 + 标签页详情 + 执行日志 + 初筛快照），发布输出目录为 `dist/`。
+- 页面由 `tools/build_dashboard.py` 生成（四策略收益对照 + 标签页详情；main 标签含候选池与观察名单；另有对照组初筛快照与执行日志），发布输出目录为 `dist/`。
 - cron 会话**可能没有 sites 插件**（qoder_cron 无法为任务挂插件）：发布失败时任务只注明"站点待同步发布"，本地 `dist/` 已是最新；任何带 sites 插件的会话用新 actionId 调 `prepare_site`（复用上述 projectId、webDirectory="dist"）+ `publish_site` 即可补发。
 
 ## 特有约束与技巧
