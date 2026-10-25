@@ -23,11 +23,13 @@
 
 配套 cron 表达式：
 
-| 任务 | 表达式 | 任务 ID（Qoder） |
+| 任务 | 表达式 | 任务 ID（Qoder CN，2026-10-25 起） |
 |---|---|---|
-| execute | `10 15 * * 1-5` | `df6f6cb3-9585-4b22-a93e-b8c812769567` |
-| research | `0 19 * * *` | `acbf75d2-160c-4377-9296-df43b078d61e` |
-| evening | `0 20 * * 1-5` | `377136b3-c3d5-4955-92c3-6a129f5b4e0c`（2026-10-25 重建） |
+| execute | `10 15 * * 1-5` | `6a4defea-34b0-473e-9dbc-b5f694678021` |
+| research | `0 19 * * *` | `32e49144-4edf-496b-8630-f03165c72452` |
+| evening | `0 20 * * 1-5` | `5f8097de-a4be-4863-965d-184e414f54ec` |
+
+> Qoder 国际版的旧任务（`df6f6cb3…` / `acbf75d2…` / `377136b3…`）已在 2026-10-25 迁移到 CN，必须在国际版停用/删除，避免双跑。详见 `docs/tools/qoder.md`。
 
 ## 2. 数据流
 
@@ -114,7 +116,7 @@
 ## 6. 状态看板与发布
 
 - 生成：`python tools/build_dashboard.py`，读账户、订单、journal、runlog、`data/pool/`、`data/watchlist.json`、对照组初筛快照，输出「各策略收益对照」+ 按策略切换的详情标签页（净值/持仓/成交/交易计划/复盘；main 标签另含候选池与观察名单）+ 执行日志 + 量化初筛（对照组）。
-- 发布：Qoder Sites，projectId `01a17110-976d-72b4-bda2-73e3f45aa97a`，站点 `ashare-sim-dashboard-hnjfa46w01s.qoder.website`（私有），描述符 `.A股模拟交易状态看板.qoder.site`，输出目录 `dist/`。
+- 发布：Qoder Sites（CN 账号），projectId `01a1728a-617c-708f-99f9-03e5934f09f3`，站点 `https://ashare-sim-dashboard-wv51upzp22k.qoder.zone`（私有），描述符 `.A股模拟交易状态看板.qoder.site`，输出目录 `dist/`。2026-10-25 从国际版迁移，旧站点 `ashare-sim-dashboard-hnjfa46w01s.qoder.website`（projectId `01a17110-…`）留在国际版账号、不再更新。
 - 流程：`prepare_site`（新 actionId）→ `get_publish_status`（等 canPublish）→ 同参数重试 `prepare_site` 写描述符 → `publish_site` → 确认 `published: true`。
 - 降级：cron 会话可能没有 sites 插件。此时任务只注明“看板已本地更新，站点待同步发布”，`dist/` 已是最新；任何带 sites 插件的会话用新 actionId 补发即可。
 - `runlog.json` 只保留最近 300 条，由 `tools/runlog.py` 维护；看板每次重建时把当前日志内嵌进 HTML，所以日志刷新依赖重建。
