@@ -53,6 +53,14 @@ class FakeMarket:
     def hfq_factor(self, code, date):
         return self.factors.get((code, date), self.factors.get(code, 1.0))
 
+    def daily(self, code, end=None):
+        """只用于 regime / 数据新鲜度检查：按价格表拼出日线，没价格返回 None。"""
+        import pandas as pd
+        dates = sorted(d for d, px in self.prices.items() if px.get(code) is not None and (end is None or d <= end))
+        if not dates:
+            return None
+        return pd.DataFrame({"close": [self.prices[d][code] for d in dates]}, index=dates)
+
 
 def new_account(cash=100000, strategy="quant"):
     return Account.create("t", strategy, cash, "2026-10-01")
@@ -181,6 +189,87 @@ def test_stop_loss_and_time_stop():
     assert r["pending_exits"] == {"sh600000": "stop_loss", "sh600001": "time_stop"}
 
 
+def test_hfq_fetch_failure_keeps_shares_and_factor():
+    """因子取数失败必须返回 None：不能被当成 1.0 后乘错持股，恢复后也不能再乘一次。"""
+    acct = new_account(cash=0)
+    acct.state["peak"] = 35000
+    acct.positions["sh600000"] = {"name": "浦发银行", "kind": "stock", "shares": 1000, "cost": 35000,
+                                  "first_buy_date": D0, "last_buy_date": D0, "last_price": 35,
+                                  "stop_price": 32.2, "hfq": 3.5}
+    m = FakeMarket({D1: {"sh600000": 35.0}}, factors={("sh600000", D1): None})
+    r = settle.settle(acct, D1, m, RCFG, "neutral")
+    pos = acct.positions["sh600000"]
+    assert pos["shares"] == 1000 and pos["hfq"] == 3.5
+    assert not [t for t in acct.trades() if t["side"] == "corp_action"]
+    assert any("复权因子取数失败" in n for n in r["notes"])
+
+    r2 = settle.settle(acct, D2, FakeMarket({D2: {"sh600000": 35.0}}, factors={("sh600000", D2): 3.5}), RCFG, "neutral")
+    assert acct.positions["sh600000"]["shares"] == 1000
+    assert acct.positions["sh600000"]["hfq"] == 3.5
+    assert not [t for t in acct.trades() if t["side"] == "corp_action"]
+    assert r2["notes"] == []
+
+
+def test_buy_without_factor_records_first_valid_factor_without_adjusting():
+    acct = new_account()
+    m = FakeMarket({D0: {"sh600000": 10.0}, D1: {"sh600000": 10.0}},
+                   factors={("sh600000", D1): None, ("sh600000", D2): 1.05})
+    broker.execute(acct, order_doc({"code": "sh600000", "name": "浦发银行", "target_weight": 0.1}),
+                   D1, m, BCFG, 0.08)
+    assert acct.positions["sh600000"]["hfq"] is None
+    settle.settle(acct, D2, FakeMarket({D2: {"sh600000": 10.0}}, factors={("sh600000", D2): 1.05}), RCFG, "neutral")
+    assert acct.positions["sh600000"]["shares"] == 1000  # 首个有效因子只记录，不折算
+    assert acct.positions["sh600000"]["hfq"] == 1.05
+
+
+def test_absurd_corp_ratio_is_not_applied():
+    """单日因子比值超出 [0.5, 3.0] 时视为数据错误：不折算、不覆盖原因子。"""
+    acct = new_account(cash=0)
+    acct.state["peak"] = 35000
+    acct.positions["sh600000"] = {"name": "浦发银行", "kind": "stock", "shares": 1000, "cost": 35000,
+                                  "first_buy_date": D0, "last_buy_date": D0, "last_price": 35,
+                                  "stop_price": 32.2, "hfq": 3.5}
+    r = settle.settle(acct, D1, FakeMarket({D1: {"sh600000": 35.0}}, factors={("sh600000", D1): 1.0}), RCFG, "neutral")
+    assert acct.positions["sh600000"]["shares"] == 1000
+    assert acct.positions["sh600000"]["hfq"] == 3.5
+    assert any("超出合理范围" in n for n in r["notes"])
+    assert not [t for t in acct.trades() if t["side"] == "corp_action"]
+
+
+def test_corp_action_adjusts_stop_price():
+    """10 送 10：持股翻倍、股价减半，止损价必须同步减半，否则当天就被误判止损。"""
+    acct = new_account(cash=10000)
+    acct.state["peak"] = 30000
+    acct.positions["sh600000"] = {"name": "浦发银行", "kind": "stock", "shares": 1000, "cost": 20000,
+                                  "first_buy_date": D0, "last_buy_date": D0, "last_price": 20,
+                                  "stop_price": 18.4, "hfq": 1.0}
+    r = settle.settle(acct, D1, FakeMarket({D1: {"sh600000": 10.0}}, factors={("sh600000", D1): 2.0}), RCFG, "neutral")
+    pos = acct.positions["sh600000"]
+    assert pos["shares"] == pytest.approx(2000) and pos["stop_price"] == pytest.approx(9.2)
+    assert r["pending_exits"] == {} and acct.state["last_settled"] == D1
+
+
+def test_settle_aborts_when_most_positions_have_no_price():
+    """取价大面积失败是数据源故障，不是停牌：不能照常写净值。"""
+    acct = new_account(cash=0)
+    for i in range(3):
+        acct.positions[f"sh60000{i}"] = {"name": f"股{i}", "kind": "stock", "shares": 100, "cost": 1000,
+                                         "first_buy_date": D0, "last_buy_date": D0, "last_price": 10,
+                                         "stop_price": 9.2, "hfq": 1}
+    m = FakeMarket({D1: {"sh600000": 10.0}})
+    with pytest.raises(settle.StaleData):
+        settle.settle(acct, D1, m, RCFG, "neutral")
+    assert acct.nav() == [] and acct.state["last_settled"] is None
+
+
+def test_regime_falls_back_to_defense_and_data_freshness_gate():
+    m = FakeMarket({D1: {"sh000300": 4000.0}})
+    assert settle.regime(m, "sh000300", D1) == "defense"          # 不足 125 行：最保守档
+    assert settle.data_fresh(m, "sh000300", D1) is True
+    assert settle.data_fresh(m, "sh000300", D2) is False          # 指数还没更新到结算日
+    assert settle.data_fresh(FakeMarket({}), "sh000300", D1) is False
+
+
 # ---------------- 风控 ----------------
 def ctx(**kw):
     base = {"trade_date": D2, "settle_date": D1, "regime": "offense", "risk_state": "normal", "rcfg": RCFG,
@@ -235,6 +324,139 @@ def test_risk_min_hold_days():
     out, _ = risk.review(acct, [{"code": "sz000002", "name": "万科A", "target_weight": 0.0, "reason_type": "exit"}],
                          ctx())
     assert by_code(out)["sz000002"]["status"] == "rejected"
+
+
+def test_risk_rejects_stop_not_below_price_and_too_tight_stop():
+    """止损价 >= 现价时单笔风险上限会退化成单票上限；距离过近同样会让仓位被算得过大。"""
+    acct = new_account()
+    out, _ = risk.review(acct, [{"code": "sh600000", "name": "浦发银行", "target_weight": 0.1, "stop_price": 10.5},
+                                {"code": "sz000002", "name": "万科A", "target_weight": 0.1, "stop_price": 10.0},
+                                {"code": "sh600001", "name": "邯郸钢铁", "target_weight": 0.1, "stop_price": 9.95}],
+                         ctx(prices={"sh600000": 10.0, "sz000002": 10.0, "sh600001": 10.0, ETF["code"]: 4.0},
+                             info={c: {"avg_amount": 5e8, "chg_1d": 0.01, "chg_5d": 0.02, "listed_days": 200}
+                                   for c in ("sh600000", "sz000002", "sh600001")}))
+    o = by_code(out)
+    assert o["sh600000"]["status"] == "rejected" and "不低于现价" in o["sh600000"]["risk_notes"][-1]
+    assert o["sz000002"]["status"] == "rejected" and "不低于现价" in o["sz000002"]["risk_notes"][-1]
+    assert o["sh600001"]["status"] == "rejected" and "止损距离" in o["sh600001"]["risk_notes"][-1]
+
+
+def test_risk_cap_still_uses_one_percent_risk_for_valid_stop():
+    acct = new_account()
+    out, _ = risk.review(acct, [{"code": "sh600000", "name": "浦发银行", "target_weight": 0.3, "stop_price": 9.2}],
+                         ctx())
+    o = by_code(out)["sh600000"]
+    assert o["status"] == "adjusted" and o["target_weight"] == pytest.approx(0.125)
+
+
+# ---------------- 数据新鲜度与命令层 ----------------
+def test_stale_index_data_aborts_settle():
+    from sim import __main__ as cli
+    acct = new_account()
+    m = FakeMarket({D0: {"sh000300": 4000.0}})  # 指数只更新到 D0，结算日 D1 没有日线
+    with pytest.raises(settle.StaleData):
+        cli.do_settle(D1, m, RCFG, BCFG)
+    with pytest.raises(settle.StaleData):
+        cli.do_plan(D1, m, RCFG, BCFG, config.load("strategy"), "defense")
+    assert acct.nav() == [] and acct.state["last_settled"] is None
+    assert not (config.orders_dir() / D2).exists()
+
+
+def test_validate_draft_keeps_good_orders_and_reports_each_problem():
+    from sim.strategies import validate_draft
+    good, meta, errs = validate_draft({"meta": {"model": "m", "decided_on": D1}, "orders": [
+        {"code": "sh600000", "target_weight": 0.05},
+        {"code": "600887", "target_weight": 0.05},
+        {"code": "sz000002", "target_weight": "5%"},
+        {"code": "sz000001", "target_weight": 0.03, "stop_price": -1},
+        {"code": "sh600001", "target_weight": 1.2},
+    ]})
+    assert [o["code"] for o in good] == ["sh600000"] and meta["model"] == "m" and len(errs) == 4
+    assert validate_draft("not a dict")[0] == []
+    assert validate_draft({"foo": 1})[0] == [] and "orders" in validate_draft({"foo": 1})[2][0]
+
+
+def test_bad_draft_does_not_block_other_accounts(monkeypatch):
+    """main 草稿坏了，quant / random / etf_band 也必须照常冻结。"""
+    import pandas as pd
+    from sim import __main__ as cli, screen as screen_mod
+    for name, strategy in (("main", "agent"), ("quant", "quant"), ("random", "random"),
+                           ("etf_band", "etf_band"), ("etf", "etf")):
+        acct = Account.create(name, strategy, 100000, D0)
+        acct.state["last_settled"] = D1
+        acct.save()
+    d = config.orders_dir() / D2
+    d.mkdir(parents=True)
+    (d / "main.draft.json").write_text('{"orders": [{"code": "600887", "target_weight": 0.05}]}', "utf-8")
+    monkeypatch.setattr(screen_mod, "run", lambda *a, **k: pd.DataFrame())
+    monkeypatch.setattr(screen_mod, "info_map", lambda sc: {})
+    monkeypatch.setattr(cli.orders, "git_commit", lambda msg: True)
+    rc = cli.do_plan(D1, FakeMarket({D1: {"sh510300": 4.0, "sh000300": 4000.0}}), RCFG, BCFG,
+                     config.load("strategy"), "defense")
+    assert rc == 0
+    for name in ("main", "quant", "random", "etf_band", "etf"):
+        assert (d / f"{name}.json").exists(), name
+    doc = json.loads((d / "main.json").read_text(encoding="utf-8"))
+    assert doc["draft_errors"] and doc["orders"][0]["code"] == ETF["code"]  # 只剩底仓停泊
+    # etf 固定 98%；etf_band 跟当日仓位区间上沿（defense 为 50%）
+    assert json.loads((d / "etf.json").read_text())["orders"][0]["target_weight"] == 0.98
+    assert json.loads((d / "etf_band.json").read_text())["orders"][0]["target_weight"] == 0.5
+
+
+def test_stale_draft_is_discarded(monkeypatch):
+    """decided_on 早于结算日的草稿不能用来下单（周末草稿周一才冻结的情况）。"""
+    import pandas as pd
+    from sim import __main__ as cli, screen as screen_mod
+    acct = Account.create("main", "agent", 100000, D0)
+    acct.state["last_settled"] = D1
+    acct.save()
+    d = config.orders_dir() / D2
+    d.mkdir(parents=True)
+    (d / "main.draft.json").write_text(json.dumps({
+        "meta": {"decided_on": "2026-10-20"},
+        "orders": [{"code": "sh600000", "name": "浦发银行", "target_weight": 0.05}]}), "utf-8")
+    monkeypatch.setattr(screen_mod, "run", lambda *a, **k: pd.DataFrame())
+    monkeypatch.setattr(screen_mod, "info_map", lambda sc: {})
+    monkeypatch.setattr(cli.orders, "git_commit", lambda msg: True)
+    cli.do_plan(D1, FakeMarket({D1: {"sh510300": 4.0, "sh600000": 10.0, "sh000300": 4000.0}}), RCFG, BCFG,
+                config.load("strategy"), "defense")
+    doc = json.loads((d / "main.json").read_text(encoding="utf-8"))
+    assert all(o["code"] == ETF["code"] for o in doc["orders"])
+    assert any("早于结算日" in e for e in doc["draft_errors"])
+    assert doc["meta"]["decided_on"] == "2026-10-20"
+
+
+def test_catch_up_execute_before_settle():
+    """成交漏跑时，evening 先补执行再结算，当天净值要反映持仓。"""
+    from sim import __main__ as cli
+    acct = Account.create("t", "agent", 100000, D0)
+    d = config.orders_dir() / D1
+    d.mkdir(parents=True)
+    orders.freeze(D1, "t", {"orders": [{"code": "sh600000", "name": "浦发银行", "target_weight": 0.1,
+                                        "status": "approved", "reason_type": "entry"}]})
+    m = FakeMarket({D1: {"sh600000": 10.0}})
+    assert cli.catch_up_execute(D1, m, BCFG, RCFG) == 0
+    assert Account("t").positions["sh600000"]["shares"] == 1000
+    assert D1 in Account("t").state["executed"]
+    settle.settle(Account("t"), D1, m, RCFG, "neutral")
+    assert float(Account("t").nav()[-1]["stock_value"]) > 0
+
+
+def test_execute_refuses_account_already_settled():
+    from sim import __main__ as cli
+    acct = Account.create("t", "agent", 100000, D0)
+    acct.state["last_settled"] = D1
+    acct.save()
+    d = config.orders_dir() / D1
+    d.mkdir(parents=True)
+    orders.freeze(D1, "t", {"orders": [{"code": "sh600000", "name": "浦发银行", "target_weight": 0.1,
+                                        "status": "approved", "reason_type": "entry"}]})
+    cli.run_orders(D1, FakeMarket({D1: {"sh600000": 10.0}}), BCFG, RCFG)
+    assert Account("t").positions == {} and D1 not in Account("t").state["executed"]
+
+
+def test_git_commit_outside_repo_is_not_a_failure():
+    assert orders.git_commit("noop") is True  # SIM_HOME 是临时目录，没有 .git
 
 
 # ---------------- 订单冻结 ----------------

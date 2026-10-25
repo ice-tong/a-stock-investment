@@ -146,7 +146,9 @@ class Market:
         return Snapshot(float(b["close"]), float(b["volume"]), prev, up, down, "close_fallback")
 
     # ---------- 复权因子（处理分红送转） ----------
-    def hfq_factor(self, code: str, date: str) -> float:
+    def hfq_factor(self, code: str, date: str) -> float | None:
+        """个股后复权因子。取不到时返回 None，绝不退回 1.0——1.0 会被当成"没有除权"写进持仓，
+        第二天真实因子回来时会被误判成一次巨量送转。失败也不缓存，下次调用可以重试。"""
         if kind(code) != "stock":
             return 1.0
         if code not in self._factor:
@@ -156,12 +158,12 @@ class Market:
                 df["date"] = df["date"].astype(str).str[:10]
                 self._factor[code] = df.sort_values("date")
             except Exception:
-                self._factor[code] = None
+                return None
         df = self._factor[code]
-        if df is None:
-            return 1.0
+        if df is None or len(df) == 0:
+            return None
         df = df[df["date"] <= date]
-        return 1.0 if len(df) == 0 else float(df["hfq_factor"].iloc[-1])
+        return None if len(df) == 0 else float(df["hfq_factor"].iloc[-1])
 
     # ---------- 全市场快照（初筛用） ----------
     def spot(self) -> pd.DataFrame:

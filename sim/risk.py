@@ -100,22 +100,29 @@ def review(acct, drafts: list, ctx: dict) -> tuple:
                 o["status"] = "rejected"; notes.append("无最新价格")
             else:
                 stop = o.get("stop_price") or price * (1 - p["stop_loss_pct"])
-                dist = max((price - stop) / price, 1e-6)
-                cap = min(p["max_single"], p["max_risk_per_trade"] / dist)
-                if tw > cap + 1e-9:
-                    o["target_weight"], o["status"] = round(cap, 4), "adjusted"
-                    notes.append(f"按单票上限/单笔风险 1% 下调至 {cap:.1%}")
-                if price * 100 > o["target_weight"] * equity:
-                    o["status"] = "rejected"; notes.append(f"一手 {price * 100:.0f} 元超过目标仓位金额")
-                is_new = code not in acct.positions
-                if o["status"] != "rejected" and is_new:
-                    if len(held_after) >= p["max_stocks"]:
-                        o["status"] = "rejected"; notes.append(f"持股数已达上限 {p['max_stocks']}")
-                    elif new_this_week >= p["max_new_per_week"]:
-                        o["status"] = "rejected"; notes.append(f"本周新开仓已达上限 {p['max_new_per_week']}")
-                    else:
-                        new_this_week += 1
-                        held_after.add(code)
+                dist = (price - stop) / price
+                if dist <= 0:
+                    # 止损价不低于现价：距离被截断后单笔风险约束会退化成单票上限，且买入次日就触发止损
+                    o["status"] = "rejected"; notes.append(f"止损价 {stop} 不低于现价 {price}，拒绝买入")
+                elif dist < p.get("min_stop_distance", 0.01):
+                    o["status"] = "rejected"; notes.append(f"止损距离 {dist:.2%} 小于下限，仓位会被算得过大")
+                else:
+                    cap = min(p["max_single"], p["max_risk_per_trade"] / dist)
+                    if tw > cap + 1e-9:
+                        o["target_weight"], o["status"] = round(cap, 4), "adjusted"
+                        notes.append(f"按单票上限/单笔风险 {p['max_risk_per_trade']:.0%} 下调至 {cap:.1%}")
+                    if price * 100 > o["target_weight"] * equity:
+                        o["status"] = "rejected"; notes.append(f"一手 {price * 100:.0f} 元超过目标仓位金额")
+                    is_new = code not in acct.positions
+                    if o["status"] != "rejected" and is_new:
+                        if len(held_after) >= p["max_stocks"]:
+                            o["status"] = "rejected"; notes.append(f"持股数已达上限 {p['max_stocks']}")
+                        elif new_this_week >= p["max_new_per_week"]:
+                            o["status"] = "rejected"; notes.append(f"本周新开仓已达上限 {p['max_new_per_week']}")
+                        else:
+                            new_this_week += 1
+                            held_after.add(code)
+
         out.append(o)
 
     # 3) 个股总仓位不超过上限：按比例压缩买入

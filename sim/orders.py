@@ -11,6 +11,7 @@ import json
 import os
 import stat
 import subprocess
+import time
 
 from . import config
 
@@ -52,12 +53,30 @@ def load_verified(trade_date: str, account: str) -> dict:
     return json.loads(data)
 
 
-def git_commit(message: str):
-    """项目是 git 仓库时，把当天的订单与账本提交，留下不可抵赖的时间记录。不是仓库则跳过。"""
+def git_commit(message: str) -> bool:
+    """把当天的订单与账本提交，留下不可抵赖的时间记录。
+
+    返回 False 表示提交真的失败（调用方应让命令返回非 0，runlog 记 failed）；
+    "没有改动"是正常情况，返回 True；不是 git 仓库时跳过，也返回 True。
+    """
     home = config.home()
     if not (home / ".git").exists():
-        return False
+        return True
     paths = [p for p in ("orders", "accounts", "data/screen", "data/pool", "data/watchlist.json") if (home / p).exists()]
-    subprocess.run(["git", "-C", str(home), "add", *paths], check=False, capture_output=True)
-    r = subprocess.run(["git", "-C", str(home), "commit", "-m", message], check=False, capture_output=True)
-    return r.returncode == 0
+    add = subprocess.run(["git", "-C", str(home), "add", *paths], check=False, capture_output=True, text=True)
+    if add.returncode != 0:
+        print(f"git add 失败：{add.stderr.strip()}", flush=True)
+        return False
+    for attempt in range(4):
+        r = subprocess.run(["git", "-C", str(home), "commit", "-m", message], check=False, capture_output=True, text=True)
+        if r.returncode == 0:
+            return True
+        out = f"{r.stdout}\n{r.stderr}"
+        if "nothing to commit" in out or "nothing added to commit" in out or "无文件要提交" in out:
+            return True
+        if "index.lock" in out and attempt < 3:  # 并发任务抢锁：等几秒重试
+            time.sleep(2)
+            continue
+        print(f"git commit 失败：{(r.stderr or r.stdout).strip()}", flush=True)
+        return False
+    return False

@@ -3,25 +3,71 @@
 - agent：读取 Agent 写的 orders/<交易日>/<账户>.draft.json（第二阶段接入）；没有草稿则只做强制卖出和底仓
 - quant：买初筛排名靠前的股票，跌出 keep_rank 才卖
 - random：同样候选池随机挑股，持有满 rotate_days 换股
-- etf：只持有底仓 ETF
+- etf / etf_band：只持有底仓 ETF（etf 固定 98%，etf_band 跟当日仓位区间上沿，见 risk.review）
 草稿里个股的目标仓位统一写个股上限 / 目标持股数，风控会再按单票上限、单笔风险等下调。
 """
 import json
 import random as rnd
+import re
 
 from . import calendar as cal
 from . import config
 
+CODE_RE = re.compile(r"^(sh|sz)\d{6}$")
 
-def drafts(acct, trade_date: str, settle_date: str, screen, band: dict, scfg: dict) -> list:
+
+def validate_draft(doc) -> tuple:
+    """校验 Agent 草稿，返回 (orders, meta, errors)。
+
+    整份草稿不合格（不是对象、没有 orders 列表）按空草稿处理；单笔不合格只剔除该笔。
+    两种情况都把原因带回去，由调用方写进冻结订单留痕——绝不因为草稿坏了就崩溃。
+    """
+    if not isinstance(doc, dict):
+        return [], {}, ["草稿不是一个 JSON 对象，按空草稿处理"]
+    meta = doc.get("meta") if isinstance(doc.get("meta"), dict) else {}
+    raw = doc.get("orders")
+    if not isinstance(raw, list):
+        return [], meta, ["草稿缺少 orders 列表，按空草稿处理"]
+    good, errors = [], []
+    for i, o in enumerate(raw, 1):
+        if not isinstance(o, dict):
+            errors.append(f"第 {i} 笔不是 JSON 对象，已剔除")
+            continue
+        code = str(o.get("code") or "")
+        if not CODE_RE.match(code):
+            errors.append(f"第 {i} 笔代码 {code!r} 不是 sh/sz + 6 位数字，已剔除")
+            continue
+        tw = o.get("target_weight")
+        if isinstance(tw, bool) or not isinstance(tw, (int, float)) or not 0 <= tw <= 1:
+            errors.append(f"第 {i} 笔 {code} 的 target_weight={tw!r} 不是 0 到 1 之间的数字，已剔除")
+            continue
+        sp = o.get("stop_price")
+        if sp is not None and (isinstance(sp, bool) or not isinstance(sp, (int, float)) or sp <= 0):
+            errors.append(f"第 {i} 笔 {code} 的 stop_price={sp!r} 不是正数，已剔除")
+            continue
+        good.append(o | {"code": code, "target_weight": float(tw)})
+    return good, meta, errors
+
+
+def load_draft(path) -> tuple:
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        return [], {}, [f"草稿无法解析（{type(e).__name__}），按空草稿处理：{e}"]
+    return validate_draft(doc)
+
+
+def drafts(acct, trade_date: str, settle_date: str, screen, band: dict, scfg: dict) -> tuple:
+    """返回 (订单列表, 草稿 meta, 草稿问题列表)。非 Agent 账户 meta 与问题均为空。"""
     s = acct.state["strategy"]
     if s == "agent":
         path = config.orders_dir() / trade_date / f"{acct.name}.draft.json"
         if not path.exists():
-            return []
-        return json.loads(path.read_text(encoding="utf-8"))["orders"]
-    if s == "etf":
-        return []
+            return [], {}, []
+        return load_draft(path)
+    if s in ("etf", "etf_band"):
+        return [], {}, []
+
     eligible = screen[screen["eligible"]] if len(screen) else screen
     pending = acct.state["pending_exits"]
     held = [c for c in acct.stock_codes() if c not in pending]
@@ -59,4 +105,4 @@ def drafts(acct, trade_date: str, settle_date: str, screen, band: dict, scfg: di
         out.append({"code": r.code, "name": r.name, "target_weight": round(weight, 4), "reason_type": "entry",
                     "reason": (f"随机抽取（初筛排名 {r.rank}）" if s == "random"
                                else f"初筛排名 {r.rank}，20 日风险调整动量 {r.score:.2f}")})
-    return out
+    return out, {}, []
