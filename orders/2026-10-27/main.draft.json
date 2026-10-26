@@ -1,3 +1,9 @@
 {
+  "meta": {
+    "tool": "qoder",
+    "model": "dfmodel",
+    "written_at": "2026-10-26T20:44:30",
+    "decided_on": "2026-10-26"
+  },
   "orders": []
 }
