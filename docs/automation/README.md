@@ -1,11 +1,11 @@
 # 模拟交易自动化 Pipeline 与迁移手册
 
-> 最后核对：2026-10-25（Asia/Shanghai）。`prompts/` 下是当时 cron 指令的原文快照。
+> 最后核对：2026-10-26（Asia/Shanghai）。`prompts/` 下是当时 cron 指令的原文快照。
 > 迁移前请用本工具的任务列表核对一次实际配置；改过指令就把对应文件一起更新。
 
 ## 范围
 
-本手册只覆盖**模拟交易主 pipeline**：execute / research / evening 三个每日任务、周六 evolution 任务，以及状态看板。整条链路**不依赖云端状态**，所有事实都在本仓库文件里，因此可以整体搬到任何能跑本地 cron + shell 的 Agent 工具。
+本手册覆盖**模拟交易主 pipeline**：execute / research / evening 三个每日任务、21:00 watchdog 巡检、周六 evolution 任务，以及状态看板。整条链路**不依赖云端状态**，所有事实都在本仓库文件里，因此可以整体搬到任何能跑本地 cron + shell 的 Agent 工具。
 
 黄金做T提醒是**独立分叉功能**，与模拟盘没有任何数据或执行依赖，只额外借用同一个 cron 与执行日志展示。它不属于本 pipeline，单独说明见[第 9 节](#9-附独立分叉功能黄金做t提醒)，迁移时可独立决定去留。
 
@@ -20,6 +20,7 @@
 | 15:10 | execute | 交易日（周一至周五，日历内部再判休市） | < 1 分钟 | 按当日冻结订单、以 14:45 分钟价成交 |
 | 19:00 | research | **每天** | 5–25 分钟 | 交易复盘（写 journal）+ 下一交易日订单草稿（写 main.draft.json） |
 | 20:00 | evening | **每天** | 1–2 分钟 | 交易日：结算 → 读草稿跑风控 → 冻结次日订单 → 日报/看板；周末与节假日的最后一晚：只冻结下一交易日订单（前夜模式） |
+| 21:00 | watchdog | **每天** | < 1 分钟 | 巡检：runlog 缺 research 或 evening 当天记录时兜底跑 `sim evening` 并推 Bark（2026-10-26 新增，见第 4 节） |
 | 周六 10:00 | evolution | 每周六 | 5–15 分钟 | 周度进化复盘：归因、观察项、提案、路线图、周报 |
 
 配套 cron 表达式：
@@ -29,8 +30,11 @@
 | execute | `10 15 * * 1-5` | `6a4defea-34b0-473e-9dbc-b5f694678021` |
 | research | `0 19 * * *` | `32e49144-4edf-496b-8630-f03165c72452` |
 | evening | `0 20 * * *` | `5f8097de-a4be-4863-965d-184e414f54ec` |
+| watchdog | `0 21 * * *` | `a5f577f5-5c93-4bd0-bbdf-a73a8924615f` |
 | evolution | `0 10 * * 6` | `425fec61-963d-443a-9ece-db2869a56025` |
 
+> Qoder CN 里的任务显示名是口语化的：`模拟盘：按单下单` / `模拟盘：晚间选股` / `模拟盘：结算并锁明日` / `策略进化：周六体检`，与本文的阶段名 execute / research / evening / evolution 一一对应（映射表见 `docs/tools/qoder.md`）。本文与代码统一用阶段名，因为命令、runlog 的 `--task` 参数和目录名都是阶段名。
+>
 > Qoder 国际版的旧任务（`df6f6cb3…` / `acbf75d2…` / `377136b3…`）已在 2026-10-25 迁移到 CN，必须在国际版停用/删除，避免双跑。详见 `docs/tools/qoder.md`。
 
 ## 2. 数据流
@@ -65,6 +69,7 @@
 | execute | [prompts/execute.md](prompts/execute.md) | `python -m sim execute` | 成交、trades.csv、runlog、看板、git 提交 |
 | research | [prompts/research.md](prompts/research.md) | 复盘 + 子代理研究 + 写草稿；必要时刷新初筛 | journal、main.draft.json、runlog、看板、git 提交 |
 | evening | [prompts/evening.md](prompts/evening.md) | `python -m sim evening` | 结算、冻结订单、日报、runlog、看板、git 提交 |
+| watchdog | 指令内嵌在 cron 任务里（规则见第 4 节） | 读 runlog 巡检，必要时 `python -m sim evening` | 一行 watchdog 日志；异常时 Bark + 兜底结算冻结 |
 | evolution | [prompts/evolution.md](prompts/evolution.md) | `python -m sim attrib` + 周度诊断 | evolution/ 周报、观察项、提案、路线图、CHANGELOG、runlog、git 提交 |
 
 > research 由 cron 读取 `prompts/research.md` 执行（唯一指令源，改文件即生效）；evolution 同样由独立 cron 读取 `prompts/evolution.md`；execute / evening 的 cron 指令与对应文件保持一致。迁移时 research / evolution 只需在 cron 写“读取并严格执行对应文件”，其余任务整份粘贴；路径与任务 ID 按新工作区替换。
@@ -93,6 +98,14 @@
 - 严格来说 evening 必须与 research 分开跑：research 是 LLM + 网络 + 子代理，失败/超时不能拖累结算。
 - 订单冻结后不可修改；SHA256 写进 `orders/<日期>/MANIFEST.json`，execute 前会校验。
 - 若项目是 git 仓库，`sim execute` / `sim evening` 结束时会自动 `git add orders accounts data/screen` 并提交，作为账本的不可抵赖时间记录；任务 prompt 只需再提交 `web/`、`dist/` 等衍生文件。
+
+### watchdog（每天 21:00，2026-10-26 新增）
+- **为什么需要**：定时任务的失败是静默的。2026-10-26 research 会话 19:00 准点触发后跑满 60 分钟硬上限被系统判 `session-failed`，会话被杀 → 指令末尾的 Bark 推送根本没执行；evening 会话 20:00 派发后卡住 41 分钟（无 `python -m sim` 进程、零产出）才自行恢复。账本当晚没坏，只是因为恢复后的 evening 用旧空草稿冻结，而补跑的结论恰好也是空 orders——不可复制的侥幸。
+- **职责**：只读巡检 `reports/sim/runlog.json`，检查当天是否各有 `task=research`（ok/skipped）与 `task=evening`（ok/skipped）记录。
+- **动作边界**：evening 缺失 → 幂等兜底跑 `python -m sim evening`（已结算/已冻结会打印跳过）；research 缺失 → **不写 journal、不改草稿**，只在 Bark 里说明"明日订单将按旧草稿或空草稿冻结"。正常（两者齐全）时只写一行 `--task watchdog` 日志，不推 Bark、不重建看板、不提交 git。
+- **不做**：不发布站点、不参与撮合与风控、不改任何提示词或配置。
+- **排查手法**：`qoder_cron list` 里看 `lastRunStatus` / `consecutiveFailures` / `runningAt`；`runningAt` 停在触发时刻且长时间不更新、而机器上没有对应 `python -m sim` 进程 = 会话卡死。
+- 指令内嵌在 cron 任务里（尚未导出为 `prompts/watchdog.md`）；迁移到其他工具时按本节与任务 prompt 重建，调度放在 evening 之后、黄金提醒 22:00 之前。
 
 ## 5. 文件地图
 
@@ -185,6 +198,7 @@
 
 ### 7.4 已知坑
 
+- **cron 会话有 60 分钟硬上限，且超限即 `session-failed`**：会话被杀时任务 prompt 末尾的 runlog / Bark / git 步骤**全部不会执行**，所以失败对本机文件与手机通知都是静默的。2026-10-26 的 research 就是跑满 60 分钟零产出（`lastDurationMs 3600597`）；同晚 evening 卡住 41 分钟后才自愈。防线是「每完成一步立即落盘」（journal / 草稿 / runlog 分步写）＋ 21:00 watchdog，不要指望任务自己的失败通知。
 - **不要合并 research 与 evening**：账本路径必须与 LLM 路径故障隔离（用户已在 2026-10-25 确认保持分开）。
 - research 每天跑，但复盘幂等；非交易日复盘最近一个已结算日，净值以 20:00 结算为准。
 - 周末草稿目标下周二，周一晚会被新草稿覆盖，不要当成 bug。

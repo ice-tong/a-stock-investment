@@ -15,12 +15,16 @@ Qoder 自动注入工作区根目录的 `AGENTS.md`，无需额外配置。
 ### 当前归属：Qoder CN（2026-10-25 迁移后）
 > Qoder 国际版与 CN 版是两套账号体系（各自的 cron 与 Sites 相互独立），但共用本机同一个工作区。**账本任务只能在一套账号里启用**。
 
-| 任务 | 计划（Asia/Shanghai） | 任务 ID（CN） |
-|---|---|---|
-| 模拟盘 execute | 交易日 15:10（`10 15 * * 1-5`） | `6a4defea-34b0-473e-9dbc-b5f694678021` |
-| 模拟盘晚间复盘与研究（第二阶段） | **每天** 19:00（`0 19 * * *`） | `32e49144-4edf-496b-8630-f03165c72452` |
-| 模拟盘 evening | 交易日 20:00（`0 20 * * 1-5`） | `5f8097de-a4be-4863-965d-184e414f54ec` |
-| 黄金做T条件提醒（独立功能） | 约每 3 小时：10:00 / 14:00 / 22:00 / 次日 01:00（`0 1,10,14,22 * * 1-6`，2026-12-31 到期） | `5c74d6a0-c23e-42c0-b8af-e895c0837509` |
+| 任务名（UI 显示） | 计划（Asia/Shanghai） | 对应命令 / 阶段 | 任务 ID（CN） |
+|---|---|---|---|
+| 模拟盘：按单下单 | 交易日 15:10（`10 15 * * 1-5`） | `sim execute` | `6a4defea-34b0-473e-9dbc-b5f694678021` |
+| 模拟盘：晚间选股 | **每天** 19:00（`0 19 * * *`） | research（复盘 + 候选研究 + 次日草稿） | `32e49144-4edf-496b-8630-f03165c72452` |
+| 模拟盘：结算并锁明日 | **每天** 20:00（`0 20 * * *`） | `sim evening` | `5f8097de-a4be-4863-965d-184e414f54ec` |
+| 模拟盘：21:00 看门狗 | **每天** 21:00（`0 21 * * *`） | runlog 巡检 + 必要时兜底 `sim evening` | `a5f577f5-5c93-4bd0-bbdf-a73a8924615f` |
+| 策略进化：周六体检 | 每周六 10:00（`0 10 * * 6`） | `sim attrib` + 周度诊断 | `425fec61-963d-443a-9ece-db2869a56025` |
+| 黄金：做T提醒（独立功能） | 每 3 小时：10:00 / 14:00 / 22:00（`0 10,14,22 * * 1-5`，23:00 后不推送，2026-12-31 到期） | `tools/gold_alert.py` | `5c74d6a0-c23e-42c0-b8af-e895c0837509` |
+
+> **任务名只是 UI 展示**（2026-10-25 按用户要求从 `execute` / `evening` / 「第二阶段」等内部叫法改为口语化）。代码、cron 指令、`docs/automation/` 与本文件正文仍用 execute / research / evening / evolution 称呼阶段，两者按上表对应；改名不影响调度与指令内容。
 
 - 创建于 2026-10-25，全部为本地执行、独立会话、Full Access、`Asia/Shanghai`。
 - 迁移后国际版的任务 ID 仅作历史记录：execute `df6f6cb3…`、research `acbf75d2…`、evening `377136b3…`、黄金 `dbfeb064…`；**必须在国际版里停用/删除，否则两套 cron 会同时写账本**。
@@ -28,6 +32,7 @@ Qoder 自动注入工作区根目录的 `AGENTS.md`，无需额外配置。
 - **移交方式**：其他工具要承担模拟盘时，先在 CN 里停用上表任务，再到新工具创建，并更新 `docs/进展与交接.md` 接手规则第 2 条的归属记录。黄金提醒与模拟盘无依赖，可独立迁移或直接不迁移。
 - 任务指令：execute / evening 的原文快照在 `docs/automation/prompts/`；**research 任务以 `docs/automation/prompts/research.md` 为唯一指令源**（cron 里只保存“读取并严格执行该文件”的短指令，修改文件即生效）；黄金提醒在 `docs/automation/extras/gold-alert.md`。完整 pipeline、数据流与迁移步骤见 `docs/automation/README.md`。
 - 2026-10-25 起，execute / evening / research 任务成功后会：追加执行日志（`tools/runlog.py` → `reports/sim/runlog.json`）→ 重建状态看板（`tools/build_dashboard.py` → `web/`+`dist/`）→ 尽力发布站点 → 推送 Bark（`tools/notify.py`）；黄金提醒仅在触发/失败时写日志并推送 Bark，不重建看板。
+- **2026-10-26 事故与看门狗**：research 会话 19:00 准点触发后跑满 **60 分钟硬上限**被判 `session-failed`（`lastError {"type":"session-failed"}`），会话被杀导致末尾的 Bark 步骤没执行——失败对用户完全静默；evening 会话 20:00 派发后卡住 41 分钟（期间无 `python -m sim` 进程、零产出），20:41 自行恢复并跑完结算与冻结。**账本没坏纯属侥幸**：它冻结时读的是 10-25 的旧空草稿，当晚补跑的结论恰好也是空 orders。为此新增「模拟盘：21:00 看门狗」（每天 21:00 巡检 runlog 是否各有 research / evening 当天记录，evening 缺失则幂等兜底跑 `sim evening`，异常才推 Bark；不写 journal、不改草稿）。排查用：`qoder_cron list` 看 `lastRunStatus` / `consecutiveFailures` / `runningAt`（`runningAt` 停在触发时刻且长时间不更新 = 会话卡死）。
 - Bark 配置在 `config/notify.local.yaml`（已 gitignore）或 `BARK_KEY` 环境变量；模板见 `config/notify.example.yaml`，未配置时静默跳过。
 - 复盘与研究任务（每天 19:00，含非交易日）：① 交易复盘——交易日复盘当天、非交易日复盘最近一个已结算交易日，写 `journal/daily/<日期>.md`（已存在则跳过）；② v1.1 分诊漏斗——`python -m sim pool` 全市场多路召回 + 分诊（action/触发位/stop_prob，产物 `data/pool/<日期>.md`）→ 按 regime 配额选 6-8 只 shortlist → 深度研究 3-5 只（结论三选一：现在买/等触发/放弃）→ 组合经理决策；另有 `python -m sim pool2` 影子池（`data/pool_v2/`，只记录 5 只 shadow shortlist，不进入下单），写入 `orders/<目标交易日>/main.draft.json`，研究成果记入 `data/watchlist.json`。`data/screen/` 只服务 quant / random 对照组，不再是 main 的候选来源。
 
