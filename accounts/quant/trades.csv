@@ -1,1 +1,5 @@
 date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,transfer_fee,slippage_cost,realized_pnl,new_position,closed,reason_type,fill_source,note
+2026-10-26,quant,20261026-quant-01,sh600825,新华传媒,buy,300.0,15.511,4653.3,5,0.0,0.05,9.3,,True,,entry,minute,
+2026-10-26,quant,20261026-quant-02,sz002242,九阳股份,buy,200.0,21.632,4326.4,5,0.0,0.04,4.4,,True,,entry,minute,
+2026-10-26,quant,20261026-quant-03,sh601857,中国石油,buy,300.0,13.343,4002.9,5,0.0,0.04,3.9,,True,,entry,minute,
+2026-10-26,quant,20261026-quant-05,sh510300,沪深300ETF,buy,8400.0,4.167,35002.8,8.75,0.0,0.0,16.8,,True,,park,minute,

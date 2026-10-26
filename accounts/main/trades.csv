@@ -1,1 +1,2 @@
 date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,transfer_fee,slippage_cost,realized_pnl,new_position,closed,reason_type,fill_source,note
+2026-10-26,main,20261026-main-01,sh510300,沪深300ETF,buy,12000.0,4.167,50004.0,12.5,0.0,0.0,24.0,,True,,park,minute,

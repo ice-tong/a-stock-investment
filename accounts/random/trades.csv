@@ -1,1 +1,5 @@
 date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,transfer_fee,slippage_cost,realized_pnl,new_position,closed,reason_type,fill_source,note
+2026-10-26,random,20261026-random-01,sh600036,招商银行,buy,100.0,42.182,4218.2,5,0.0,0.04,4.2,,True,,entry,minute,
+2026-10-26,random,20261026-random-02,sh601328,交通银行,buy,600.0,8.208,4924.8,5,0.0,0.05,4.8,,True,,entry,minute,
+2026-10-26,random,20261026-random-03,sh600887,伊利股份,buy,100.0,28.518,2851.8,5,0.0,0.03,2.8,,True,,entry,minute,
+2026-10-26,random,20261026-random-05,sh510300,沪深300ETF,buy,8400.0,4.167,35002.8,8.75,0.0,0.0,16.8,,True,,park,minute,

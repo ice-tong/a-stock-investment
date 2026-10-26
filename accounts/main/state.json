@@ -2,14 +2,28 @@
   "name": "main",
   "strategy": "agent",
   "initial_cash": 100000,
-  "cash": 100000,
+  "cash": 49983.5,
   "start_date": "2026-10-23",
-  "positions": {},
+  "positions": {
+    "sh510300": {
+      "name": "沪深300ETF",
+      "kind": "etf",
+      "role": "park",
+      "shares": 12000.0,
+      "cost": 50016.5,
+      "first_buy_date": "2026-10-26",
+      "hfq": 1.0,
+      "last_buy_date": "2026-10-26",
+      "last_price": 4.165
+    }
+  },
   "peak": 100000,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
   "last_settled": "2026-10-23",
-  "executed": []
+  "executed": [
+    "2026-10-26"
+  ]
 }
