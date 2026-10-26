@@ -14,15 +14,15 @@
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
       "last_buy_date": "2026-10-26",
-      "last_price": 4.165
+      "last_price": 4.178
     }
   },
-  "peak": 100000,
+  "peak": 100119.5,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-10-23",
+  "last_settled": "2026-10-26",
   "executed": [
     "2026-10-26"
   ]
