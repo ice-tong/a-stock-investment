@@ -1,1 +1,2 @@
 date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,transfer_fee,slippage_cost,realized_pnl,new_position,closed,reason_type,fill_source,note
+2026-10-27,etf_band,20261027-etf_band-01,sh510300,沪深300ETF,buy,12000.0,4.157,49884.0,12.47,0.0,0.0,24.0,,True,,park,minute,
