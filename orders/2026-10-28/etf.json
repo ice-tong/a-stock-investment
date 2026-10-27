@@ -1,0 +1,19 @@
+{
+  "account": "etf",
+  "strategy": "etf",
+  "strategy_version": "strategy-v1.4",
+  "trade_date": "2026-10-28",
+  "decided_on": "2026-10-27",
+  "frozen_at": "2026-10-27T20:42:13",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.2
+  },
+  "equity_estimate": 98941.52,
+  "meta": {},
+  "draft_errors": [],
+  "orders": []
+}

@@ -14,7 +14,7 @@
       "first_buy_date": "2026-10-26",
       "hfq": 6.7422879877129,
       "last_buy_date": "2026-10-26",
-      "last_price": 42.5,
+      "last_price": 42.99,
       "stop_price": 38.854
     },
     "sh601328": {
@@ -26,7 +26,7 @@
       "first_buy_date": "2026-10-26",
       "hfq": 2.7912206056332,
       "last_buy_date": "2026-10-26",
-      "last_price": 8.25,
+      "last_price": 8.34,
       "stop_price": 7.559
     },
     "sh600887": {
@@ -38,7 +38,7 @@
       "first_buy_date": "2026-10-26",
       "hfq": 109.20660346095481,
       "last_buy_date": "2026-10-26",
-      "last_price": 28.6,
+      "last_price": 28.89,
       "stop_price": 26.283
     },
     "sh510300": {
@@ -50,7 +50,7 @@
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
       "last_buy_date": "2026-10-26",
-      "last_price": 4.178
+      "last_price": 4.123
     }
   },
   "peak": 100133.72999999998,
@@ -58,7 +58,7 @@
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-10-26",
+  "last_settled": "2026-10-27",
   "executed": [
     "2026-10-26",
     "2026-10-27"
