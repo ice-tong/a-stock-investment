@@ -1,0 +1,32 @@
+{
+  "account": "quant",
+  "strategy": "quant",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-10-29",
+  "decided_on": "2026-10-28",
+  "frozen_at": "2026-10-28T20:00:43",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 99520.92,
+  "meta": {},
+  "draft_errors": [],
+  "orders": [
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [
+        "本周新开仓已达上限 3"
+      ],
+      "code": "sz301313",
+      "name": "凡拓数创",
+      "reason": "初筛排名 4，20 日风险调整动量 0.71",
+      "status": "rejected",
+      "id": "20261029-quant-01"
+    }
+  ]
+}
