@@ -14,9 +14,9 @@
       "first_buy_date": "2026-10-26",
       "hfq": 6.7422879877129,
       "last_buy_date": "2026-10-26",
-      "last_price": 42.13,
+      "last_price": 42.94,
       "stop_price": 38.854,
-      "high_close": 42.13
+      "high_close": 42.94
     },
     "sh601328": {
       "name": "交通银行",
@@ -27,9 +27,9 @@
       "first_buy_date": "2026-10-26",
       "hfq": 2.7912206056332,
       "last_buy_date": "2026-10-26",
-      "last_price": 8.26,
+      "last_price": 8.56,
       "stop_price": 7.559,
-      "high_close": 8.26
+      "high_close": 8.56
     },
     "sh600887": {
       "name": "伊利股份",
@@ -40,9 +40,9 @@
       "first_buy_date": "2026-10-26",
       "hfq": 109.20660346095481,
       "last_buy_date": "2026-10-26",
-      "last_price": 28.69,
+      "last_price": 29.45,
       "stop_price": 26.283,
-      "high_close": 28.69
+      "high_close": 29.45
     },
     "sh510300": {
       "name": "沪深300ETF",
@@ -53,16 +53,16 @@
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
       "last_buy_date": "2026-10-26",
-      "last_price": 4.123,
-      "high_close": 4.123
+      "last_price": 4.152,
+      "high_close": 4.152
     }
   },
-  "peak": 100133.72999999998,
+  "peak": 100230.32999999999,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-10-28",
+  "last_settled": "2026-10-29",
   "executed": [
     "2026-10-26",
     "2026-10-27",

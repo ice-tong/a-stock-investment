@@ -14,9 +14,9 @@
       "first_buy_date": "2026-10-26",
       "hfq": 12.877971780841,
       "last_buy_date": "2026-10-26",
-      "last_price": 14.81,
+      "last_price": 14.84,
       "stop_price": 14.286,
-      "high_close": 14.81
+      "high_close": 14.84
     },
     "sz002242": {
       "name": "九阳股份",
@@ -27,9 +27,9 @@
       "first_buy_date": "2026-10-26",
       "hfq": 5.6695054256078,
       "last_buy_date": "2026-10-26",
-      "last_price": 22.38,
+      "last_price": 23.0,
       "stop_price": 19.925,
-      "high_close": 22.38
+      "high_close": 23.0
     },
     "sh601857": {
       "name": "中国石油",
@@ -40,9 +40,9 @@
       "first_buy_date": "2026-10-26",
       "hfq": 1.8911096523287,
       "last_buy_date": "2026-10-26",
-      "last_price": 13.26,
+      "last_price": 13.69,
       "stop_price": 12.291,
-      "high_close": 13.26
+      "high_close": 13.69
     },
     "sh510300": {
       "name": "沪深300ETF",
@@ -53,8 +53,8 @@
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
       "last_buy_date": "2026-10-26",
-      "last_price": 4.123,
-      "high_close": 4.123
+      "last_price": 4.152,
+      "high_close": 4.152
     }
   },
   "peak": 100056.91999999998,
@@ -62,7 +62,7 @@
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-10-28",
+  "last_settled": "2026-10-29",
   "executed": [
     "2026-10-26",
     "2026-10-27",
