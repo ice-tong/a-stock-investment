@@ -1,0 +1,15 @@
+{
+  "name": "challenger/pead",
+  "strategy": "pead-v1",
+  "initial_cash": 100000.0,
+  "cash": 100000.0,
+  "start_date": "2026-11-02",
+  "positions": {},
+  "peak": 100000.0,
+  "halted": false,
+  "breaker_until": null,
+  "dd_warn": false,
+  "pending_exits": {},
+  "last_settled": null,
+  "executed": []
+}
