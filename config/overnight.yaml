@@ -1,0 +1,29 @@
+# 隔夜实验（尾盘集合竞价买 → 次日开盘集合竞价卖）参数。设计见 docs/research/隔夜策略_可行性与设计.md
+# 三个账户独立于 main/quant/random：账本在 accounts/overnight/<账户>/，订单在 orders/<交易日>/overnight_<账户>.json
+
+version: overnight-v0.1
+initial_cash: 100000          # 三个账户都从 10 万开始（2026-11-01 用户确认）
+
+accounts:                     # 账户名: 决策方
+  agent: agent                # Agent 决策（主实验对象）
+  quant: quant                # 纯因子打分前 N（对照：Agent 是否比公式强）
+  random: random              # 可交易池随机 N 只（对照：是否只赚了 beta）
+
+fills:                        # 集合竞价成交：买入价 = 当日收盘价，卖出价 = 次日开盘价；费率沿用 config/broker.yaml
+  slippage: 0.0               # 集合竞价单一价格成交，小资金不计滑点（理论 = 实操是本实验的前提）
+
+scan:                         # python -m sim on-scan（交易日 14:40 左右）：全市场快照 + 量化打分（Agent 的工具，也是 quant 组）
+  min_amount: 200000000       # 当日截至快照成交额下限（2 亿）
+  pct_min: 2.0                # 当日涨幅下限（%）
+  limit_gap: 1.5              # 距涨停至少留多少个百分点（贴着涨停的大概率封板买不到）
+  pos_min: 0.7                # 现价在日内高低区间的位置下限（0=最低，1=最高）
+  minute_top: 60              # 对初筛前 N 只拉分钟线算尾盘强度
+  tail_from: "14:00"          # 尾盘强度 = 现价 / 该时点价格 − 1
+  show_top: 40                # 候选表展示前 N 只
+  weights: {pos: 1.0, pct: 1.0, tail: 1.0, amount: 0.5}
+
+quant:
+  n: 4                        # 每晚买前 N 只，等权
+random:
+  n: 4
+  min_amount: 100000000       # 随机池：当日成交额 ≥ 1 亿、非 ST、未贴涨停

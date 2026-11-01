@@ -1,0 +1,14 @@
+# 隔夜实验风控（2026-11-01 用户确认"放开点，按建议来"）。只有用户本人能改；改动从下一次冻结生效。
+# 三个账户同一套规则，保证对照公平。config/risk.yaml（main 等账户）不受影响。
+
+max_picks: 5                  # 每晚最多买几只
+max_single: 0.40              # 单只最高仓位（占账户总资产）
+max_total: 1.0                # 总仓位上限（允许满仓过夜）
+min_avg_amount: 50000000      # 近 20 日日均成交额下限（5000 万）
+min_listed_days: 20           # 上市不足 N 个交易日的不买
+min_price: 2.0                # 股价下限（元）
+exclude_st: true
+exclude_bj: true              # 北交所不做（流动性与 30% 涨跌幅）
+halt_drawdown: 0.35           # 账户从净值高点回撤 ≥ 35%：停止开新仓，需 python -m sim on-resume <账户> 人工恢复
+require_fields: [p_win, thesis, kill]   # Agent 每只入选必须给出的字段，缺一剔除
+freeze_deadline: "14:57"      # 冻结必须早于收盘集合竞价开始；晚于此时点冻结的订单作废

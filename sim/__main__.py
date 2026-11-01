@@ -6,6 +6,10 @@
                                                     非交易日：只按最近结算冻结明天的订单（前夜模式）
 冻结时点是"交易日前一晚"：周一单周日晚冻结，周二单周一晚冻结；周末/节假日新增的信息因此能进订单。
 同一天重复运行不会重复结算或下单。
+隔夜实验（尾盘买、次日开盘卖；独立账户 accounts/overnight/，见 sim/overnight.py）：
+  交易日 14:40   python -m sim on-scan     全市场快照 + 量化打分候选
+  交易日 14:54   python -m sim on-freeze   读 Agent 草稿 → 风控 → 冻结三组订单（14:57 前）
+  交易日 15:30   python -m sim on-settle   开盘价卖出前一晚持仓、收盘价买入今日订单、打分
 """
 import argparse
 import datetime as dt
@@ -13,6 +17,7 @@ import sys
 
 from . import attrib, broker, calendar as cal, config, dashboard, orders, pool, pool_v2, report, risk, screen, settle, strategies
 from . import etf as etf_mod
+from . import overnight
 from .ledger import Account, all_accounts
 from .market import Market
 from .market import kind as code_kind
@@ -341,6 +346,65 @@ def cmd_resume(a):
     log(f"[{acct.name}] 已人工恢复，净值高点重置为 {acct.state['peak']:,.2f}")
 
 
+def _on_today(a) -> str | None:
+    date = resolve_date(a.date)
+    if not cal.is_trading_day(date):
+        log(f"{date} 不是交易日，跳过")
+        return None
+    return date
+
+
+def cmd_on_init(a):
+    overnight.init(resolve_date(a.date), log)
+
+
+def cmd_on_scan(a):
+    if not (date := _on_today(a)):
+        return
+    if date != cal.today():
+        log("全市场快照只有当前时刻，on-scan 只能在当天盘中运行")
+        return 1
+    overnight.scan(date, Market(), log)
+
+
+def cmd_on_freeze(a):
+    if not (date := _on_today(a)):
+        return
+    return overnight.freeze(date, Market(), log)
+
+
+def cmd_on_settle(a):
+    if not (date := _on_today(a)):
+        return
+    try:
+        rc = overnight.run_settle(date, Market(), log)
+    except settle.StaleData as e:
+        log(f"中止：{e}")
+        return 1
+    log(f"隔夜实验报告：{overnight.report(date)}")
+    return rc
+
+
+def cmd_on_report(a):
+    log(f"隔夜实验报告：{overnight.report(resolve_date(a.date))}")
+
+
+def cmd_on_status(a):
+    for acct in overnight.accounts():
+        st = acct.state
+        print(f"== {acct.name}（{st['strategy']}）现金 {st['cash']:,.2f}  最近结算 {st['last_settled']}  暂停 {st['halted']}")
+        for c, p in st["positions"].items():
+            print(f"   {p['name']}({c}) {p['shares']:.0f} 股  买入 {p['buy_price']}（{p['night']}）  现价 {p['last_price']}")
+
+
+def cmd_on_resume(a):
+    acct = Account(overnight.acct_name(a.account))
+    acct.state["halted"] = False
+    acct.state["peak"] = acct.values({})[2]
+    acct.save()
+    log(f"[{acct.name}] 已人工恢复，净值高点重置为 {acct.state['peak']:,.2f}")
+
+
 def main():
     p = argparse.ArgumentParser(prog="python -m sim", description="A 股模拟交易")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -350,7 +414,13 @@ def main():
                             ("evening", cmd_evening, "晚间任务：结算 + 生成订单 + 报告"),
                             ("execute", cmd_execute, "执行当日冻结订单（14:45 之后任意时间）"),
                             ("report", cmd_report, "生成日报和资金看板"),
-                            ("attrib", cmd_attrib, "策略归因（给策略进化官）：账户对照 + 按通道/置信度/版本分组"), ("status", cmd_status, "查看账户")]:
+                            ("attrib", cmd_attrib, "策略归因（给策略进化官）：账户对照 + 按通道/置信度/版本分组"), ("status", cmd_status, "查看账户"),
+                            ("on-init", cmd_on_init, "隔夜实验：创建 agent / quant / random 三个账户"),
+                            ("on-scan", cmd_on_scan, "隔夜实验：全市场快照 + 量化候选（交易日 14:40）"),
+                            ("on-freeze", cmd_on_freeze, "隔夜实验：读草稿、风控、冻结三组订单（14:57 前）"),
+                            ("on-settle", cmd_on_settle, "隔夜实验：开盘卖、收盘买、记净值与打分（15:30 后）"),
+                            ("on-report", cmd_on_report, "隔夜实验：生成三组对照与预测校准报告"),
+                            ("on-status", cmd_on_status, "隔夜实验：查看账户")]:
         sp = sub.add_parser(name, help=help_)
         sp.add_argument("--date", help="YYYY-MM-DD，默认今天")
         sp.set_defaults(fn=fn)
@@ -365,6 +435,9 @@ def main():
     sp.add_argument("--date", help="YYYY-MM-DD，默认最近交易日")
     sp.add_argument("--force", action="store_true", help="忽略当天缓存重新生成")
     sp.set_defaults(fn=cmd_pool2)
+    sp = sub.add_parser("on-resume", help="隔夜实验：回撤暂停后人工恢复")
+    sp.add_argument("account", choices=list(config.load("overnight")["accounts"]))
+    sp.set_defaults(fn=cmd_on_resume)
     sp = sub.add_parser("resume", help="系统暂停后人工恢复")
     sp.add_argument("account")
     sp.set_defaults(fn=cmd_resume)

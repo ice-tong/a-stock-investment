@@ -94,6 +94,12 @@
 - 模拟盘自动化（execute / research / evening）的时间表、数据流、prompt 原文快照与迁移到其他工具的方法见 `docs/automation/README.md`；黄金做T提醒是独立分叉功能，说明见 `docs/automation/extras/gold-alert.md`
 - 第二阶段起，Agent 只能把主策略订单草稿写到 `orders/<交易日>/main.draft.json`，由 `python -m sim plan` 风控校验并冻结（冻结时点 = 目标日前一晚；`decided_on` 缺失或早于结算日的草稿整份丢弃）
 
+## 隔夜实验（尾盘买、次日开盘卖；设计见 docs/research/隔夜策略_可行性与设计.md）
+- 检验"以 Agent 决策为主能否提高隔夜胜率与收益"：agent / quant / random 三个独立账户（`accounts/overnight/`，各 10 万），同规则同成本，只有选股方不同
+- 引擎 `sim/overnight.py`，命令 `python -m sim on-scan | on-freeze | on-settle | on-report | on-status`；参数 `config/overnight.yaml`，风控 `config/overnight_risk.yaml`（只有用户能改）
+- Agent 只能写 `orders/<日>/overnight_agent.{provisional,draft}.json` 与 `data/overnight/journal/`、`data/overnight/lessons.md`；提示词 `docs/automation/prompts/overnight_*.md`；定时任务交接 `docs/automation/overnight-handoff.md`
+- 实验结果 `data/overnight/report.md`；每组满 200 笔前的结论只算观察
+
 ## 硬性约束
 - **禁止修改** `accounts/`、`orders/` 下已冻结的文件和 `config/risk.yaml`。账本只能由 `python -m sim` 写入；风控规则只有用户本人能改。
 - 测试时设置环境变量 `SIM_HOME` 指向临时目录，不要在正式账户上试验。
