@@ -12,6 +12,9 @@ data/*
 !data/pool_v2/
 !data/watchlist.json
 !data/overnight/
+!data/s002/
+!data/s003/
+data/s002/cache/
 data/overnight/snap/
 
 # 日报和资金看板可随时由账本重新生成
