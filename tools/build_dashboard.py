@@ -222,6 +222,7 @@ def load_challengers():
                       if periods and "k3" in periods[0] else {})
         sig = sorted((ROOT / data / "orders").glob("*.json")) if (ROOT / data / "orders").exists() else []
         a["last_signal"] = sig[-1].stem if sig else ""
+        a["last_order"] = json.loads(sig[-1].read_text(encoding="utf-8")) if sig else {}
         out.append(a)
     return out
 
@@ -527,7 +528,7 @@ def main() -> int:
     </div>""")
     # ---- 挑战者 ----
     challengers = load_challengers()
-    ch_rows, ch_details = [], []
+    ch_rows = []
     for a in challengers:
         bench = (" · ".join(f"{k} {pct(v)}" for k, v in a["bench"].items())
                  or ("满一期后显示" if a["name"] != "challenger/pead" else "逐笔统计见 data/pead/report.md"))
@@ -538,20 +539,39 @@ def main() -> int:
             f"<td class='num'>{pct(a['drawdown'], signed=False)}</td>"
             f"<td class='num'>{len(a['positions'])}</td><td class='num'>{esc(a['last_settled'] or '未结算')}</td>"
             f"<td class='small'>{esc(bench)}</td></tr>")
-        vals = [float(r["equity"]) for r in a["nav"]]
-        sig = f" · 最近订单 {esc(a['last_signal'])}" if a["last_signal"] else ""
-        ch_details.append(f"""<details style="margin-top:10px"><summary>{esc(a['label'])}（持仓 {len(a['positions'])} 只 · 现金 {money(a['cash'])}{sig}）</summary>
-      <p class="small muted" style="margin:8px 0">{esc(a['note'])}</p>
-      <div class="card">{sparkline(vals, a['state']['initial_cash'], a['label'] + ' 净值曲线')}</div>
-      <div class="grid grid-2" style="margin-top:10px">
+        key = a["name"].replace("/", "-")
+        order = a["last_order"]
+        pick_rows = "".join(
+            f"<tr><td>{esc(o.get('name', ''))} <span class='muted small num'>{esc(o.get('code', ''))}</span></td>"
+            f"<td class='num'>{esc(o.get('z', o.get('pct', '—')))}</td>"
+            f"<td class='num'>{esc(o.get('mcap_yi', o.get('weight', '—')))}</td>"
+            f"<td>{'持有' if o.get('code') in a['positions'] else '<span class=muted>未持有</span>'}</td></tr>"
+            for o in order.get("picks", [])) or "<tr><td colspan=4 class='muted'>暂无订单</td></tr>"
+        is_pead = a["name"] == "challenger/pead"
+        pick_head = ("<tr><th>标的</th><th>反应日涨幅%</th><th>权重</th><th>当前</th></tr>" if is_pead
+                     else "<tr><th>标的</th><th>合成分 Z</th><th>流通市值（亿）</th><th>当前</th></tr>")
+        when = (f"{esc(order.get('date', a['last_signal']))} 尾盘扫描" if is_pead
+                else f"信号日 {esc(order.get('signal_date', ''))} → 换仓日 {esc(order.get('exec_date', a['last_signal']))}")
+        tab_buttons.append(f"<button class='tab' data-tab='{key}'>{esc(a['label'])}</button>")
+        tab_panels.append(f"""
+    <div class="tab-panel" id="tab-{key}">
+      <p class="small muted" style="margin-bottom:12px"><span class="tag tag-pending">挑战者 · 独立实验</span> {esc(a['note'])}</p>
+      {summary_cards(a)}
+      <div class="card" style="margin-top:14px">{sparkline([float(r["equity"]) for r in a["nav"]], a['state']['initial_cash'], a['label'] + ' 净值曲线')}</div>
+      <div class="grid grid-2" style="margin-top:14px">
         <div class="table-card"><table><thead><tr><th>持仓</th><th>股数</th><th>成本价</th><th>现价</th><th>市值</th><th>盈亏</th><th>止损价</th><th>建仓日</th></tr></thead>
         <tbody>{positions_table(a)}</tbody></table></div>
         <div class="table-card"><table><thead><tr><th>日期</th><th>方向</th><th>标的</th><th>股数</th><th>价格</th><th>金额</th><th>费用</th><th>类型</th></tr></thead>
         <tbody>{trades_table(a, 10)}</tbody></table></div>
-      </div></details>""")
+      </div>
+      <p class="small muted" style="margin-top:8px">同期对照（累计）：{esc(bench)}</p>
+      <h3 class="subhead">最近订单</h3>
+      <div class="table-card"><table><thead>{pick_head}</thead><tbody>{pick_rows}</tbody></table></div>
+      <p class="small muted" style="margin-top:8px">{when}。订单由 {'tools/pead.py' if is_pead else 'tools/s002.py'} 冻结，挑战者不经过主流程风控与 evening 冻结。</p>
+    </div>""")
     challenger_block = (f"""<div class="table-card"><table>
       <thead><tr><th>账户</th><th>净值</th><th>累计盈亏</th><th>当日盈亏</th><th>回撤</th><th>持仓</th><th>结算至</th><th>同期对照（累计）</th></tr></thead>
-      <tbody>{''.join(ch_rows)}</tbody></table></div>{''.join(ch_details)}""" if challengers
+      <tbody>{''.join(ch_rows)}</tbody></table></div>""" if challengers
                         else "<p class='muted'>暂无挑战者账户。</p>")
 
     # ---- 执行日志 ----
@@ -657,7 +677,7 @@ def main() -> int:
   <section>
     <h2>挑战者账户（独立实验）</h2>
     {challenger_block}
-    <p class="small muted" style="margin-top:8px">挑战者是各自 10 万的独立纸面账户（accounts/challenger/），不进主流程的风控、结算与上方收益对照；由各自工具结算（tools/s002.py、tools/pead.py）。同期对照来自 data/&lt;账户&gt;/periods.csv，按已完成的换仓期复利累计。</p>
+    <p class="small muted" style="margin-top:8px">挑战者是各自 10 万的独立纸面账户（accounts/challenger/），不进主流程的风控、结算与上方收益对照；由各自工具结算（tools/s002.py、tools/pead.py）。持仓、成交与最近订单在上方「策略详情」切换到对应标签查看。同期对照来自 data/&lt;账户&gt;/periods.csv，按已完成的换仓期复利累计。</p>
   </section>
 
   <section>
