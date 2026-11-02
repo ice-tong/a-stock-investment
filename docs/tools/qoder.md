@@ -34,8 +34,8 @@ Qoder 自动注入工作区根目录的 `AGENTS.md`，无需额外配置。
 | 隔夜：市场上下文（数据） | 交易日 20:40（`40 20 * * 1-5`） | `tools/fetch_context.py`（两融/事件/涨停/炸板） | `b491d616-6850-4363-ab59-087b994df7af` |
 | PEAD：尾盘扫描 | 交易日 14:50（`50 14 * * 1-5`） | `tools/pead.py scan` | `8cd61a00-08dd-4fbe-ad56-c66897bb4075` |
 | PEAD：结算 | 交易日 20:45（`45 20 * * 1-5`） | `tools/pead.py settle` | `e88f3b17-fb28-4afa-ba68-3cf03866b9be` |
-| 挑战者：结算（S-002 + S-003） | 交易日 20:50（`50 20 * * 1-5`） | 读取并严格执行 [prompts/challenger_settle.md](../automation/prompts/challenger_settle.md)（`tools/s002.py settle`，2026-11-02 起只剩 S-003；除权、月初换仓、净值；幂等） | `2bb5991b-b1ca-4105-ab87-84e834318808`（2026-11-02 建；原由 Claude Code 合并为两个任务） |
-| 挑战者：月末信号（S-002 + S-003） | 交易日 21:15（`15 21 * * 1-5`） | 读取并严格执行 [prompts/challenger_signal.md](../automation/prompts/challenger_signal.md)（`tools/s002.py signal`，只剩 S-003；非月末自动跳过；月末约 10 分钟） | `9bb89634-f9e2-4267-90b6-8137ae2fffc5`（2026-11-02 建） |
+| 挑战者：结算（S-003） | 交易日 20:50（`50 20 * * 1-5`） | 读取并严格执行 [prompts/challenger_settle.md](../automation/prompts/challenger_settle.md)（`tools/s002.py --profile s003 settle`；除权、月初换仓、净值；幂等） | `2bb5991b-b1ca-4105-ab87-84e834318808`（2026-11-02 建；同日 S-002 删除后改名） |
+| 挑战者：月末信号（S-003） | 交易日 21:15（`15 21 * * 1-5`） | 读取并严格执行 [prompts/challenger_signal.md](../automation/prompts/challenger_signal.md)（`tools/s002.py --profile s003 signal`；非月末自动跳过；月末约 10 分钟） | `9bb89634-f9e2-4267-90b6-8137ae2fffc5`（2026-11-02 建；同日 S-002 删除后改名） |
 
 > **任务名只是 UI 展示**（2026-10-25 按用户要求从 `execute` / `evening` / 「第二阶段」等内部叫法改为口语化）。代码、cron 指令、`docs/automation/` 与本文件正文仍用 execute / research / evening / evolution 称呼阶段，两者按上表对应；改名不影响调度与指令内容。
 
@@ -44,7 +44,7 @@ Qoder 自动注入工作区根目录的 `AGENTS.md`，无需额外配置。
 - **PEAD 挑战者（2026-11-01 新增）**：14:50 扫描、20:45 结算（等日线更新，卖价仍按次日收盘），独立账户 `accounts/challenger/pead/`（10 万），只写 `data/pead/` 与自己的账本；主流程 `all_accounts()` 只扫 `accounts/*` 第一层，看不到它。规则、样本内证据与 kill 线见 `docs/research/隔夜策略_理论边界与探索方针.md` 附录 D。
 - **S-002 挑战者（已删除，2026-11-02 用户决定）**：第四轮 F4 的 50 只版本，10 万分 50 只每只约 2000 元、买不起一手的多，用户认为与宽基持仓区别不大，删除账户 `accounts/challenger/s002/` 与 `data/s002/`（历史在 git 提交 7650d58 及之前）。`tools/s002.py` 只保留 s003 profile。
 - **S-003 挑战者（2026-11-01 新增，Claude Code 实现，观察级）**：第五轮 R5（F4 池子 + 退市/解禁减持剔除 + 增持回购加分，取前 10 只、前 30 名缓冲），同一工具 `tools/s002.py --profile s003`。账户 `accounts/challenger/s003/`（10 万），数据 `data/s003/`，日线与财报缓存 `data/s003/cache/`（gitignored，2026-11-02 从 `data/s002/cache/` 迁来）。首个信号已冻结 `data/s003/orders/2026-11-02.json`；11-02 首次建仓已手动结算（买 10 只，现金 6,030，净值 100,173）。
-- **挑战者两个任务**（2026-11-02 由四个合并，同日 S-002 删除后只跑 S-003；Qoder 里的任务名仍写「S-002 + S-003」，只是展示名，指令读 prompt 文件，已自动生效，可顺手改名）：结算每个交易日都要跑（净值、除权、跌停顺延卖单），信号每天触发但只在月末最后一个交易日干活（cron 写不出「月末交易日」）；信号排在结算之后（缓冲要读结算后的持仓）。结算与信号分开建：信号要全市场联网取数、较易失败，不能拖累每日结算。runlog 任务名 `challenger-settle` / `challenger-signal`。
+- **挑战者两个任务**（2026-11-02 由四个合并，同日 S-002 删除后改名为只跑 S-003，任务 ID 不变）：结算每个交易日都要跑（净值、除权、跌停顺延卖单），信号每天触发但只在月末最后一个交易日干活（cron 写不出「月末交易日」）；信号排在结算之后（缓冲要读结算后的持仓）。结算与信号分开建：信号要全市场联网取数、较易失败，不能拖累每日结算。runlog 任务名 `challenger-settle` / `challenger-signal`。cron 指令只跑一次 `--profile s003`，不要再同时跑默认 profile（两者等价，会重复执行）。
 - 迁移后国际版的任务 ID 仅作历史记录：execute `df6f6cb3…`、research `acbf75d2…`、evening `377136b3…`、黄金 `dbfeb064…`；**必须在国际版里停用/删除，否则两套 cron 会同时写账本**。
 - cron 会在非交易日触发，但 `sim` 命令内部会判断交易日并空跑，无需外部过滤。
 - **移交方式**：其他工具要承担模拟盘时，先在 CN 里停用上表任务，再到新工具创建，并更新 `docs/进展与交接.md` 接手规则第 2 条的归属记录。黄金提醒与模拟盘无依赖，可独立迁移或直接不迁移。
