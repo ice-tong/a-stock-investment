@@ -1,0 +1,66 @@
+{
+  "account": "quant",
+  "strategy": "overnight_quant",
+  "version": "overnight-v0.2",
+  "trade_date": "2026-11-02",
+  "frozen_at": "2026-11-02T14:54:02",
+  "source": "quant",
+  "market_view": "",
+  "market": null,
+  "draft_errors": [],
+  "orders": [
+    {
+      "code": "sz300803",
+      "name": "指南针",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sz300558",
+      "name": "贝达药业",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sh688775",
+      "name": "影石创新",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sz300274",
+      "name": "阳光电源",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    }
+  ],
+  "vetoed": []
+}
