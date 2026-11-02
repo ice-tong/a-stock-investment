@@ -1,1 +1,6 @@
 date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,transfer_fee,slippage_cost,realized_pnl,new_position,closed,reason_type,fill_source,note
+2026-11-02,challenger/pead,20261102-pead-sh688169,sh688169,石头科技,buy,100,126.99,12699.0,5,0.0,0.13,0.0,,True,,pead_entry,close_auction,
+2026-11-02,challenger/pead,20261102-pead-sz300803,sz300803,指南针,buy,400,44.32,17728.0,5,0.0,0.18,0.0,,True,,pead_entry,close_auction,
+2026-11-02,challenger/pead,20261102-pead-sh688019,sh688019,安集科技,buy,100,184.66,18466.0,5,0.0,0.18,0.0,,True,,pead_entry,close_auction,
+2026-11-02,challenger/pead,20261102-pead-sh688095,sh688095,福昕软件,buy,300,60.7,18210.0,5,0.0,0.18,0.0,,True,,pead_entry,close_auction,
+2026-11-02,challenger/pead,20261102-pead-sz301551,sz301551,无线传媒,buy,800,24.33,19464.0,5,0.0,0.19,0.0,,True,,pead_entry,close_auction,
