@@ -1,1 +1,5 @@
 date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,transfer_fee,slippage_cost,realized_pnl,new_position,closed,reason_type,fill_source,note
+2026-11-02,overnight/random,20261102-overnight_random-sh603276,sh603276,恒兴新材,buy,1300,18.5,24050.0,6.01,0.0,0.24,0.0,,True,,overnight_entry,close_auction,
+2026-11-02,overnight/random,20261102-overnight_random-sh603318,sh603318,水发燃气,buy,3100,7.87,24397.0,6.1,0.0,0.24,0.0,,True,,overnight_entry,close_auction,
+2026-11-02,overnight/random,20261102-overnight_random-sh601615,sh601615,明阳智能,buy,3200,7.81,24992.0,6.25,0.0,0.25,0.0,,True,,overnight_entry,close_auction,
+2026-11-02,overnight/random,20261102-overnight_random-sz002867,sz002867,周大生,buy,2300,10.75,24725.0,6.18,0.0,0.25,0.0,,True,,overnight_entry,close_auction,

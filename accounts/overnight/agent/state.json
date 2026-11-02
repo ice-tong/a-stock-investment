@@ -2,14 +2,105 @@
   "name": "overnight/agent",
   "strategy": "overnight_agent",
   "initial_cash": 100000,
-  "cash": 100000,
+  "cash": 61589.51,
   "start_date": "2026-11-02",
-  "positions": {},
+  "positions": {
+    "sh600030": {
+      "name": "中信证券",
+      "kind": "stock",
+      "shares": 800,
+      "cost": 20453.31,
+      "buy_price": 25.56,
+      "night": "2026-11-02",
+      "last_price": 25.56,
+      "order_id": "20261102-overnight_agent-sh600030",
+      "pred": {
+        "night": "2026-11-02",
+        "account": "agent",
+        "code": "sh600030",
+        "name": "中信证券",
+        "weight": 0.22,
+        "p_win": 0.45,
+        "exp_gap": 0.003,
+        "thesis_type": "政策催化",
+        "source": "draft",
+        "exception": "",
+        "buy_price": 25.56
+      }
+    },
+    "sh600999": {
+      "name": "招商证券",
+      "kind": "stock",
+      "shares": 1100,
+      "cost": 17957.18,
+      "buy_price": 16.32,
+      "night": "2026-11-02",
+      "last_price": 16.32,
+      "order_id": "20261102-overnight_agent-sh600999",
+      "pred": {
+        "night": "2026-11-02",
+        "account": "agent",
+        "code": "sh600999",
+        "name": "招商证券",
+        "weight": 0.18,
+        "p_win": 0.44,
+        "exp_gap": 0.003,
+        "thesis_type": "政策催化",
+        "source": "draft",
+        "exception": "",
+        "buy_price": 16.32
+      }
+    }
+  },
   "peak": 100000,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": null,
-  "executed": []
+  "last_settled": "2026-11-02",
+  "executed": [],
+  "veto_prev": [
+    {
+      "code": "sz300059",
+      "name": "东方财富",
+      "p_win": 0.43,
+      "reason": "同一政策逻辑的最强品种（主力净流入 12.88 亿全场第一），但 81 亿成交意味着筹码已大量换手，且与中信/招商高度同源，不重复下注",
+      "night": "2026-11-02"
+    },
+    {
+      "code": "sz300274",
+      "name": "阳光电源",
+      "p_win": 0.35,
+      "reason": "10-30 盘后三季报净利同比 -68%，今日 +9.7% 是消息后的超跌反弹，年内已跌六成，次日开盘兑现压力大",
+      "night": "2026-11-02"
+    },
+    {
+      "code": "sz002371",
+      "name": "北方华创",
+      "p_win": 0.38,
+      "reason": "半导体今天是硬件被动跟涨，隔夜外盘纳指跌近 3%、科技承压，与政策主线无关",
+      "night": "2026-11-02"
+    },
+    {
+      "code": "sz300803",
+      "name": "指南针",
+      "p_win": 0.38,
+      "reason": "已涨 17.7%、距涨停仅 1.9%，尾盘可能封板买不到；买到也是追高位",
+      "night": "2026-11-02"
+    },
+    {
+      "code": "sz300558",
+      "name": "贝达药业",
+      "p_win": 0.37,
+      "reason": "+17.0% 单日大涨无已知催化确认，医药单票缺口风险高",
+      "night": "2026-11-02"
+    },
+    {
+      "code": "sh605117",
+      "name": "德业股份",
+      "p_win": 0.39,
+      "reason": "距涨停仅 2.3%，封板即买不到；与阳光电源同属光储链，业绩风险同源",
+      "night": "2026-11-02"
+    }
+  ]
 }

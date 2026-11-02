@@ -2,14 +2,108 @@
   "name": "overnight/quant",
   "strategy": "overnight_quant",
   "initial_cash": 100000,
-  "cash": 100000,
+  "cash": 13583.41,
   "start_date": "2026-11-02",
-  "positions": {},
+  "positions": {
+    "sz300803": {
+      "name": "指南针",
+      "kind": "stock",
+      "shares": 500,
+      "cost": 22165.76,
+      "buy_price": 44.32,
+      "night": "2026-11-02",
+      "last_price": 44.32,
+      "order_id": "20261102-overnight_quant-sz300803",
+      "pred": {
+        "night": "2026-11-02",
+        "account": "quant",
+        "code": "sz300803",
+        "name": "指南针",
+        "weight": 0.25,
+        "p_win": null,
+        "exp_gap": null,
+        "thesis_type": null,
+        "source": "quant",
+        "exception": "",
+        "buy_price": 44.32
+      }
+    },
+    "sz300558": {
+      "name": "贝达药业",
+      "kind": "stock",
+      "shares": 500,
+      "cost": 23266.05,
+      "buy_price": 46.52,
+      "night": "2026-11-02",
+      "last_price": 46.52,
+      "order_id": "20261102-overnight_quant-sz300558",
+      "pred": {
+        "night": "2026-11-02",
+        "account": "quant",
+        "code": "sz300558",
+        "name": "贝达药业",
+        "weight": 0.25,
+        "p_win": null,
+        "exp_gap": null,
+        "thesis_type": null,
+        "source": "quant",
+        "exception": "",
+        "buy_price": 46.52
+      }
+    },
+    "sh688775": {
+      "name": "影石创新",
+      "kind": "stock",
+      "shares": 200,
+      "cost": 19517.2,
+      "buy_price": 97.56,
+      "night": "2026-11-02",
+      "last_price": 97.56,
+      "order_id": "20261102-overnight_quant-sh688775",
+      "pred": {
+        "night": "2026-11-02",
+        "account": "quant",
+        "code": "sh688775",
+        "name": "影石创新",
+        "weight": 0.25,
+        "p_win": null,
+        "exp_gap": null,
+        "thesis_type": null,
+        "source": "quant",
+        "exception": "",
+        "buy_price": 97.56
+      }
+    },
+    "sz300274": {
+      "name": "阳光电源",
+      "kind": "stock",
+      "shares": 300,
+      "cost": 21467.58,
+      "buy_price": 71.54,
+      "night": "2026-11-02",
+      "last_price": 71.54,
+      "order_id": "20261102-overnight_quant-sz300274",
+      "pred": {
+        "night": "2026-11-02",
+        "account": "quant",
+        "code": "sz300274",
+        "name": "阳光电源",
+        "weight": 0.25,
+        "p_win": null,
+        "exp_gap": null,
+        "thesis_type": null,
+        "source": "quant",
+        "exception": "",
+        "buy_price": 71.54
+      }
+    }
+  },
   "peak": 100000,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": null,
-  "executed": []
+  "last_settled": "2026-11-02",
+  "executed": [],
+  "veto_pending": []
 }
