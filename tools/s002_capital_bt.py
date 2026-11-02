@@ -27,7 +27,7 @@ def fee(amount, side):
 
 def simulate(cash0, n=50, rule="F4", st="name"):
     w = bt.load(st)
-    elig, f = bt.features(w)
+    elig, f = bt.features(w, **bt.feature_args(rule))
     opn, close, amount, volume = w["open"], w["close"], w["amount"], w["volume"]
     dates = close.index
     month = pd.Series(dates.str[:7], index=dates)
@@ -103,7 +103,9 @@ def main():
     ap.add_argument("--n", type=int, default=50)
     ap.add_argument("--rule", default="F4")
     ap.add_argument("--st", default="name", choices=["name", "pit", "r5"])
+    ap.add_argument("--r6", default="", help="第六轮 R6 的组成（如 y1,y4）")
     a = ap.parse_args()
+    bt.R6_PARTS.update(x for x in a.r6.split(",") if x)
     codes = set(bt.load(a.st)["close"].columns)
     ew = bt.run("EW", codes, cost=False, st_mode=a.st)
     ideal = bt.run(a.rule, codes, a.n, st_mode=a.st)

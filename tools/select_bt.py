@@ -14,8 +14,10 @@ import numpy as np
 import pandas as pd
 
 try:
+    from tools import select_r6 as r6
     from tools import select_screens as scr
 except ImportError:  # 直接以脚本运行时
+    import select_r6 as r6
     import select_screens as scr
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,6 +26,7 @@ SPOT = ROOT / "data" / "cache" / "spot_20261027.csv"
 
 COST_ONE_WAY = 0.00175  # 佣金 0.025% + 印花税 0.05%/2 + 过户费 0.001% + 滑点 0.10% ≈ 0.35%/来回
 MIN_AMT20 = 5e7
+MIN_AMT20_Y4 = 2e7  # 第六轮 Y4
 MIN_PRICE = 3.0
 MIN_AGE = 250
 SEGMENTS = [("2020-22", "2020", "2022"), ("2023-24", "2023", "2024"), ("2025-26", "2025", "2026")]
@@ -109,8 +112,9 @@ def delisted_st(index, columns):
     return st
 
 
-def features(w, fin_pit=None, sue_pit=None):
-    """fin_pit / sue_pit 不传时读研究缓存；前向账户（tools/s002.py）传入自己刷新的表。"""
+def features(w, fin_pit=None, sue_pit=None, min_amt=MIN_AMT20, r6_signals=False):
+    """fin_pit / sue_pit 不传时读研究缓存；前向账户（tools/s002.py）传入自己刷新的表。
+    min_amt：资格的 20 日日均成交额门槛（第六轮 Y4 用 2000 万）；r6_signals：加第六轮 Y1~Y3 的宽表（只读研究缓存）。"""
     close, amount, volume, turnover = w["close"], w["amount"], w["volume"], w["turnover"]
     ret = close.pct_change(fill_method=None)
     obs = close.notna().cumsum()
@@ -118,7 +122,7 @@ def features(w, fin_pit=None, sue_pit=None):
     age_ok = (obs >= MIN_AGE) | seasoned
     amt20 = amount.rolling(20, min_periods=15).mean()
     vwap20 = amount.rolling(20, min_periods=15).sum() / volume.rolling(20, min_periods=15).sum()
-    elig = age_ok & (amt20 >= MIN_AMT20) & (vwap20 >= MIN_PRICE) & close.notna()
+    elig = age_ok & (amt20 >= min_amt) & (vwap20 >= MIN_PRICE) & close.notna()
     if "st" in w:
         elig &= ~w["st"]
     mcap = (amount / turnover.replace(0, np.nan)).rolling(20, min_periods=15).mean()
@@ -137,13 +141,22 @@ def features(w, fin_pit=None, sue_pit=None):
     f["acc"] = (fin["eps_ttm"] - fin["cfps_ttm"]) / (amount / volume.replace(0, np.nan))
     f["px_raw"] = amount / volume.replace(0, np.nan)          # 第五轮 X2：未复权价
     f["fmcap_d"] = amount / turnover.replace(0, np.nan)       # 第五轮 X2/X3：当日流通市值
+    if r6_signals:
+        t = r6.tables()
+        f["sue_np"] = r6.sue_latest_wide(close.index, close.columns, t["sue_np"])
+        f["sue_fc"] = r6.sue_latest_wide(close.index, close.columns, t["sue_fc"])
+        f["y1"] = r6.gdhs_wide(close.index, close.columns, t["gdhs"])
+        if t["jgdy"] is not None:
+            f["y2"] = r6.jgdy_wide(close.index, close.columns, t["jgdy"])
     return elig, f
 
 
-def composite(sue, ep, at, acc):
-    """第四轮合成分 Z：各因子截面百分位（越高越好）等权平均；缺 2 个及以上为 NaN。输入为同一截面的 Series。"""
-    ranks = pd.concat([sue.rank(pct=True), ep.rank(pct=True), (-at).rank(pct=True), (-acc).rank(pct=True)], axis=1)
-    return ranks.mean(axis=1).where(ranks.notna().sum(axis=1) >= 3)
+def composite(sue, ep, at, acc, *extra):
+    """第四轮合成分 Z：各因子截面百分位（越高越好）等权平均；缺 2 个及以上为 NaN。输入为同一截面的 Series。
+    extra：第六轮新增分量（已是越高越好的方向），与原四个同权。"""
+    ranks = pd.concat([sue.rank(pct=True), ep.rank(pct=True), (-at).rank(pct=True), (-acc).rank(pct=True),
+                       *(x.rank(pct=True) for x in extra)], axis=1)
+    return ranks.mean(axis=1).where(ranks.notna().sum(axis=1) >= ranks.shape[1] - 1)
 
 
 def fpick(rule, f, d, cand, n, held=()):
@@ -163,11 +176,20 @@ def fpick(rule, f, d, cand, n, held=()):
         return list(z[m <= m.quantile(0.2)].dropna().nlargest(n).index)
     if rule == "F5":
         return list(z[m > m.quantile(0.3)].dropna().nlargest(n).index)
-    if rule in RRULES:
+    if rule in YRULES:
+        parts = yparts(rule)
+        sue = at["sue"]
+        if "y3" in parts:
+            sue = f["sue_fc"].loc[d].reindex(cand)
+        elif "np" in parts:
+            sue = f["sue_np"].loc[d].reindex(cand)
+        extra = [f[k].loc[d].reindex(cand) for k in ("y1", "y2") if k in parts]
+        z = composite(sue, at["ep"], at["at"], at["acc"], *extra)
+    if rule in RRULES or rule in YRULES:
         pool = z[m <= m.quantile(0.2)].dropna()
         x = screens(rule, d, pool.index, f)
         pool = (pool + x["bonus"] * scr.BONUS).where(~x["bad"]).dropna().sort_values(ascending=False)
-        if rule != "R5":
+        if rule not in ("R5", "R6"):
             return list(pool.index[:n])
         ranked = list(pool.index)
         keep = [c for c in ranked[:R5_BUFFER] if c in set(held)]
@@ -178,11 +200,29 @@ def fpick(rule, f, d, cand, n, held=()):
 # 第五轮：R1 = F4+X1，R2 = F4+X2，R3 = F4+X3，R4 = 三道叠加，R5 = R4 取 10 只 + 前 30 名缓冲
 RRULES = {"R1": ("x1",), "R2": ("x2",), "R3": ("x3",), "R4": ("x1", "x2", "x3"), "R5": ("x1", "x2", "x3")}
 R5_N, R5_BUFFER = 10, 30
+# 第六轮（R4 为底，X1+X2+X3 照常）：L0 = SUE 换净利润口径的 R4；Y1/Y2 加分量；Y3 预告版 SUE；Y4 资格 2000 万；
+# R6 = R4 + 通过的 Y（Y3 没过则用原 EPS 口径 SUE），10 只 + 前 30 缓冲。R6_PARTS 由判定结果设定（--r6）。
+YRULES = {"L0": {"np"}, "Y1": {"np", "y1"}, "Y2": {"np", "y2"}, "Y3": {"y3"}, "Y4": {"np", "y4"}, "R6": set()}
+R6_PARTS: set = set()
+
+
+def yparts(rule):
+    if rule != "R6":
+        return YRULES[rule]
+    return set(R6_PARTS)  # 不含 y3 时 SUE 走原 EPS 口径（与 S-003 一致），不加 np
+
+
+def feature_args(rule):
+    """run / 资金口径回测共用：第六轮规则需要的 features 参数。"""
+    if rule not in YRULES:
+        return {}
+    parts = yparts(rule)
+    return {"r6_signals": True, "min_amt": MIN_AMT20_Y4 if "y4" in parts else MIN_AMT20}
 
 
 def screens(rule, d, codes, f):
     t = scr.tables()
-    use = RRULES[rule]
+    use = RRULES.get(rule, ("x1", "x2", "x3"))
     idx = pd.Index(codes)
     bad = pd.Series(False, index=idx)
     bonus = pd.Series(0.0, index=idx)
@@ -198,7 +238,7 @@ def screens(rule, d, codes, f):
     return {"bad": bad, "bonus": bonus}
 
 
-FRULES = ("F1", "F3", "F4", "F5", *RRULES)
+FRULES = ("F1", "F3", "F4", "F5", *RRULES, *YRULES)
 
 
 # 第三轮组合构造：(持股数, 缓冲名次, 分位)；分位非空时持有市值最小的该比例全部股票
@@ -259,7 +299,7 @@ def run(rule, universe, n=20, cost=True, st_mode="name", veto=None):
     w = load(st_mode)
     cols = [c for c in w["close"].columns if c in universe]
     w = {k: v[cols] for k, v in w.items()}
-    elig, f = features(w)
+    elig, f = features(w, **feature_args(rule))
     if veto is not None:
         elig &= ~veto.reindex(index=elig.index, columns=elig.columns).fillna(False).astype(bool)
     opn, close = w["open"], w["close"]
@@ -453,7 +493,9 @@ def main():
     ap.add_argument("--prefix", default="r3-")
     ap.add_argument("--cmp", default=None, help="切分时的对照规则（第四轮 F4 用 K3）")
     ap.add_argument("--out", default=None, help="切分明细另存 CSV")
+    ap.add_argument("--r6", default="", help="第六轮 R6 的组成（通过判定的 Y，如 y1,y4）")
     a = ap.parse_args()
+    R6_PARTS.update(x for x in a.r6.split(",") if x)
     codes = load(a.st)["close"].columns
     if a.set == "SPLITS":
         d = splits(codes, a.rules.split(","), a.st, prefix=a.prefix, n=a.n, cmp=a.cmp)
