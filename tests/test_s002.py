@@ -1,4 +1,4 @@
-"""S-002 挑战者单元测试（不联网）：.venv/bin/python -m pytest tests/test_s002.py -q"""
+"""S-003 挑战者（tools/s002.py）单元测试（不联网）：.venv/bin/python -m pytest tests/test_s002.py -q"""
 import datetime as dt
 import json
 
@@ -109,17 +109,8 @@ def test_retained_within_tolerance_not_traded_and_corp_action():
     assert not ((t.date == D1) & t.side.isin(["buy", "sell"])).any()  # 偏离 <25%，不调
 
 
-def test_s003_profile_isolated(monkeypatch):
-    monkeypatch.setattr(s002, "PROFILE", s002.PROFILE)
-    for k in ("ACCOUNT", "STRATEGY", "RULE", "N"):
-        monkeypatch.setattr(s002, k, getattr(s002, k))
-    s002.use("s003")
-    assert (s002.ACCOUNT, s002.RULE, s002.N) == ("challenger/s003", "R5", 10)
-    assert s002.data_dir().name == "s003" and s002.cache_dir().parent.name == "s002"  # 日线缓存共用
-    Account.create(s002.ACCOUNT, s002.STRATEGY, s002.INIT_CASH, D0)
-    intent(D0, [f"sh6000{i:02d}" for i in range(10)])
-    m = FakeMarket({D0: {f"sh6000{i:02d}": (10.0, 10.0) for i in range(10)}})
-    s002.settle(D0, m, print)
-    a = Account("challenger/s003")
-    assert len(a.positions) == 10 and all(p["shares"] == 900 for p in a.positions.values())  # 1 万 / 10.01 → 900 股
-    assert not Account("challenger/s002").positions
+def test_s003_is_default_and_isolated():
+    assert (s002.ACCOUNT, s002.RULE, s002.PROFILES["s003"]["n"]) == ("challenger/s003", "R5", 10)
+    assert list(s002.PROFILES) == ["s003"]  # S-002 已于 2026-11-02 删除
+    assert s002.data_dir().name == "s003" and s002.cache_dir().parent.name == "s003"
+    assert all(a.name != s002.ACCOUNT for a in all_accounts())

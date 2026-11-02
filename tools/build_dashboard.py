@@ -18,10 +18,8 @@ ACCOUNTS = [("main", "main · 主策略"), ("quant", "quant · 量化初筛"),
             ("etf", "etf · 底仓对照")]
 # 挑战者：独立纸面实验（accounts/challenger/*，不进 all_accounts），看板只读展示
 CHALLENGERS = [
-    ("challenger/s002", "S-002 · 小市值合成分 50 只", "data/s002",
-     "第四轮 F4：流通市值最小 20% 内按 SUE/EP/低异常换手/低应计合成分取 50 只，月末信号、次日开盘等权换仓。评估：满 12 期年化 ≥11% 且累计跑赢 K3。"),
-    ("challenger/s003", "S-003 · 排雷后集中 10 只（观察级）", "data/s003",
-     "第五轮 R5：S-002 池子剔除退市风险与解禁减持、增持回购加分，取前 10 只、前 30 名缓冲。回测 t=2.19 未过存档门槛，只作观察。"),
+    ("challenger/s003", "S-003 · 小市值排雷 10 只（观察级）", "data/s003",
+     "第五轮 R5：流通市值最小 20% 内按 SUE/EP/低异常换手/低应计合成分排序，剔除退市风险与解禁减持、增持回购加分，取前 10 只、前 30 名缓冲。回测 t=2.19 未过存档门槛，只作观察。"),
     ("challenger/pead", "PEAD · 财报反应日隔夜", "data/pead",
      "财报反应日涨幅 >5% 收盘买入，次日 +3% 限价、未成交收盘卖。kill：满 100 笔均值 ≤0。"),
 ]
@@ -677,7 +675,7 @@ def main() -> int:
   <section>
     <h2>挑战者账户（独立实验）</h2>
     {challenger_block}
-    <p class="small muted" style="margin-top:8px">挑战者是各自 10 万的独立纸面账户（accounts/challenger/），不进主流程的风控、结算与上方收益对照；由各自工具结算（tools/s002.py、tools/pead.py）。持仓、成交与最近订单在上方「策略详情」切换到对应标签查看。同期对照来自 data/&lt;账户&gt;/periods.csv，按已完成的换仓期复利累计。</p>
+    <p class="small muted" style="margin-top:8px">挑战者是各自 10 万的独立纸面账户（accounts/challenger/），不进主流程的风控、结算与上方收益对照；由各自工具结算（S-003 用 tools/s002.py，PEAD 用 tools/pead.py）。持仓、成交与最近订单在上方「策略详情」切换到对应标签查看。同期对照来自 data/&lt;账户&gt;/periods.csv，按已完成的换仓期复利累计。</p>
   </section>
 
   <section>

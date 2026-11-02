@@ -1,12 +1,13 @@
-"""S-002 / S-003 挑战者：小市值 + 学术因子合成的前向纸面验证（--profile 选择，默认 s002）。
+"""S-003 挑战者：小市值 + 学术因子合成的前向纸面验证（文件名沿用 S-002，引擎是第四轮 F4）。
 
-  - s002：第四轮 F4（50 只），下文规则描述；
   - s003：第五轮 R5（观察级，未过存档门槛 t ≥ 2.5）：F4 的池子与合成分，剔除 X1 退市风险、X2 解禁/减持，
           X3 增持/回购 Z+0.10，取前 10 只；已持有且仍在前 30 名的继续持有（缓冲）。
           预注册 docs/research/选股策略_预注册_第五轮_2026-11-01.md，报告 reports/20261101_选股策略_第五轮.md。
-  两个账户共用日线缓存 data/s002/cache/（先跑的那个下载，后跑的命中缓存）。
+  - S-002（F4，50 只）2026-11-02 按用户要求删除：10 万分 50 只每只约 2000 元，买不起一手的多、与宽基持仓区别不明显。
+    账本与信号只在 git 历史里（提交 7650d58 及之前）。
 
-规则（预注册见 docs/research/选股策略_预注册_第四轮_2026-11-01.md，报告 reports/20261101_选股策略_第四轮.md，不可事后改）：
+F4 基础规则（预注册见 docs/research/选股策略_预注册_第四轮_2026-11-01.md，报告 reports/20261101_选股策略_第四轮.md，不可事后改；
+R5 在此基础上改为 10 只 + 排雷 + 缓冲）：
   - 信号：每月最后一个交易日收盘后，在可投资格（上市满 250 日、20 日日均成交额 ≥5000 万、成交均价 ≥3 元、非 ST）内，
           取流通市值最小 20%，按合成分 Z（SUE / EP / 低异常换手 / 低应计的截面百分位等权）取最高 50 只。
   - 执行：下一个交易日开盘，等权（每只 = 开盘时净值 / 50）；开盘接近涨停的新票不买，资金留现金；
@@ -14,16 +15,16 @@
   - 成本：config/broker.yaml 费率 + 单边 0.10% 滑点（与回测 0.35%/来回一致）。
   - 前向偏离（实施约定，写于首次运行前）：已持有且仍入选的票，只有偏离目标权重 >25% 才调回等权，避免碎单的 5 元最低佣金。
 
-隔离：账户 accounts/challenger/s002/（主流程 all_accounts 只扫 accounts/* 第一层）；数据 data/s002/；不写 orders/、config/。
+隔离：账户 accounts/challenger/s003/（主流程 all_accounts 只扫 accounts/* 第一层）；数据 data/s003/（日线与财报缓存 data/s003/cache/，gitignored）；不写 orders/、config/。
 
-评估（报告里给出，不自动停）：满 12 次调仓后，年化 ≥ 11%（回测切分中位数 22.2% 的一半）且累计跑赢 K3 纯小市值 → 可提交主策略提案；否则停止。
+评估（报告里给出，不自动停）：满 12 次调仓后，年化 ≥ 11%（F4 回测切分中位数 22.2% 的一半）且累计跑赢 K3 纯小市值 → 可提交主策略提案；否则停止。
 
 用法：
   .venv/bin/python tools/s002.py init --date 2026-11-02
   .venv/bin/python tools/s002.py signal [--date 2026-10-30] [--force]   # 每个交易日 21:15 跑；非月末自动跳过
-  .venv/bin/python tools/s002.py settle [--date 2026-11-02]             # 每个交易日 20:45 跑：除权、换仓、净值
+  .venv/bin/python tools/s002.py settle [--date 2026-11-02]             # 每个交易日 20:50 跑：除权、换仓、净值
   .venv/bin/python tools/s002.py report | status
-  .venv/bin/python tools/s002.py --profile s003 <同上命令>          # S-003（R5，10 只）
+  （--profile s003 可写可不写，只剩这一个 profile）
 """
 from __future__ import annotations
 
@@ -50,19 +51,16 @@ from tools import select_bt as bt
 from tools import select_fin as sf
 
 PROFILES = {
-    "s002": {"account": "challenger/s002", "strategy": "s002-f4-v1", "rule": "F4", "n": 50,
-             "desc": "月末取流通市值最小 20% 中合成分（SUE / EP / 低异常换手 / 低应计）最高的 50 只，次日开盘等权换仓。"
-                     "回测：全市场年化 25.2%，切分中位数 22.2%（样本内）。"},
     "s003": {"account": "challenger/s003", "strategy": "s003-r5-v1", "rule": "R5", "n": 10,
-             "desc": "在 S-002 的池子上剔除退市风险、解禁/减持，增持/回购加分，取前 10 只（前 30 名缓冲），次日开盘等权换仓。"
+             "desc": "在流通市值最小 20% 的池子里按合成分（SUE / EP / 低异常换手 / 低应计）排序，剔除退市风险、解禁/减持，增持/回购加分，取前 10 只（前 30 名缓冲），次日开盘等权换仓。"
                      "观察级：回测切分中位数 22.0%、10 万口径 23.7%，月度超额 t = 2.19 未过 2.5。"},
 }
-PROFILE = "s002"
-ACCOUNT = "challenger/s002"
-STRATEGY = "s002-f4-v1"
-RULE = "F4"
-INIT_CASH = 100_000.0  # 用户 2026-11-01 指定 10 万：每只目标 2000 元，约 1/5 的票买不起一手、留现金，最低佣金放大成本（已知偏离，报告里看 F4 理想收益对照）
-N = 50
+PROFILE = "s003"
+ACCOUNT = "challenger/s003"
+STRATEGY = "s003-r5-v1"
+RULE = "R5"
+INIT_CASH = 100_000.0  # 用户 2026-11-01 指定 10 万：每只目标约 1 万元
+N = 10
 SLIP = 0.001
 REBAL_TOL = 0.25
 WINDOW_DAYS = 450  # 日历日，约 300 个交易日，够算 250 日换手与上市满 250 日
@@ -86,7 +84,7 @@ def data_dir() -> Path:
 
 
 def cache_dir() -> Path:
-    return config.home() / "data" / "s002" / "cache"  # 两个账户共用
+    return config.home() / "data" / "s003" / "cache"
 
 
 def orders_dir() -> Path:
@@ -592,8 +590,8 @@ def status() -> None:
 
 def main() -> int:
     from sim.market import Market
-    ap = argparse.ArgumentParser(description="S-002 / S-003 挑战者（独立账户）")
-    ap.add_argument("--profile", default="s002", choices=list(PROFILES))
+    ap = argparse.ArgumentParser(description="S-003 挑战者（独立账户）")
+    ap.add_argument("--profile", default="s003", choices=list(PROFILES))  # 只剩 s003，保留参数兼容旧命令
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("init"); p.add_argument("--date", required=True)
     p = sub.add_parser("signal"); p.add_argument("--date"); p.add_argument("--force", action="store_true")
