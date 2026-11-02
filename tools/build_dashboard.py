@@ -16,6 +16,15 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 ACCOUNTS = [("main", "main · 主策略"), ("quant", "quant · 量化初筛"),
             ("random", "random · 随机对照"), ("etf_band", "etf_band · 仓位对照"),
             ("etf", "etf · 底仓对照")]
+# 挑战者：独立纸面实验（accounts/challenger/*，不进 all_accounts），看板只读展示
+CHALLENGERS = [
+    ("challenger/s002", "S-002 · 小市值合成分 50 只", "data/s002",
+     "第四轮 F4：流通市值最小 20% 内按 SUE/EP/低异常换手/低应计合成分取 50 只，月末信号、次日开盘等权换仓。评估：满 12 期年化 ≥11% 且累计跑赢 K3。"),
+    ("challenger/s003", "S-003 · 排雷后集中 10 只（观察级）", "data/s003",
+     "第五轮 R5：S-002 池子剔除退市风险与解禁减持、增持回购加分，取前 10 只、前 30 名缓冲。回测 t=2.19 未过存档门槛，只作观察。"),
+    ("challenger/pead", "PEAD · 财报反应日隔夜", "data/pead",
+     "财报反应日涨幅 >5% 收盘买入，次日 +3% 限价、未成交收盘卖。kill：满 100 笔均值 ≤0。"),
+]
 CONTROL_NOTE = {"main": "本看板主角", "quant": "对照组", "random": "对照组",
                 "etf_band": "对照组", "etf": "对照组"}
 REASON_CN = {"entry": "新开仓", "exit": "调仓卖出", "park": "底仓停泊",
@@ -193,6 +202,28 @@ def trades_table(account, limit=8) -> str:
             f"<td class='num'>{money(float(t['amount']))}</td><td class='num'>{fees:.2f}</td>"
             f"<td class='small muted'>{esc(REASON_CN.get(t.get('reason_type', ''), t.get('reason_type', '')))}</td></tr>")
     return "".join(rows) or "<tr><td colspan=8 class='muted'>尚无成交</td></tr>"
+
+
+def load_challengers():
+    out = []
+    for name, label, data, note in CHALLENGERS:
+        if not (ROOT / "accounts" / name / "state.json").exists():
+            continue
+        a = load_account(name)
+        a.update(label=label, note=note)
+        periods = read_csv(ROOT / data / "periods.csv")
+        def cum(col):
+            v = 1.0
+            for r in periods:
+                v *= 1 + float(r.get(col) or 0)
+            return v - 1
+        a["n_periods"] = len(periods)
+        a["bench"] = ({"规则理想": cum("f4_ideal"), "K3 纯小市值": cum("k3"), "等权": cum("ew")}
+                      if periods and "k3" in periods[0] else {})
+        sig = sorted((ROOT / data / "orders").glob("*.json")) if (ROOT / data / "orders").exists() else []
+        a["last_signal"] = sig[-1].stem if sig else ""
+        out.append(a)
+    return out
 
 
 def load_orders():
@@ -494,6 +525,35 @@ def main() -> int:
       <h3 class="subhead">复盘</h3>
       {review}
     </div>""")
+    # ---- 挑战者 ----
+    challengers = load_challengers()
+    ch_rows, ch_details = [], []
+    for a in challengers:
+        bench = (" · ".join(f"{k} {pct(v)}" for k, v in a["bench"].items())
+                 or ("满一期后显示" if a["name"] != "challenger/pead" else "逐笔统计见 data/pead/report.md"))
+        ch_rows.append(
+            f"<tr><td><b>{esc(a['label'])}</b></td><td class='num'>{money(a['equity'])}</td>"
+            f"<td class='num {cls(a['pnl_pct'])}'>{pct(a['pnl_pct'])}</td>"
+            f"<td class='num {cls(a['day_pnl'])}'>{money(a['day_pnl'])}</td>"
+            f"<td class='num'>{pct(a['drawdown'], signed=False)}</td>"
+            f"<td class='num'>{len(a['positions'])}</td><td class='num'>{esc(a['last_settled'] or '未结算')}</td>"
+            f"<td class='small'>{esc(bench)}</td></tr>")
+        vals = [float(r["equity"]) for r in a["nav"]]
+        sig = f" · 最近订单 {esc(a['last_signal'])}" if a["last_signal"] else ""
+        ch_details.append(f"""<details style="margin-top:10px"><summary>{esc(a['label'])}（持仓 {len(a['positions'])} 只 · 现金 {money(a['cash'])}{sig}）</summary>
+      <p class="small muted" style="margin:8px 0">{esc(a['note'])}</p>
+      <div class="card">{sparkline(vals, a['state']['initial_cash'], a['label'] + ' 净值曲线')}</div>
+      <div class="grid grid-2" style="margin-top:10px">
+        <div class="table-card"><table><thead><tr><th>持仓</th><th>股数</th><th>成本价</th><th>现价</th><th>市值</th><th>盈亏</th><th>止损价</th><th>建仓日</th></tr></thead>
+        <tbody>{positions_table(a)}</tbody></table></div>
+        <div class="table-card"><table><thead><tr><th>日期</th><th>方向</th><th>标的</th><th>股数</th><th>价格</th><th>金额</th><th>费用</th><th>类型</th></tr></thead>
+        <tbody>{trades_table(a, 10)}</tbody></table></div>
+      </div></details>""")
+    challenger_block = (f"""<div class="table-card"><table>
+      <thead><tr><th>账户</th><th>净值</th><th>累计盈亏</th><th>当日盈亏</th><th>回撤</th><th>持仓</th><th>结算至</th><th>同期对照（累计）</th></tr></thead>
+      <tbody>{''.join(ch_rows)}</tbody></table></div>{''.join(ch_details)}""" if challengers
+                        else "<p class='muted'>暂无挑战者账户。</p>")
+
     # ---- 执行日志 ----
     log_rows = []
     for e in runlog[::-1][:30]:
@@ -592,6 +652,12 @@ def main() -> int:
     <h2>策略详情</h2>
     <div class="tabs" role="tablist">{''.join(tab_buttons)}</div>
     {''.join(tab_panels)}
+  </section>
+
+  <section>
+    <h2>挑战者账户（独立实验）</h2>
+    {challenger_block}
+    <p class="small muted" style="margin-top:8px">挑战者是各自 10 万的独立纸面账户（accounts/challenger/），不进主流程的风控、结算与上方收益对照；由各自工具结算（tools/s002.py、tools/pead.py）。同期对照来自 data/&lt;账户&gt;/periods.csv，按已完成的换仓期复利累计。</p>
   </section>
 
   <section>
