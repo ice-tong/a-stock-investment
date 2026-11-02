@@ -2,14 +2,431 @@
   "name": "challenger/s002",
   "strategy": "s002-f4-v1",
   "initial_cash": 100000.0,
-  "cash": 100000.0,
+  "cash": 24179.9,
   "start_date": "2026-11-02",
-  "positions": {},
-  "peak": 100000.0,
+  "positions": {
+    "sh600262": {
+      "name": "北方股份",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1439.4099999999999,
+      "first_buy_date": "2026-11-02",
+      "hfq": 2.2653671990293,
+      "last_price": 14.2
+    },
+    "sz301408": {
+      "name": "华人健康",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1364.4099999999999,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.0236976995144,
+      "last_price": 13.8
+    },
+    "sz002054": {
+      "name": "德美化工",
+      "kind": "stock",
+      "shares": 300.0,
+      "cost": 1866.8200000000002,
+      "first_buy_date": "2026-11-02",
+      "hfq": 3.5780452606683,
+      "last_price": 6.26
+    },
+    "sz301175": {
+      "name": "中科环保",
+      "kind": "stock",
+      "shares": 300.0,
+      "cost": 1674.82,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.0991712900437,
+      "last_price": 5.58
+    },
+    "sz300867": {
+      "name": "圣元环保",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1588.6200000000001,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.0298406602569,
+      "last_price": 15.72
+    },
+    "sh600638": {
+      "name": "新黄浦",
+      "kind": "stock",
+      "shares": 400.0,
+      "cost": 1790.6200000000001,
+      "first_buy_date": "2026-11-02",
+      "hfq": 21.2719617997789,
+      "last_price": 4.48
+    },
+    "sz300932": {
+      "name": "三友联众",
+      "kind": "stock",
+      "shares": 200.0,
+      "cost": 1632.62,
+      "first_buy_date": "2026-11-02",
+      "hfq": 3.8443168915792,
+      "last_price": 8.04
+    },
+    "sz001311": {
+      "name": "多利科技",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1476.51,
+      "first_buy_date": "2026-11-02",
+      "hfq": 3.0247607287513,
+      "last_price": 14.92
+    },
+    "sz300453": {
+      "name": "三鑫医疗",
+      "kind": "stock",
+      "shares": 200.0,
+      "cost": 1864.82,
+      "first_buy_date": "2026-11-02",
+      "hfq": 7.436745905399901,
+      "last_price": 9.42
+    },
+    "sz300511": {
+      "name": "雪榕生物",
+      "kind": "stock",
+      "shares": 500.0,
+      "cost": 1992.02,
+      "first_buy_date": "2026-11-02",
+      "hfq": 2.9986539364719,
+      "last_price": 4.03
+    },
+    "sh600969": {
+      "name": "郴电国际",
+      "kind": "stock",
+      "shares": 200.0,
+      "cost": 1576.62,
+      "first_buy_date": "2026-11-02",
+      "hfq": 2.1157314302526,
+      "last_price": 7.9
+    },
+    "sz300631": {
+      "name": "久吾高科",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1992.02,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.7109544135759,
+      "last_price": 19.88
+    },
+    "sz300241": {
+      "name": "瑞丰光电",
+      "kind": "stock",
+      "shares": 300.0,
+      "cost": 1533.52,
+      "first_buy_date": "2026-11-02",
+      "hfq": 4.1154903218796,
+      "last_price": 5.17
+    },
+    "sz300622": {
+      "name": "博士眼镜",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1426.41,
+      "first_buy_date": "2026-11-02",
+      "hfq": 4.2978346162644,
+      "last_price": 15.04
+    },
+    "sz002998": {
+      "name": "优彩资源",
+      "kind": "stock",
+      "shares": 300.0,
+      "cost": 1993.12,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.1922045361113,
+      "last_price": 6.68
+    },
+    "sz300721": {
+      "name": "怡达股份",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1469.51,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.9640101956122,
+      "last_price": 15.33
+    },
+    "sz300658": {
+      "name": "延江股份",
+      "kind": "stock",
+      "shares": 200.0,
+      "cost": 1562.6200000000001,
+      "first_buy_date": "2026-11-02",
+      "hfq": 2.979608968474,
+      "last_price": 7.87
+    },
+    "sz300407": {
+      "name": "凯发电气",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1026.01,
+      "first_buy_date": "2026-11-02",
+      "hfq": 4.2712725547279,
+      "last_price": 10.17
+    },
+    "sz000803": {
+      "name": "山高环能",
+      "kind": "stock",
+      "shares": 300.0,
+      "cost": 1860.82,
+      "first_buy_date": "2026-11-02",
+      "hfq": 5.8893996798,
+      "last_price": 6.23
+    },
+    "sz000889": {
+      "name": "中嘉博创",
+      "kind": "stock",
+      "shares": 600.0,
+      "cost": 1752.82,
+      "first_buy_date": "2026-11-02",
+      "hfq": 5.2162338490535,
+      "last_price": 2.97
+    },
+    "sz300040": {
+      "name": "九洲集团",
+      "kind": "stock",
+      "shares": 400.0,
+      "cost": 1967.02,
+      "first_buy_date": "2026-11-02",
+      "hfq": 6.3586158508872,
+      "last_price": 4.96
+    },
+    "sh603600": {
+      "name": "永艺股份",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1117.1100000000001,
+      "first_buy_date": "2026-11-02",
+      "hfq": 3.6125257097853,
+      "last_price": 11.22
+    },
+    "sz003011": {
+      "name": "海象新材",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1656.62,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.5972788214713,
+      "last_price": 16.8
+    },
+    "sz001376": {
+      "name": "百通能源",
+      "kind": "stock",
+      "shares": 200.0,
+      "cost": 1921.02,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.0362211027877,
+      "last_price": 9.83
+    },
+    "sz301151": {
+      "name": "冠龙节能",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1563.6200000000001,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.1097690461648,
+      "last_price": 15.7
+    },
+    "sz300686": {
+      "name": "智动力",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1039.01,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.6209192779413,
+      "last_price": 10.59
+    },
+    "sz300591": {
+      "name": "万里马",
+      "kind": "stock",
+      "shares": 300.0,
+      "cost": 1542.52,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.3107394170462,
+      "last_price": 5.16
+    },
+    "sz300651": {
+      "name": "金陵体育",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1424.41,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.7850889817212,
+      "last_price": 14.54
+    },
+    "sz002363": {
+      "name": "隆基机械",
+      "kind": "stock",
+      "shares": 300.0,
+      "cost": 1836.82,
+      "first_buy_date": "2026-11-02",
+      "hfq": 2.9617716965983,
+      "last_price": 6.3
+    },
+    "sz002404": {
+      "name": "嘉欣丝绸",
+      "kind": "stock",
+      "shares": 300.0,
+      "cost": 1605.52,
+      "first_buy_date": "2026-11-02",
+      "hfq": 6.3255916591149,
+      "last_price": 5.39
+    },
+    "sh603817": {
+      "name": "海峡环保",
+      "kind": "stock",
+      "shares": 300.0,
+      "cost": 1647.52,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.0914287913627,
+      "last_price": 5.54
+    },
+    "sh603332": {
+      "name": "苏州龙杰",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1231.21,
+      "first_buy_date": "2026-11-02",
+      "hfq": 2.0831604599694,
+      "last_price": 12.5
+    },
+    "sz300812": {
+      "name": "易天股份",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1472.51,
+      "first_buy_date": "2026-11-02",
+      "hfq": 2.5772940849517,
+      "last_price": 14.9
+    },
+    "sz002296": {
+      "name": "辉煌科技",
+      "kind": "stock",
+      "shares": 200.0,
+      "cost": 1706.62,
+      "first_buy_date": "2026-11-02",
+      "hfq": 5.3534496657614,
+      "last_price": 8.68
+    },
+    "sz002613": {
+      "name": "北玻股份",
+      "kind": "stock",
+      "shares": 600.0,
+      "cost": 1866.8200000000002,
+      "first_buy_date": "2026-11-02",
+      "hfq": 3.7887141584168,
+      "last_price": 3.14
+    },
+    "sz002729": {
+      "name": "好利科技",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1248.21,
+      "first_buy_date": "2026-11-02",
+      "hfq": 2.8017019607956,
+      "last_price": 12.56
+    },
+    "sz300132": {
+      "name": "诺斯贝尔",
+      "kind": "stock",
+      "shares": 300.0,
+      "cost": 1794.82,
+      "first_buy_date": "2026-11-02",
+      "hfq": 6.120979948142,
+      "last_price": 6.0
+    },
+    "sh600980": {
+      "name": "北矿科技",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1752.72,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.8450240350186,
+      "last_price": 17.14
+    },
+    "sh600844": {
+      "name": "金煤科技",
+      "kind": "stock",
+      "shares": 700.0,
+      "cost": 1932.1200000000001,
+      "first_buy_date": "2026-11-02",
+      "hfq": 6.9366888694874,
+      "last_price": 2.77
+    },
+    "sh600419": {
+      "name": "天润乳业",
+      "kind": "stock",
+      "shares": 200.0,
+      "cost": 1804.8200000000002,
+      "first_buy_date": "2026-11-02",
+      "hfq": 3.3804544660142,
+      "last_price": 9.45
+    },
+    "sz300270": {
+      "name": "中威电子",
+      "kind": "stock",
+      "shares": 200.0,
+      "cost": 1650.62,
+      "first_buy_date": "2026-11-02",
+      "hfq": 6.7002467097065,
+      "last_price": 8.31
+    },
+    "sz300801": {
+      "name": "泰和科技",
+      "kind": "stock",
+      "shares": 100.0,
+      "cost": 1760.82,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.9748553909199,
+      "last_price": 17.44
+    },
+    "sh600257": {
+      "name": "大湖股份",
+      "kind": "stock",
+      "shares": 400.0,
+      "cost": 1879.0199999999998,
+      "first_buy_date": "2026-11-02",
+      "hfq": 6.6984844399168,
+      "last_price": 4.77
+    },
+    "sz300051": {
+      "name": "琏升科技",
+      "kind": "stock",
+      "shares": 300.0,
+      "cost": 1830.8200000000002,
+      "first_buy_date": "2026-11-02",
+      "hfq": 6.2867608235972,
+      "last_price": 6.32
+    },
+    "sz300437": {
+      "name": "清水源",
+      "kind": "stock",
+      "shares": 200.0,
+      "cost": 1860.82,
+      "first_buy_date": "2026-11-02",
+      "hfq": 2.9321123335792,
+      "last_price": 9.39
+    },
+    "sh603329": {
+      "name": "上海雅仕",
+      "kind": "stock",
+      "shares": 200.0,
+      "cost": 1822.8200000000002,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.4239646059187,
+      "last_price": 9.07
+    }
+  },
+  "peak": 100709.9,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": null,
-  "executed": []
+  "last_settled": "2026-11-02",
+  "executed": [
+    "2026-11-02"
+  ]
 }

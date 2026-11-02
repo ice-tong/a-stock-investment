@@ -2,14 +2,107 @@
   "name": "challenger/s003",
   "strategy": "s003-r5-v1",
   "initial_cash": 100000.0,
-  "cash": 100000.0,
+  "cash": 6030.05,
   "start_date": "2026-11-02",
-  "positions": {},
-  "peak": 100000.0,
+  "positions": {
+    "sz002054": {
+      "name": "德美化工",
+      "kind": "stock",
+      "shares": 1600.0,
+      "cost": 9934.7,
+      "first_buy_date": "2026-11-02",
+      "hfq": 3.5780452606683,
+      "last_price": 6.26
+    },
+    "sh600262": {
+      "name": "北方股份",
+      "kind": "stock",
+      "shares": 600.0,
+      "cost": 8611.49,
+      "first_buy_date": "2026-11-02",
+      "hfq": 2.2653671990293,
+      "last_price": 14.2
+    },
+    "sz301408": {
+      "name": "华人健康",
+      "kind": "stock",
+      "shares": 700.0,
+      "cost": 9520.9,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.0236976995144,
+      "last_price": 13.8
+    },
+    "sz300453": {
+      "name": "三鑫医疗",
+      "kind": "stock",
+      "shares": 1000.0,
+      "cost": 9304.09,
+      "first_buy_date": "2026-11-02",
+      "hfq": 7.436745905399901,
+      "last_price": 9.42
+    },
+    "sz301175": {
+      "name": "中科环保",
+      "kind": "stock",
+      "shares": 1700.0,
+      "cost": 9467.289999999999,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.0991712900437,
+      "last_price": 5.58
+    },
+    "sz300407": {
+      "name": "凯发电气",
+      "kind": "stock",
+      "shares": 900.0,
+      "cost": 9194.09,
+      "first_buy_date": "2026-11-02",
+      "hfq": 4.2712725547279,
+      "last_price": 10.17
+    },
+    "sz300867": {
+      "name": "圣元环保",
+      "kind": "stock",
+      "shares": 600.0,
+      "cost": 9506.7,
+      "first_buy_date": "2026-11-02",
+      "hfq": 1.0298406602569,
+      "last_price": 15.72
+    },
+    "sh600638": {
+      "name": "新黄浦",
+      "kind": "stock",
+      "shares": 2200.0,
+      "cost": 9825.900000000001,
+      "first_buy_date": "2026-11-02",
+      "hfq": 21.2719617997789,
+      "last_price": 4.48
+    },
+    "sz300932": {
+      "name": "三友联众",
+      "kind": "stock",
+      "shares": 1200.0,
+      "cost": 9770.7,
+      "first_buy_date": "2026-11-02",
+      "hfq": 3.8443168915792,
+      "last_price": 8.04
+    },
+    "sz001311": {
+      "name": "多利科技",
+      "kind": "stock",
+      "shares": 600.0,
+      "cost": 8834.09,
+      "first_buy_date": "2026-11-02",
+      "hfq": 3.0247607287513,
+      "last_price": 14.92
+    }
+  },
+  "peak": 100173.05,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": null,
-  "executed": []
+  "last_settled": "2026-11-02",
+  "executed": [
+    "2026-11-02"
+  ]
 }
