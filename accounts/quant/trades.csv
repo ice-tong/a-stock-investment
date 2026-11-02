@@ -3,3 +3,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-10-26,quant,20261026-quant-02,sz002242,九阳股份,buy,200.0,21.632,4326.4,5,0.0,0.04,4.4,,True,,entry,minute,
 2026-10-26,quant,20261026-quant-03,sh601857,中国石油,buy,300.0,13.343,4002.9,5,0.0,0.04,3.9,,True,,entry,minute,
 2026-10-26,quant,20261026-quant-05,sh510300,沪深300ETF,buy,8400.0,4.167,35002.8,8.75,0.0,0.0,16.8,,True,,park,minute,
+2026-11-02,quant,20261102-quant-01,sh600825,新华传媒,sell,300.0,12.767,3830.1,5,1.92,0.04,3.9,-835.21,,True,stop_loss,minute,
+2026-11-02,quant,20261102-quant-04,sh510300,沪深300ETF,sell,4500.0,4.087,18391.5,5,0.0,0.0,9.0,-369.69,,False,park,minute,
+2026-11-02,quant,20261102-quant-02,sh601328,交通银行,buy,1400.0,8.569,11996.6,5,0.0,0.12,12.6,,True,,entry,minute,
+2026-11-02,quant,20261102-quant-03,sh600887,伊利股份,buy,400.0,30.671,12268.4,5,0.0,0.12,12.4,,True,,entry,minute,

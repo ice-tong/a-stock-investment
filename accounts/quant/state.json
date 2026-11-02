@@ -2,22 +2,9 @@
   "name": "quant",
   "strategy": "quant",
   "initial_cash": 100000,
-  "cash": 51990.719999999994,
+  "cash": 49925.11999999998,
   "start_date": "2026-10-23",
   "positions": {
-    "sh600825": {
-      "name": "新华传媒",
-      "kind": "stock",
-      "role": "stock",
-      "shares": 300.0,
-      "cost": 4658.35,
-      "first_buy_date": "2026-10-26",
-      "hfq": 12.877971780841,
-      "last_buy_date": "2026-10-26",
-      "last_price": 13.36,
-      "stop_price": 14.286,
-      "high_close": 14.84
-    },
     "sz002242": {
       "name": "九阳股份",
       "kind": "stock",
@@ -48,13 +35,37 @@
       "name": "沪深300ETF",
       "kind": "etf",
       "role": "park",
-      "shares": 8400.0,
-      "cost": 35011.549999999996,
+      "shares": 3900.0,
+      "cost": 16255.3625,
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
       "last_buy_date": "2026-10-26",
       "last_price": 4.111,
       "high_close": 4.152
+    },
+    "sh601328": {
+      "name": "交通银行",
+      "kind": "stock",
+      "role": "stock",
+      "shares": 1400.0,
+      "cost": 12001.720000000001,
+      "first_buy_date": "2026-11-02",
+      "hfq": 2.7912206056332,
+      "last_buy_date": "2026-11-02",
+      "last_price": 8.56,
+      "stop_price": 7.887
+    },
+    "sh600887": {
+      "name": "伊利股份",
+      "kind": "stock",
+      "role": "stock",
+      "shares": 400.0,
+      "cost": 12273.52,
+      "first_buy_date": "2026-11-02",
+      "hfq": 109.20660346095481,
+      "last_buy_date": "2026-11-02",
+      "last_price": 30.64,
+      "stop_price": 28.229
     }
   },
   "peak": 100056.91999999998,
@@ -70,6 +81,7 @@
     "2026-10-27",
     "2026-10-28",
     "2026-10-29",
-    "2026-10-30"
+    "2026-10-30",
+    "2026-11-02"
   ]
 }
