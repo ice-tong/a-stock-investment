@@ -3,3 +3,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-02,overnight/quant,20261102-overnight_quant-sz300558,sz300558,贝达药业,buy,500,46.52,23260.0,5.82,0.0,0.23,0.0,,True,,overnight_entry,close_auction,
 2026-11-02,overnight/quant,20261102-overnight_quant-sh688775,sh688775,影石创新,buy,200,97.56,19512.0,5,0.0,0.2,0.0,,True,,overnight_entry,close_auction,
 2026-11-02,overnight/quant,20261102-overnight_quant-sz300274,sz300274,阳光电源,buy,300,71.54,21462.0,5.37,0.0,0.21,0.0,,True,,overnight_entry,close_auction,
+2026-11-03,overnight/quant,20261102-overnight_quant-sz300803,sz300803,指南针,sell,500,43.36,21680.0,5.42,10.84,0.22,0.0,-502.24,,True,overnight_exit,open_auction,
+2026-11-03,overnight/quant,20261102-overnight_quant-sz300558,sz300558,贝达药业,sell,500,46.19,23095.0,5.77,11.55,0.23,0.0,-188.6,,True,overnight_exit,open_auction,
+2026-11-03,overnight/quant,20261102-overnight_quant-sh688775,sh688775,影石创新,sell,200,96.98,19396.0,5,9.7,0.19,0.0,-136.09,,True,overnight_exit,open_auction,
+2026-11-03,overnight/quant,20261102-overnight_quant-sz300274,sz300274,阳光电源,sell,300,72.03,21609.0,5.4,10.8,0.22,0.0,125.0,,True,overnight_exit,open_auction,

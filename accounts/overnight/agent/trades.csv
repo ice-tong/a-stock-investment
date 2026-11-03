@@ -1,3 +1,5 @@
 date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,transfer_fee,slippage_cost,realized_pnl,new_position,closed,reason_type,fill_source,note
 2026-11-02,overnight/agent,20261102-overnight_agent-sh600030,sh600030,中信证券,buy,800,25.56,20448.0,5.11,0.0,0.2,0.0,,True,,overnight_entry,close_auction,
 2026-11-02,overnight/agent,20261102-overnight_agent-sh600999,sh600999,招商证券,buy,1100,16.32,17952.0,5,0.0,0.18,0.0,,True,,overnight_entry,close_auction,
+2026-11-03,overnight/agent,20261102-overnight_agent-sh600030,sh600030,中信证券,sell,800,25.6,20480.0,5.12,10.24,0.2,0.0,11.13,,True,overnight_exit,open_auction,
+2026-11-03,overnight/agent,20261102-overnight_agent-sh600999,sh600999,招商证券,sell,1100,16.33,17963.0,5,8.98,0.18,0.0,-8.34,,True,overnight_exit,open_auction,

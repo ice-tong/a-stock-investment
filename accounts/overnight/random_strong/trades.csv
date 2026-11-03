@@ -3,3 +3,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-02,overnight/random_strong,20261102-overnight_random_strong-sz002841,sz002841,视源股份,buy,500,42.18,21090.0,5.27,0.0,0.21,0.0,,True,,overnight_entry,close_auction,
 2026-11-02,overnight/random_strong,20261102-overnight_random_strong-sh600206,sh600206,有研新材,buy,700,33.71,23597.0,5.9,0.0,0.24,0.0,,True,,overnight_entry,close_auction,
 2026-11-02,overnight/random_strong,20261102-overnight_random_strong-sh688187,sh688187,时代电气,buy,500,47.6,23800.0,5.95,0.0,0.24,0.0,,True,,overnight_entry,close_auction,
+2026-11-03,overnight/random_strong,20261102-overnight_random_strong-sz300299,sz300299,富春股份,sell,4100,6.01,24641.0,6.16,12.32,0.25,0.0,-189.18,,True,overnight_exit,open_auction,
+2026-11-03,overnight/random_strong,20261102-overnight_random_strong-sz002841,sz002841,视源股份,sell,500,41.72,20860.0,5.21,10.43,0.21,0.0,-251.33,,True,overnight_exit,open_auction,
+2026-11-03,overnight/random_strong,20261102-overnight_random_strong-sh600206,sh600206,有研新材,sell,700,33.54,23478.0,5.87,11.74,0.23,0.0,-142.98,,True,overnight_exit,open_auction,
+2026-11-03,overnight/random_strong,20261102-overnight_random_strong-sh688187,sh688187,时代电气,sell,500,47.2,23600.0,5.9,11.8,0.24,0.0,-224.13,,True,overnight_exit,open_auction,
