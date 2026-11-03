@@ -1,0 +1,19 @@
+{
+  "account": "random",
+  "strategy": "random",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-04",
+  "decided_on": "2026-11-03",
+  "frozen_at": "2026-11-03T20:00:48",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 99325.61,
+  "meta": {},
+  "draft_errors": [],
+  "orders": []
+}
