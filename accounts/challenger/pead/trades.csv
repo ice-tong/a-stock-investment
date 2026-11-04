@@ -4,3 +4,8 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-02,challenger/pead,20261102-pead-sh688019,sh688019,安集科技,buy,100,184.66,18466.0,5,0.0,0.18,0.0,,True,,pead_entry,close_auction,
 2026-11-02,challenger/pead,20261102-pead-sh688095,sh688095,福昕软件,buy,300,60.7,18210.0,5,0.0,0.18,0.0,,True,,pead_entry,close_auction,
 2026-11-02,challenger/pead,20261102-pead-sz301551,sz301551,无线传媒,buy,800,24.33,19464.0,5,0.0,0.19,0.0,,True,,pead_entry,close_auction,
+2026-11-04,challenger/pead,20261102-pead-sh688169,sh688169,石头科技,sell,100,130.8,13080.0,5,6.54,0.13,0.0,364.2,,True,pead_exit,limit,
+2026-11-04,challenger/pead,20261102-pead-sz300803,sz300803,指南针,sell,400,45.65,18260.0,5,9.13,0.18,0.0,512.51,,True,pead_exit,limit,
+2026-11-04,challenger/pead,20261102-pead-sh688019,sh688019,安集科技,sell,100,190.2,19020.0,5,9.51,0.19,0.0,534.12,,True,pead_exit,limit,
+2026-11-04,challenger/pead,20261102-pead-sh688095,sh688095,福昕软件,sell,300,59.28,17784.0,5,8.89,0.18,0.0,-445.25,,True,pead_exit,close,
+2026-11-04,challenger/pead,20261102-pead-sz301551,sz301551,无线传媒,sell,800,24.7,19760.0,5,9.88,0.2,0.0,275.73,,True,pead_exit,close,

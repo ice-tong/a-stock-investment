@@ -2,80 +2,14 @@
   "name": "challenger/pead",
   "strategy": "pead-v1",
   "initial_cash": 100000.0,
-  "cash": 13407.14,
+  "cash": 101241.31,
   "start_date": "2026-11-02",
-  "positions": {
-    "sh688169": {
-      "name": "石头科技",
-      "kind": "stock",
-      "shares": 100,
-      "cost": 12704.13,
-      "buy_price": 126.99,
-      "night": "2026-11-02",
-      "last_price": 126.99,
-      "order_id": "20261102-pead-sh688169",
-      "pred": {
-        "pct": 17.327
-      }
-    },
-    "sz300803": {
-      "name": "指南针",
-      "kind": "stock",
-      "shares": 400,
-      "cost": 17733.18,
-      "buy_price": 44.32,
-      "night": "2026-11-02",
-      "last_price": 44.32,
-      "order_id": "20261102-pead-sz300803",
-      "pred": {
-        "pct": 16.985
-      }
-    },
-    "sh688019": {
-      "name": "安集科技",
-      "kind": "stock",
-      "shares": 100,
-      "cost": 18471.18,
-      "buy_price": 184.66,
-      "night": "2026-11-02",
-      "last_price": 184.66,
-      "order_id": "20261102-pead-sh688019",
-      "pred": {
-        "pct": 16.715
-      }
-    },
-    "sh688095": {
-      "name": "福昕软件",
-      "kind": "stock",
-      "shares": 300,
-      "cost": 18215.18,
-      "buy_price": 60.7,
-      "night": "2026-11-02",
-      "last_price": 60.7,
-      "order_id": "20261102-pead-sh688095",
-      "pred": {
-        "pct": 16.242
-      }
-    },
-    "sz301551": {
-      "name": "无线传媒",
-      "kind": "stock",
-      "shares": 800,
-      "cost": 19469.19,
-      "buy_price": 24.33,
-      "night": "2026-11-02",
-      "last_price": 24.33,
-      "order_id": "20261102-pead-sz301551",
-      "pred": {
-        "pct": 15.52
-      }
-    }
-  },
-  "peak": 100000.0,
+  "positions": {},
+  "peak": 101241.31,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-02",
+  "last_settled": "2026-11-04",
   "executed": []
 }
