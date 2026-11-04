@@ -1,3 +1,4 @@
 date,cash,stock_value,etf_value,equity,stock_weight,etf_weight,peak,drawdown,regime,risk_state,active_etf_value,active_etf_weight
 2026-11-02,6683.74,93292.0,0,99975.74,0.9331,0,100000,0.0002,,normal,,
 2026-11-03,99192.38,0,0,99192.38,0.0,0,100000,0.0081,,normal,,
+2026-11-04,5320.99,93847.0,0,99167.99,0.9463,0,100000,0.0083,,normal,,

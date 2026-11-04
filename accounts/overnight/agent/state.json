@@ -2,15 +2,119 @@
   "name": "overnight/agent",
   "strategy": "overnight_agent",
   "initial_cash": 100000,
-  "cash": 100002.79,
+  "cash": 61164.89,
   "start_date": "2026-11-02",
-  "positions": {},
+  "positions": {
+    "sh688825": {
+      "name": "长鑫科技",
+      "kind": "stock",
+      "shares": 500,
+      "cost": 22050.73,
+      "buy_price": 44.09,
+      "night": "2026-11-04",
+      "last_price": 44.09,
+      "order_id": "20261104-overnight_agent-sh688825",
+      "pred": {
+        "night": "2026-11-04",
+        "account": "agent",
+        "code": "sh688825",
+        "name": "长鑫科技",
+        "weight": 0.25,
+        "p_win": 0.51,
+        "exp_gap": 0.002,
+        "thesis_type": "板块龙头尾盘抢筹",
+        "source": "draft",
+        "exception": "",
+        "buy_price": 44.09
+      }
+    },
+    "sh688008": {
+      "name": "澜起科技",
+      "kind": "stock",
+      "shares": 100,
+      "cost": 16787.17,
+      "buy_price": 167.82,
+      "night": "2026-11-04",
+      "last_price": 167.82,
+      "order_id": "20261104-overnight_agent-sh688008",
+      "pred": {
+        "night": "2026-11-04",
+        "account": "agent",
+        "code": "sh688008",
+        "name": "澜起科技",
+        "weight": 0.2,
+        "p_win": 0.5,
+        "exp_gap": 0.002,
+        "thesis_type": "板块龙头尾盘抢筹",
+        "source": "draft",
+        "exception": "",
+        "buy_price": 167.82
+      }
+    }
+  },
   "peak": 100002.79,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-03",
+  "last_settled": "2026-11-04",
   "executed": [],
-  "veto_prev": []
+  "veto_prev": [
+    {
+      "code": "sh688220",
+      "name": "翱捷科技",
+      "p_win": 0.4,
+      "reason": "收在 +19.3%、距 20% 涨停仅 0.6 个点，14:54 后几乎必然封板，买入等于博未成交；且为 U 股、无独立催化",
+      "night": "2026-11-04"
+    },
+    {
+      "code": "sz300672",
+      "name": "国科微",
+      "p_win": 0.45,
+      "reason": "距涨停仅 1.7 个点，收敛空间太小；+18% 的单日涨幅缺乏独立公告支撑，属板块情绪溢出",
+      "night": "2026-11-04"
+    },
+    {
+      "code": "sh688702",
+      "name": "盛科通信",
+      "p_win": 0.44,
+      "reason": "距涨停 2.4 个点、U 股亏损、+17.2% 已是加速末段，隔夜风险回报不对称",
+      "night": "2026-11-04"
+    },
+    {
+      "code": "sz300408",
+      "name": "三环集团",
+      "p_win": 0.46,
+      "reason": "质地最好但已 +15.9%、位置 0.996、距涨停仅 3.5 个点，跳空空间被压缩，且 MLCC 属补涨扩散而非主线本身",
+      "night": "2026-11-04"
+    },
+    {
+      "code": "sz300502",
+      "name": "新易盛",
+      "p_win": 0.46,
+      "reason": "195 亿天量、换手 8.5%、位置 0.947，光模块高位分歧大，天量后次日常见冲高回落",
+      "night": "2026-11-04"
+    },
+    {
+      "code": "sh688347",
+      "name": "华虹宏力",
+      "p_win": 0.45,
+      "reason": "成熟制程代工，与存储涨价逻辑隔一层；+18.3% 已接近 20% 涨停、距板 1.4 个点，可买性差",
+      "night": "2026-11-04"
+    },
+    {
+      "code": "sz300666",
+      "name": "江丰电子",
+      "p_win": 0.5,
+      "reason": "午间首选，但已于收盘前封 +20% 涨停，实际买不到，按未成交处理（不是看空，是流动性问题）",
+      "night": "2026-11-04"
+    },
+    {
+      "code": "sh603893",
+      "name": "瑞芯微",
+      "p_win": 0.5,
+      "reason": "午间次选，同样已封 +10% 涨停，买不到",
+      "night": "2026-11-04"
+    }
+  ]
 }

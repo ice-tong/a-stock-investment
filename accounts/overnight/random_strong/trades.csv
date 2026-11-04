@@ -7,3 +7,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-03,overnight/random_strong,20261102-overnight_random_strong-sz002841,sz002841,视源股份,sell,500,41.72,20860.0,5.21,10.43,0.21,0.0,-251.33,,True,overnight_exit,open_auction,
 2026-11-03,overnight/random_strong,20261102-overnight_random_strong-sh600206,sh600206,有研新材,sell,700,33.54,23478.0,5.87,11.74,0.23,0.0,-142.98,,True,overnight_exit,open_auction,
 2026-11-03,overnight/random_strong,20261102-overnight_random_strong-sh688187,sh688187,时代电气,sell,500,47.2,23600.0,5.9,11.8,0.24,0.0,-224.13,,True,overnight_exit,open_auction,
+2026-11-04,overnight/random_strong,20261104-overnight_random_strong-sz300302,sz300302,同有科技,buy,1100,21.23,23353.0,5.84,0.0,0.23,0.0,,True,,overnight_entry,close_auction,
+2026-11-04,overnight/random_strong,20261104-overnight_random_strong-sh688700,sh688700,东威科技,buy,600,37.85,22710.0,5.68,0.0,0.23,0.0,,True,,overnight_entry,close_auction,
+2026-11-04,overnight/random_strong,20261104-overnight_random_strong-sz300862,sz300862,蓝盾光电,buy,800,30.47,24376.0,6.09,0.0,0.24,0.0,,True,,overnight_entry,close_auction,
+2026-11-04,overnight/random_strong,20261104-overnight_random_strong-sz300319,sz300319,麦捷科技,buy,1600,14.63,23408.0,5.85,0.0,0.23,0.0,,True,,overnight_entry,close_auction,

@@ -7,3 +7,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-03,overnight/random,20261102-overnight_random-sh603318,sh603318,水发燃气,sell,3100,7.8,24180.0,6.04,12.09,0.24,0.0,-241.71,,True,overnight_exit,open_auction,
 2026-11-03,overnight/random,20261102-overnight_random-sh601615,sh601615,明阳智能,sell,3200,7.79,24928.0,6.23,12.46,0.25,0.0,-89.44,,True,overnight_exit,open_auction,
 2026-11-03,overnight/random,20261102-overnight_random-sz002867,sz002867,周大生,sell,2300,10.78,24794.0,6.2,12.4,0.25,0.0,43.72,,True,overnight_exit,open_auction,
+2026-11-04,overnight/random,20261104-overnight_random-sh688182,sh688182,灿勤科技,buy,1300,18.99,24687.0,6.17,0.0,0.25,0.0,,True,,overnight_entry,close_auction,
+2026-11-04,overnight/random,20261104-overnight_random-sz301012,sz301012,扬电科技,buy,1200,19.84,23808.0,5.95,0.0,0.24,0.0,,True,,overnight_entry,close_auction,
+2026-11-04,overnight/random,20261104-overnight_random-sz300798,sz300798,锦鸡股份,buy,3700,6.71,24827.0,6.21,0.0,0.25,0.0,,True,,overnight_entry,close_auction,
+2026-11-04,overnight/random,20261104-overnight_random-sh603132,sh603132,金徽股份,buy,1400,16.99,23786.0,5.95,0.0,0.24,0.0,,True,,overnight_entry,close_auction,
