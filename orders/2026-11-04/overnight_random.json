@@ -1,0 +1,66 @@
+{
+  "account": "random",
+  "strategy": "overnight_random",
+  "version": "overnight-v0.2",
+  "trade_date": "2026-11-04",
+  "frozen_at": "2026-11-04T14:54:03",
+  "source": "random",
+  "market_view": "",
+  "market": null,
+  "draft_errors": [],
+  "orders": [
+    {
+      "code": "sh688182",
+      "name": "灿勤科技",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sz301012",
+      "name": "扬电科技",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sz300798",
+      "name": "锦鸡股份",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sh603132",
+      "name": "金徽股份",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    }
+  ],
+  "vetoed": []
+}

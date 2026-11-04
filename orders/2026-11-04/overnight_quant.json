@@ -1,0 +1,66 @@
+{
+  "account": "quant",
+  "strategy": "overnight_quant",
+  "version": "overnight-v0.2",
+  "trade_date": "2026-11-04",
+  "frozen_at": "2026-11-04T14:54:03",
+  "source": "quant",
+  "market_view": "",
+  "market": null,
+  "draft_errors": [],
+  "orders": [
+    {
+      "code": "sz300408",
+      "name": "三环集团",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sh688220",
+      "name": "翱捷科技",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sz300806",
+      "name": "斯迪克",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sz300502",
+      "name": "新易盛",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    }
+  ],
+  "vetoed": []
+}
