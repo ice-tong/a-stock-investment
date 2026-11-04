@@ -14,9 +14,9 @@
       "first_buy_date": "2026-10-26",
       "hfq": 5.6695054256078,
       "last_buy_date": "2026-10-26",
-      "last_price": 22.88,
+      "last_price": 23.68,
       "stop_price": 19.925,
-      "high_close": 23.33
+      "high_close": 23.68
     },
     "sh601857": {
       "name": "中国石油",
@@ -27,7 +27,7 @@
       "first_buy_date": "2026-10-26",
       "hfq": 1.8911096523287,
       "last_buy_date": "2026-10-26",
-      "last_price": 14.0,
+      "last_price": 13.62,
       "stop_price": 12.291,
       "high_close": 14.02
     },
@@ -40,7 +40,7 @@
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
       "last_buy_date": "2026-10-26",
-      "last_price": 4.085,
+      "last_price": 4.092,
       "high_close": 4.152
     },
     "sh601328": {
@@ -52,7 +52,7 @@
       "first_buy_date": "2026-11-02",
       "hfq": 2.7912206056332,
       "last_buy_date": "2026-11-02",
-      "last_price": 8.39,
+      "last_price": 8.25,
       "stop_price": 7.887,
       "high_close": 8.57
     },
@@ -65,7 +65,7 @@
       "first_buy_date": "2026-11-02",
       "hfq": 109.20660346095481,
       "last_buy_date": "2026-11-02",
-      "last_price": 31.47,
+      "last_price": 30.71,
       "stop_price": 28.229,
       "high_close": 31.47
     }
@@ -75,7 +75,7 @@
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-03",
+  "last_settled": "2026-11-04",
   "executed": [
     "2026-10-26",
     "2026-10-27",

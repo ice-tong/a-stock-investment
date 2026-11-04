@@ -1,0 +1,52 @@
+{
+  "account": "quant",
+  "strategy": "quant",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-05",
+  "decided_on": "2026-11-04",
+  "frozen_at": "2026-11-04T20:00:47",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 98539.92,
+  "meta": {},
+  "draft_errors": [],
+  "orders": [
+    {
+      "target_weight": 0.0,
+      "reason_type": "exit",
+      "risk_notes": [],
+      "code": "sh601328",
+      "name": "交通银行",
+      "reason": "跌出初筛排名前 12 或不再符合条件",
+      "status": "approved",
+      "id": "20261105-quant-01"
+    },
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [],
+      "code": "sz301313",
+      "name": "凡拓数创",
+      "reason": "初筛排名 2，20 日风险调整动量 0.82",
+      "status": "approved",
+      "id": "20261105-quant-02"
+    },
+    {
+      "code": "sh510300",
+      "name": "沪深300ETF",
+      "target_weight": 0.1608,
+      "reason_type": "park",
+      "reason": "底仓 ETF：闲置资金停泊",
+      "status": "approved",
+      "risk_notes": [
+        "市场状态 defense，风控状态 normal，总仓位区间 30%-50%"
+      ],
+      "id": "20261105-quant-03"
+    }
+  ]
+}
