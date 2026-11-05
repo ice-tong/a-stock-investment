@@ -1,0 +1,101 @@
+{
+  "account": "quant",
+  "strategy": "quant",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-06",
+  "decided_on": "2026-11-05",
+  "frozen_at": "2026-11-05T20:00:45",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 98649.43,
+  "meta": {},
+  "draft_errors": [],
+  "orders": [
+    {
+      "target_weight": 0.0,
+      "reason_type": "exit",
+      "risk_notes": [],
+      "code": "sh601857",
+      "name": "中国石油",
+      "reason": "跌出初筛排名前 12 或不再符合条件",
+      "status": "approved",
+      "id": "20261106-quant-01"
+    },
+    {
+      "target_weight": 0.0,
+      "reason_type": "exit",
+      "risk_notes": [
+        "未满最短持有期 3 个交易日"
+      ],
+      "code": "sz301313",
+      "name": "凡拓数创",
+      "reason": "跌出初筛排名前 12 或不再符合条件",
+      "status": "rejected",
+      "id": "20261106-quant-02"
+    },
+    {
+      "target_weight": 0.0,
+      "reason_type": "exit",
+      "risk_notes": [],
+      "code": "sz002242",
+      "name": "九阳股份",
+      "reason": "跌出初筛排名前 12 或不再符合条件",
+      "status": "approved",
+      "id": "20261106-quant-03"
+    },
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [
+        "本周新开仓已达上限 3"
+      ],
+      "code": "sz000678",
+      "name": "襄阳轴承",
+      "reason": "初筛排名 2，20 日风险调整动量 0.59",
+      "status": "rejected",
+      "id": "20261106-quant-04"
+    },
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [
+        "本周新开仓已达上限 3"
+      ],
+      "code": "sh601166",
+      "name": "兴业银行",
+      "reason": "初筛排名 4，20 日风险调整动量 0.41",
+      "status": "rejected",
+      "id": "20261106-quant-05"
+    },
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [
+        "按单票上限/单笔风险 1% 下调至 12.5%",
+        "本周新开仓已达上限 3"
+      ],
+      "code": "sz000333",
+      "name": "美的集团",
+      "reason": "初筛排名 5，20 日风险调整动量 0.39",
+      "status": "rejected",
+      "id": "20261106-quant-06"
+    },
+    {
+      "code": "sh510300",
+      "name": "沪深300ETF",
+      "target_weight": 0.3064,
+      "reason_type": "park",
+      "reason": "底仓 ETF：闲置资金停泊",
+      "status": "approved",
+      "risk_notes": [
+        "市场状态 defense，风控状态 normal，总仓位区间 30%-50%"
+      ],
+      "id": "20261106-quant-07"
+    }
+  ]
+}
