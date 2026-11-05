@@ -7,3 +7,6 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-02,quant,20261102-quant-04,sh510300,沪深300ETF,sell,4500.0,4.087,18391.5,5,0.0,0.0,9.0,-369.69,,False,park,minute,
 2026-11-02,quant,20261102-quant-02,sh601328,交通银行,buy,1400.0,8.569,11996.6,5,0.0,0.12,12.6,,True,,entry,minute,
 2026-11-02,quant,20261102-quant-03,sh600887,伊利股份,buy,400.0,30.671,12268.4,5,0.0,0.12,12.4,,True,,entry,minute,
+2026-11-05,quant,20261105-quant-01,sh601328,交通银行,sell,1400.0,8.162,11426.8,5,5.71,0.11,11.2,-585.74,,True,exit,minute,
+2026-11-05,quant,20261105-quant-03,sh510300,沪深300ETF,sell,200.0,4.178,835.6,5,0.0,0.0,0.4,-3.01,,False,park,minute,
+2026-11-05,quant,20261105-quant-02,sz301313,凡拓数创,buy,100.0,66.967,6696.7,5,0.0,0.07,6.7,,True,,entry,minute,

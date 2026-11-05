@@ -2,7 +2,7 @@
   "name": "quant",
   "strategy": "quant",
   "initial_cash": 100000,
-  "cash": 49925.11999999998,
+  "cash": 55469.929999999986,
   "start_date": "2026-10-23",
   "positions": {
     "sz002242": {
@@ -35,26 +35,13 @@
       "name": "沪深300ETF",
       "kind": "etf",
       "role": "park",
-      "shares": 3900.0,
-      "cost": 16255.3625,
+      "shares": 3700.0,
+      "cost": 15421.754166666666,
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
       "last_buy_date": "2026-10-26",
       "last_price": 4.092,
       "high_close": 4.152
-    },
-    "sh601328": {
-      "name": "交通银行",
-      "kind": "stock",
-      "role": "stock",
-      "shares": 1400.0,
-      "cost": 12001.720000000001,
-      "first_buy_date": "2026-11-02",
-      "hfq": 2.7912206056332,
-      "last_buy_date": "2026-11-02",
-      "last_price": 8.25,
-      "stop_price": 7.887,
-      "high_close": 8.57
     },
     "sh600887": {
       "name": "伊利股份",
@@ -68,6 +55,18 @@
       "last_price": 30.71,
       "stop_price": 28.229,
       "high_close": 31.47
+    },
+    "sz301313": {
+      "name": "凡拓数创",
+      "kind": "stock",
+      "role": "stock",
+      "shares": 100.0,
+      "cost": 6701.7699999999995,
+      "first_buy_date": "2026-11-05",
+      "hfq": 1.0110671659476,
+      "last_buy_date": "2026-11-05",
+      "last_price": 66.9,
+      "stop_price": 61.656
     }
   },
   "peak": 100056.91999999998,
@@ -84,6 +83,7 @@
     "2026-10-30",
     "2026-11-02",
     "2026-11-03",
-    "2026-11-04"
+    "2026-11-04",
+    "2026-11-05"
   ]
 }
