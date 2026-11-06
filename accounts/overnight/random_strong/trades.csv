@@ -19,3 +19,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-05,overnight/random_strong,20261105-overnight_random_strong-sz002903,sz002903,宇环数控,buy,900,25.1,22590.0,5.65,0.0,0.23,0.0,,True,,overnight_entry,close_auction,
 2026-11-05,overnight/random_strong,20261105-overnight_random_strong-sh688772,sh688772,珠海冠宇,buy,1400,16.78,23492.0,5.87,0.0,0.23,0.0,,True,,overnight_entry,close_auction,
 2026-11-05,overnight/random_strong,20261105-overnight_random_strong-sz301155,sz301155,海力风电,buy,500,43.0,21500.0,5.38,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
+2026-11-06,overnight/random_strong,20261105-overnight_random_strong-sz002048,sz002048,宁波华翔,sell,1200,18.58,22296.0,5.57,11.15,0.22,0.0,-1127.02,,True,overnight_exit,open_auction,
+2026-11-06,overnight/random_strong,20261105-overnight_random_strong-sz002903,sz002903,宇环数控,sell,900,24.1,21690.0,5.42,10.85,0.22,0.0,-922.37,,True,overnight_exit,open_auction,
+2026-11-06,overnight/random_strong,20261105-overnight_random_strong-sh688772,sh688772,珠海冠宇,sell,1400,16.0,22400.0,5.6,11.2,0.22,0.0,-1115.12,,True,overnight_exit,open_auction,
+2026-11-06,overnight/random_strong,20261105-overnight_random_strong-sz301155,sz301155,海力风电,sell,500,42.01,21005.0,5.25,10.5,0.21,0.0,-516.56,,True,overnight_exit,open_auction,

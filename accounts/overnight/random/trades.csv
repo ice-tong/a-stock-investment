@@ -19,3 +19,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-05,overnight/random,20261105-overnight_random-sz300916,sz300916,朗特智能,buy,800,28.53,22824.0,5.71,0.0,0.23,0.0,,True,,overnight_entry,close_auction,
 2026-11-05,overnight/random,20261105-overnight_random-sh688227,sh688227,品高股份,buy,300,68.58,20574.0,5.14,0.0,0.21,0.0,,True,,overnight_entry,close_auction,
 2026-11-05,overnight/random,20261105-overnight_random-sz001248,sz001248,华润新能,buy,2200,10.82,23804.0,5.95,0.0,0.24,0.0,,True,,overnight_entry,close_auction,
+2026-11-06,overnight/random,20261105-overnight_random-sz000333,sz000333,美的集团,sell,200,87.52,17504.0,5,8.75,0.18,0.0,-139.11,,True,overnight_exit,open_auction,
+2026-11-06,overnight/random,20261105-overnight_random-sz300916,sz300916,朗特智能,sell,800,26.83,21464.0,5.37,10.73,0.21,0.0,-1382.25,,True,overnight_exit,open_auction,
+2026-11-06,overnight/random,20261105-overnight_random-sh688227,sh688227,品高股份,sell,300,64.85,19455.0,5,9.73,0.19,0.0,-1139.27,,True,overnight_exit,open_auction,
+2026-11-06,overnight/random,20261105-overnight_random-sz001248,sz001248,华润新能,sell,2200,10.63,23386.0,5.85,11.69,0.23,0.0,-441.96,,True,overnight_exit,open_auction,

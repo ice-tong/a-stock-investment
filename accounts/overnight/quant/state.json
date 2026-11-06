@@ -2,85 +2,15 @@
   "name": "overnight/quant",
   "strategy": "overnight_quant",
   "initial_cash": 100000,
-  "cash": 29333.46,
+  "cash": 91886.89,
   "start_date": "2026-11-02",
-  "positions": {
-    "sh603258": {
-      "name": "电魂网络",
-      "kind": "stock",
-      "shares": 1400,
-      "cost": 23596.14,
-      "buy_price": 16.85,
-      "night": "2026-11-05",
-      "last_price": 16.85,
-      "order_id": "20261105-overnight_quant-sh603258",
-      "pred": {
-        "night": "2026-11-05",
-        "account": "quant",
-        "code": "sh603258",
-        "name": "电魂网络",
-        "weight": 0.25,
-        "p_win": null,
-        "exp_gap": null,
-        "thesis_type": null,
-        "source": "quant",
-        "exception": "",
-        "buy_price": 16.85
-      }
-    },
-    "sh688158": {
-      "name": "优刻得",
-      "kind": "stock",
-      "shares": 700,
-      "cost": 21159.5,
-      "buy_price": 30.22,
-      "night": "2026-11-05",
-      "last_price": 30.22,
-      "order_id": "20261105-overnight_quant-sh688158",
-      "pred": {
-        "night": "2026-11-05",
-        "account": "quant",
-        "code": "sh688158",
-        "name": "优刻得",
-        "weight": 0.25,
-        "p_win": null,
-        "exp_gap": null,
-        "thesis_type": null,
-        "source": "quant",
-        "exception": "",
-        "buy_price": 30.22
-      }
-    },
-    "sh688209": {
-      "name": "英集芯",
-      "kind": "stock",
-      "shares": 800,
-      "cost": 21213.51,
-      "buy_price": 26.51,
-      "night": "2026-11-05",
-      "last_price": 26.51,
-      "order_id": "20261105-overnight_quant-sh688209",
-      "pred": {
-        "night": "2026-11-05",
-        "account": "quant",
-        "code": "sh688209",
-        "name": "英集芯",
-        "weight": 0.25,
-        "p_win": null,
-        "exp_gap": null,
-        "thesis_type": null,
-        "source": "quant",
-        "exception": "",
-        "buy_price": 26.51
-      }
-    }
-  },
+  "positions": {},
   "peak": 100000,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-05",
+  "last_settled": "2026-11-06",
   "executed": [],
   "veto_pending": []
 }

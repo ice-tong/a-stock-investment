@@ -18,3 +18,6 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-05,overnight/quant,20261105-overnight_quant-sh603258,sh603258,电魂网络,buy,1400,16.85,23590.0,5.9,0.0,0.24,0.0,,True,,overnight_entry,close_auction,
 2026-11-05,overnight/quant,20261105-overnight_quant-sh688158,sh688158,优刻得,buy,700,30.22,21154.0,5.29,0.0,0.21,0.0,,True,,overnight_entry,close_auction,
 2026-11-05,overnight/quant,20261105-overnight_quant-sh688209,sh688209,英集芯,buy,800,26.51,21208.0,5.3,0.0,0.21,0.0,,True,,overnight_entry,close_auction,
+2026-11-06,overnight/quant,20261105-overnight_quant-sh603258,sh603258,电魂网络,sell,1400,16.0,22400.0,5.6,11.2,0.22,0.0,-1213.16,,True,overnight_exit,open_auction,
+2026-11-06,overnight/quant,20261105-overnight_quant-sh688158,sh688158,优刻得,sell,700,28.87,20209.0,5.05,10.1,0.2,0.0,-965.85,,True,overnight_exit,open_auction,
+2026-11-06,overnight/quant,20261105-overnight_quant-sh688209,sh688209,英集芯,sell,800,24.99,19992.0,5,10.0,0.2,0.0,-1236.71,,True,overnight_exit,open_auction,
