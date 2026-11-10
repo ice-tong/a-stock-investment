@@ -21,3 +21,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-06,overnight/quant,20261105-overnight_quant-sh603258,sh603258,电魂网络,sell,1400,16.0,22400.0,5.6,11.2,0.22,0.0,-1213.16,,True,overnight_exit,open_auction,
 2026-11-06,overnight/quant,20261105-overnight_quant-sh688158,sh688158,优刻得,sell,700,28.87,20209.0,5.05,10.1,0.2,0.0,-965.85,,True,overnight_exit,open_auction,
 2026-11-06,overnight/quant,20261105-overnight_quant-sh688209,sh688209,英集芯,sell,800,24.99,19992.0,5,10.0,0.2,0.0,-1236.71,,True,overnight_exit,open_auction,
+2026-11-10,overnight/quant,20261110-overnight_quant-sh688486,sh688486,龙迅股份,buy,400,46.78,18712.0,5,0.0,0.19,0.0,,True,,overnight_entry,close_auction,
+2026-11-10,overnight/quant,20261110-overnight_quant-sz300133,sz300133,华策影视,buy,2000,11.29,22580.0,5.65,0.0,0.23,0.0,,True,,overnight_entry,close_auction,
+2026-11-10,overnight/quant,20261110-overnight_quant-sz300118,sz300118,东方日升,buy,1900,11.59,22021.0,5.51,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
+2026-11-10,overnight/quant,20261110-overnight_quant-sz300494,sz300494,盛天网络,buy,2000,11.0,22000.0,5.5,0.0,0.22,0.0,,True,,overnight_entry,close_auction,

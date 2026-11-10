@@ -23,3 +23,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-06,overnight/random_strong,20261105-overnight_random_strong-sz002903,sz002903,宇环数控,sell,900,24.1,21690.0,5.42,10.85,0.22,0.0,-922.37,,True,overnight_exit,open_auction,
 2026-11-06,overnight/random_strong,20261105-overnight_random_strong-sh688772,sh688772,珠海冠宇,sell,1400,16.0,22400.0,5.6,11.2,0.22,0.0,-1115.12,,True,overnight_exit,open_auction,
 2026-11-06,overnight/random_strong,20261105-overnight_random_strong-sz301155,sz301155,海力风电,sell,500,42.01,21005.0,5.25,10.5,0.21,0.0,-516.56,,True,overnight_exit,open_auction,
+2026-11-10,overnight/random_strong,20261110-overnight_random_strong-sz300133,sz300133,华策影视,buy,2000,11.29,22580.0,5.65,0.0,0.23,0.0,,True,,overnight_entry,close_auction,
+2026-11-10,overnight/random_strong,20261110-overnight_random_strong-sz003032,sz003032,传智教育,buy,2200,10.1,22220.0,5.55,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
+2026-11-10,overnight/random_strong,20261110-overnight_random_strong-sz002920,sz002920,德赛西威,buy,200,83.09,16618.0,5,0.0,0.17,0.0,,True,,overnight_entry,close_auction,
+2026-11-10,overnight/random_strong,20261110-overnight_random_strong-sh688209,sh688209,英集芯,buy,800,26.9,21520.0,5.38,0.0,0.22,0.0,,True,,overnight_entry,close_auction,

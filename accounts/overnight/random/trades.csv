@@ -23,3 +23,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-06,overnight/random,20261105-overnight_random-sz300916,sz300916,朗特智能,sell,800,26.83,21464.0,5.37,10.73,0.21,0.0,-1382.25,,True,overnight_exit,open_auction,
 2026-11-06,overnight/random,20261105-overnight_random-sh688227,sh688227,品高股份,sell,300,64.85,19455.0,5,9.73,0.19,0.0,-1139.27,,True,overnight_exit,open_auction,
 2026-11-06,overnight/random,20261105-overnight_random-sz001248,sz001248,华润新能,sell,2200,10.63,23386.0,5.85,11.69,0.23,0.0,-441.96,,True,overnight_exit,open_auction,
+2026-11-10,overnight/random,20261110-overnight_random-sz300657,sz300657,弘信电子,buy,700,30.6,21420.0,5.36,0.0,0.21,0.0,,True,,overnight_entry,close_auction,
+2026-11-10,overnight/random,20261110-overnight_random-sh600938,sh600938,中国海油,buy,800,29.88,23904.0,5.98,0.0,0.24,0.0,,True,,overnight_entry,close_auction,
+2026-11-10,overnight/random,20261110-overnight_random-sh603888,sh603888,新华网,buy,1300,17.21,22373.0,5.59,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
+2026-11-10,overnight/random,20261110-overnight_random-sz002716,sz002716,湖南白银,buy,3100,7.67,23777.0,5.94,0.0,0.24,0.0,,True,,overnight_entry,close_auction,
