@@ -14,7 +14,7 @@
       "first_buy_date": "2026-10-26",
       "hfq": 6.7422879877129,
       "last_buy_date": "2026-10-26",
-      "last_price": 42.88,
+      "last_price": 43.01,
       "stop_price": 38.854,
       "high_close": 43.55
     },
@@ -27,7 +27,7 @@
       "first_buy_date": "2026-10-26",
       "hfq": 2.7912206056332,
       "last_buy_date": "2026-10-26",
-      "last_price": 8.3,
+      "last_price": 8.41,
       "stop_price": 7.559,
       "high_close": 8.63
     },
@@ -40,7 +40,7 @@
       "first_buy_date": "2026-10-26",
       "hfq": 109.20660346095481,
       "last_buy_date": "2026-10-26",
-      "last_price": 31.45,
+      "last_price": 31.14,
       "stop_price": 26.283,
       "high_close": 31.47
     },
@@ -53,7 +53,7 @@
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
       "last_buy_date": "2026-10-26",
-      "last_price": 4.195,
+      "last_price": 4.13,
       "high_close": 4.195
     },
     "sz300296": {
@@ -65,17 +65,17 @@
       "first_buy_date": "2026-11-02",
       "hfq": 20.0495450249254,
       "last_buy_date": "2026-11-02",
-      "last_price": 5.47,
+      "last_price": 5.93,
       "stop_price": 5.233,
-      "high_close": 5.8
+      "high_close": 5.93
     }
   },
-  "peak": 100345.60999999999,
+  "peak": 100530.60999999999,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-06",
+  "last_settled": "2026-11-10",
   "executed": [
     "2026-10-26",
     "2026-10-27",
