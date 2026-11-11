@@ -12,7 +12,7 @@
       "cost": 9934.7,
       "first_buy_date": "2026-11-02",
       "hfq": 3.5780452606683,
-      "last_price": 6.39
+      "last_price": 6.41
     },
     "sh600262": {
       "name": "北方股份",
@@ -21,7 +21,7 @@
       "cost": 8611.49,
       "first_buy_date": "2026-11-02",
       "hfq": 2.2653671990293,
-      "last_price": 14.3
+      "last_price": 14.41
     },
     "sz301408": {
       "name": "华人健康",
@@ -39,7 +39,7 @@
       "cost": 9304.09,
       "first_buy_date": "2026-11-02",
       "hfq": 7.436745905399901,
-      "last_price": 9.53
+      "last_price": 9.47
     },
     "sz301175": {
       "name": "中科环保",
@@ -48,7 +48,7 @@
       "cost": 9467.289999999999,
       "first_buy_date": "2026-11-02",
       "hfq": 1.0991712900437,
-      "last_price": 5.66
+      "last_price": 5.69
     },
     "sz300407": {
       "name": "凯发电气",
@@ -66,7 +66,7 @@
       "cost": 9506.7,
       "first_buy_date": "2026-11-02",
       "hfq": 1.0298406602569,
-      "last_price": 15.83
+      "last_price": 15.82
     },
     "sh600638": {
       "name": "新黄浦",
@@ -75,7 +75,7 @@
       "cost": 9825.900000000001,
       "first_buy_date": "2026-11-02",
       "hfq": 21.2719617997789,
-      "last_price": 4.44
+      "last_price": 4.49
     },
     "sz300932": {
       "name": "三友联众",
@@ -84,7 +84,7 @@
       "cost": 9770.7,
       "first_buy_date": "2026-11-02",
       "hfq": 3.8443168915792,
-      "last_price": 8.24
+      "last_price": 8.35
     },
     "sz001311": {
       "name": "多利科技",
@@ -93,7 +93,7 @@
       "cost": 8834.09,
       "first_buy_date": "2026-11-02",
       "hfq": 3.0247607287513,
-      "last_price": 15.51
+      "last_price": 15.9
     }
   },
   "peak": 102836.05,
@@ -101,7 +101,7 @@
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-10",
+  "last_settled": "2026-11-11",
   "executed": [
     "2026-11-02"
   ]
