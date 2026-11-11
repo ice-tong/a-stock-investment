@@ -2,46 +2,44 @@
   "name": "quant",
   "strategy": "quant",
   "initial_cash": 100000,
-  "cash": 49407.929999999986,
+  "cash": 65042.579999999965,
   "start_date": "2026-10-23",
   "positions": {
     "sh510300": {
       "name": "沪深300ETF",
       "kind": "etf",
       "role": "park",
-      "shares": 7300.0,
-      "cost": 30298.354166666664,
+      "shares": 3000.0,
+      "cost": 12451.378424657534,
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
       "last_buy_date": "2026-11-06",
       "last_price": 4.13,
       "high_close": 4.195
     },
-    "sh600887": {
-      "name": "伊利股份",
+    "sz002242": {
+      "name": "九阳股份",
       "kind": "stock",
       "role": "stock",
       "shares": 400.0,
-      "cost": 12273.52,
-      "first_buy_date": "2026-11-02",
-      "hfq": 109.20660346095481,
-      "last_buy_date": "2026-11-02",
-      "last_price": 31.14,
-      "stop_price": 28.229,
-      "high_close": 31.47
+      "cost": 10619.91,
+      "first_buy_date": "2026-11-11",
+      "hfq": 5.6695054256078,
+      "last_buy_date": "2026-11-11",
+      "last_price": 26.51,
+      "stop_price": 24.426
     },
-    "sz301313": {
-      "name": "凡拓数创",
+    "sh601166": {
+      "name": "兴业银行",
       "kind": "stock",
       "role": "stock",
-      "shares": 100.0,
-      "cost": 6701.7699999999995,
-      "first_buy_date": "2026-11-05",
-      "hfq": 1.0110671659476,
-      "last_buy_date": "2026-11-05",
-      "last_price": 76.49,
-      "stop_price": 61.656,
-      "high_close": 76.49
+      "shares": 600.0,
+      "cost": 11783.12,
+      "first_buy_date": "2026-11-11",
+      "hfq": 5.9911993595577,
+      "last_buy_date": "2026-11-11",
+      "last_price": 19.61,
+      "stop_price": 18.067
     }
   },
   "peak": 100056.91999999998,
@@ -60,6 +58,7 @@
     "2026-11-03",
     "2026-11-04",
     "2026-11-05",
-    "2026-11-06"
+    "2026-11-06",
+    "2026-11-11"
   ]
 }
