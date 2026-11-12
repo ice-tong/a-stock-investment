@@ -2,19 +2,19 @@
   "name": "quant",
   "strategy": "quant",
   "initial_cash": 100000,
-  "cash": 65042.579999999965,
+  "cash": 50480.05999999996,
   "start_date": "2026-10-23",
   "positions": {
     "sh510300": {
       "name": "沪深300ETF",
       "kind": "etf",
       "role": "park",
-      "shares": 3000.0,
-      "cost": 12451.378424657534,
+      "shares": 3600.0,
+      "cost": 14927.778424657534,
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
-      "last_buy_date": "2026-11-06",
-      "last_price": 4.15,
+      "last_buy_date": "2026-11-12",
+      "last_price": 4.117,
       "high_close": 4.195
     },
     "sz002242": {
@@ -42,6 +42,18 @@
       "last_price": 19.55,
       "stop_price": 18.067,
       "high_close": 19.55
+    },
+    "sz300007": {
+      "name": "汉威科技",
+      "kind": "stock",
+      "role": "stock",
+      "shares": 300.0,
+      "cost": 12086.120000000003,
+      "first_buy_date": "2026-11-12",
+      "hfq": 4.2509480795954,
+      "last_buy_date": "2026-11-12",
+      "last_price": 40.23,
+      "stop_price": 37.064
     }
   },
   "peak": 100056.91999999998,
@@ -61,6 +73,7 @@
     "2026-11-04",
     "2026-11-05",
     "2026-11-06",
-    "2026-11-11"
+    "2026-11-11",
+    "2026-11-12"
   ]
 }

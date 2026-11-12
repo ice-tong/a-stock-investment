@@ -18,3 +18,5 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-11,quant,20261111-quant-07,sh510300,沪深300ETF,sell,4300.0,4.148,17836.4,5,0.0,0.0,8.6,-15.58,,False,park,minute,
 2026-11-11,quant,20261111-quant-03,sz002242,九阳股份,buy,400.0,26.537,10614.8,5,0.0,0.11,10.8,,True,,entry,minute,
 2026-11-11,quant,20261111-quant-04,sh601166,兴业银行,buy,600.0,19.63,11778.0,5,0.0,0.12,12.0,,True,,entry,minute,
+2026-11-12,quant,20261112-quant-03,sz300007,汉威科技,buy,300.0,40.27,12081.0,5,0.0,0.12,12.0,,True,,entry,minute,
+2026-11-12,quant,20261112-quant-07,sh510300,沪深300ETF,buy,600.0,4.119,2471.4,5,0.0,0.0,1.2,,False,,park,minute,
