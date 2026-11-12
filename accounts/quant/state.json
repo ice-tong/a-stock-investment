@@ -14,7 +14,7 @@
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
       "last_buy_date": "2026-11-12",
-      "last_price": 4.117,
+      "last_price": 4.114,
       "high_close": 4.195
     },
     "sz002242": {
@@ -26,9 +26,9 @@
       "first_buy_date": "2026-11-11",
       "hfq": 5.6695054256078,
       "last_buy_date": "2026-11-11",
-      "last_price": 26.59,
+      "last_price": 26.65,
       "stop_price": 24.426,
-      "high_close": 26.59
+      "high_close": 26.65
     },
     "sh601166": {
       "name": "兴业银行",
@@ -39,9 +39,9 @@
       "first_buy_date": "2026-11-11",
       "hfq": 5.9911993595577,
       "last_buy_date": "2026-11-11",
-      "last_price": 19.55,
+      "last_price": 19.58,
       "stop_price": 18.067,
-      "high_close": 19.55
+      "high_close": 19.58
     },
     "sz300007": {
       "name": "汉威科技",
@@ -52,8 +52,9 @@
       "first_buy_date": "2026-11-12",
       "hfq": 4.2509480795954,
       "last_buy_date": "2026-11-12",
-      "last_price": 40.23,
-      "stop_price": 37.064
+      "last_price": 40.14,
+      "stop_price": 37.064,
+      "high_close": 40.14
     }
   },
   "peak": 100056.91999999998,
@@ -61,7 +62,7 @@
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-11",
+  "last_settled": "2026-11-12",
   "executed": [
     "2026-10-26",
     "2026-10-27",

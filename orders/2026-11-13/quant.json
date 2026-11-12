@@ -1,0 +1,81 @@
+{
+  "account": "quant",
+  "strategy": "quant",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-13",
+  "decided_on": "2026-11-12",
+  "frozen_at": "2026-11-12T21:01:47",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 99740.46,
+  "meta": {},
+  "draft_errors": [],
+  "orders": [
+    {
+      "target_weight": 0.0,
+      "reason_type": "exit",
+      "risk_notes": [
+        "未满最短持有期 3 个交易日"
+      ],
+      "code": "sh601166",
+      "name": "兴业银行",
+      "reason": "跌出初筛排名前 12 或不再符合条件",
+      "status": "rejected",
+      "id": "20261113-quant-01"
+    },
+    {
+      "target_weight": 0.0,
+      "reason_type": "exit",
+      "risk_notes": [
+        "未满最短持有期 3 个交易日"
+      ],
+      "code": "sz300007",
+      "name": "汉威科技",
+      "reason": "跌出初筛排名前 12 或不再符合条件",
+      "status": "rejected",
+      "id": "20261113-quant-02"
+    },
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [
+        "本周新开仓已达上限 3"
+      ],
+      "code": "sz000678",
+      "name": "襄阳轴承",
+      "reason": "初筛排名 1，20 日风险调整动量 1.22",
+      "status": "rejected",
+      "id": "20261113-quant-03"
+    },
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [
+        "本周新开仓已达上限 3"
+      ],
+      "code": "sh605488",
+      "name": "福莱新材",
+      "reason": "初筛排名 2，20 日风险调整动量 1.14",
+      "status": "rejected",
+      "id": "20261113-quant-04"
+    },
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [
+        "按单票上限/单笔风险 1% 下调至 12.5%",
+        "本周新开仓已达上限 3"
+      ],
+      "code": "sz301313",
+      "name": "凡拓数创",
+      "reason": "初筛排名 4，20 日风险调整动量 0.86",
+      "status": "rejected",
+      "id": "20261113-quant-05"
+    }
+  ]
+}
