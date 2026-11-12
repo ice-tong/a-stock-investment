@@ -11,3 +11,5 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-11,overnight/agent,20261110-overnight_agent-sz300251,sz300251,光线传媒,sell,1900,12.92,24548.0,6.14,12.27,0.25,0.0,-25.05,,True,overnight_exit,open_auction,
 2026-11-11,overnight/agent,20261111-overnight_agent-sz300607,sz300607,拓斯达,buy,400,33.37,13348.0,5,0.0,0.13,0.0,,True,,overnight_entry,close_auction,
 2026-11-11,overnight/agent,20261111-overnight_agent-sh601138,sh601138,工业富联,buy,200,45.56,9112.0,5,0.0,0.09,0.0,,True,,overnight_entry,close_auction,
+2026-11-12,overnight/agent,20261111-overnight_agent-sz300607,sz300607,拓斯达,sell,400,33.2,13280.0,5,6.64,0.13,0.0,-84.9,,True,overnight_exit,open_auction,
+2026-11-12,overnight/agent,20261111-overnight_agent-sh601138,sh601138,工业富联,sell,200,44.78,8956.0,5,4.48,0.09,0.0,-170.66,,True,overnight_exit,open_auction,

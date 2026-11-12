@@ -2,133 +2,15 @@
   "name": "overnight/agent",
   "strategy": "overnight_agent",
   "initial_cash": 100000,
-  "cash": 75865.35,
+  "cash": 98080.01,
   "start_date": "2026-11-02",
-  "positions": {
-    "sz300607": {
-      "name": "拓斯达",
-      "kind": "stock",
-      "shares": 400,
-      "cost": 13353.13,
-      "buy_price": 33.37,
-      "night": "2026-11-11",
-      "last_price": 33.37,
-      "order_id": "20261111-overnight_agent-sz300607",
-      "pred": {
-        "night": "2026-11-11",
-        "account": "agent",
-        "code": "sz300607",
-        "name": "拓斯达",
-        "weight": 0.15,
-        "p_win": 0.48,
-        "exp_gap": 0.0006,
-        "thesis_type": "板块龙头尾盘抢筹",
-        "source": "draft",
-        "exception": "",
-        "buy_price": 33.37
-      }
-    },
-    "sh601138": {
-      "name": "工业富联",
-      "kind": "stock",
-      "shares": 200,
-      "cost": 9117.09,
-      "buy_price": 45.56,
-      "night": "2026-11-11",
-      "last_price": 45.56,
-      "order_id": "20261111-overnight_agent-sh601138",
-      "pred": {
-        "night": "2026-11-11",
-        "account": "agent",
-        "code": "sh601138",
-        "name": "工业富联",
-        "weight": 0.1,
-        "p_win": 0.5,
-        "exp_gap": 0.001,
-        "thesis_type": "资金回流",
-        "source": "draft",
-        "exception": "",
-        "buy_price": 45.56
-      }
-    }
-  },
+  "positions": {},
   "peak": 100002.79,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-11",
+  "last_settled": "2026-11-12",
   "executed": [],
-  "veto_prev": [
-    {
-      "code": "sz300502",
-      "name": "新易盛",
-      "p_win": 0.35,
-      "reason": "+17.39%、234 亿、位置 0.98，加速末段；经验库「13~18% 高位票次日集体低开」",
-      "night": "2026-11-11"
-    },
-    {
-      "code": "sz300570",
-      "name": "太辰光",
-      "p_win": 0.35,
-      "reason": "+18.10%、位置 0.91，已进入涨停板附近的高位加速",
-      "night": "2026-11-11"
-    },
-    {
-      "code": "sz300394",
-      "name": "天孚通信",
-      "p_win": 0.38,
-      "reason": "+13.89%、位置 0.96，午后被拉回高位但属跟风补涨",
-      "night": "2026-11-11"
-    },
-    {
-      "code": "sh688048",
-      "name": "长光华芯",
-      "p_win": 0.35,
-      "reason": "+12.54%、位置 0.98，光芯片加速段",
-      "night": "2026-11-11"
-    },
-    {
-      "code": "sz300620",
-      "name": "光库科技",
-      "p_win": 0.35,
-      "reason": "+12.54%、位置 0.97，同链加速",
-      "night": "2026-11-11"
-    },
-    {
-      "code": "sz300489",
-      "name": "光智科技",
-      "p_win": 0.36,
-      "reason": "+14.84%、位置 0.78，尾盘冲高但位置已回落",
-      "night": "2026-11-11"
-    },
-    {
-      "code": "sh688313",
-      "name": "仕佳光子",
-      "p_win": 0.4,
-      "reason": "+14.66%、定增在审，审核进展公告随时可能发布",
-      "night": "2026-11-11"
-    },
-    {
-      "code": "sz300476",
-      "name": "胜宏科技",
-      "p_win": 0.38,
-      "reason": "+10.62%、位置 0.91，PCB 高位跟随",
-      "night": "2026-11-11"
-    },
-    {
-      "code": "sh688167",
-      "name": "炬光科技",
-      "p_win": 0.35,
-      "reason": "+10.68%、位置 0.99，成交仅 12 亿的小票加速",
-      "night": "2026-11-11"
-    },
-    {
-      "code": "sz301205",
-      "name": "联特科技",
-      "p_win": 0.38,
-      "reason": "+12.94%、位置 0.96，明日召开临时股东会在持有窗口内",
-      "night": "2026-11-11"
-    }
-  ]
+  "veto_prev": []
 }

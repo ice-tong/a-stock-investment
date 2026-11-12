@@ -32,3 +32,6 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-11,overnight/quant,20261111-overnight_quant-sz300502,sz300502,新易盛,buy,100,215.0,21500.0,5.38,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
 2026-11-11,overnight/quant,20261111-overnight_quant-sz300570,sz300570,太辰光,buy,100,125.0,12500.0,5,0.0,0.12,0.0,,True,,overnight_entry,close_auction,
 2026-11-11,overnight/quant,20261111-overnight_quant-sz300394,sz300394,天孚通信,buy,100,144.06,14406.0,5,0.0,0.14,0.0,,True,,overnight_entry,close_auction,
+2026-11-12,overnight/quant,20261111-overnight_quant-sz300502,sz300502,新易盛,sell,100,212.5,21250.0,5.31,10.62,0.21,0.0,-271.74,,True,overnight_exit,open_auction,
+2026-11-12,overnight/quant,20261111-overnight_quant-sz300570,sz300570,太辰光,sell,100,125.75,12575.0,5,6.29,0.13,0.0,58.46,,True,overnight_exit,open_auction,
+2026-11-12,overnight/quant,20261111-overnight_quant-sz300394,sz300394,天孚通信,sell,100,143.5,14350.0,5,7.17,0.14,0.0,-73.45,,True,overnight_exit,open_auction,

@@ -2,85 +2,15 @@
   "name": "overnight/quant",
   "strategy": "overnight_quant",
   "initial_cash": 100000,
-  "cash": 41148.02,
+  "cash": 89283.15,
   "start_date": "2026-11-02",
-  "positions": {
-    "sz300502": {
-      "name": "新易盛",
-      "kind": "stock",
-      "shares": 100,
-      "cost": 21505.6,
-      "buy_price": 215.0,
-      "night": "2026-11-11",
-      "last_price": 215.0,
-      "order_id": "20261111-overnight_quant-sz300502",
-      "pred": {
-        "night": "2026-11-11",
-        "account": "quant",
-        "code": "sz300502",
-        "name": "新易盛",
-        "weight": 0.25,
-        "p_win": null,
-        "exp_gap": null,
-        "thesis_type": null,
-        "source": "quant",
-        "exception": "",
-        "buy_price": 215.0
-      }
-    },
-    "sz300570": {
-      "name": "太辰光",
-      "kind": "stock",
-      "shares": 100,
-      "cost": 12505.12,
-      "buy_price": 125.0,
-      "night": "2026-11-11",
-      "last_price": 125.0,
-      "order_id": "20261111-overnight_quant-sz300570",
-      "pred": {
-        "night": "2026-11-11",
-        "account": "quant",
-        "code": "sz300570",
-        "name": "太辰光",
-        "weight": 0.25,
-        "p_win": null,
-        "exp_gap": null,
-        "thesis_type": null,
-        "source": "quant",
-        "exception": "",
-        "buy_price": 125.0
-      }
-    },
-    "sz300394": {
-      "name": "天孚通信",
-      "kind": "stock",
-      "shares": 100,
-      "cost": 14411.14,
-      "buy_price": 144.06,
-      "night": "2026-11-11",
-      "last_price": 144.06,
-      "order_id": "20261111-overnight_quant-sz300394",
-      "pred": {
-        "night": "2026-11-11",
-        "account": "quant",
-        "code": "sz300394",
-        "name": "天孚通信",
-        "weight": 0.25,
-        "p_win": null,
-        "exp_gap": null,
-        "thesis_type": null,
-        "source": "quant",
-        "exception": "",
-        "buy_price": 144.06
-      }
-    }
-  },
+  "positions": {},
   "peak": 100000,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-11",
+  "last_settled": "2026-11-12",
   "executed": [],
   "veto_pending": []
 }

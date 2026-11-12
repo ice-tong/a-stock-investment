@@ -35,3 +35,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-11,overnight/random,20261111-overnight_random-sz002947,sz002947,恒铭达,buy,400,50.9,20360.0,5.09,0.0,0.2,0.0,,True,,overnight_entry,close_auction,
 2026-11-11,overnight/random,20261111-overnight_random-sh688323,sh688323,瑞华泰,buy,1100,19.86,21846.0,5.46,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
 2026-11-11,overnight/random,20261111-overnight_random-sh605196,sh605196,华通线缆,buy,900,25.92,23328.0,5.83,0.0,0.23,0.0,,True,,overnight_entry,close_auction,
+2026-11-12,overnight/random,20261111-overnight_random-sh603118,sh603118,共进股份,sell,1800,12.83,23094.0,5.77,11.55,0.23,0.0,30.46,,True,overnight_exit,open_auction,
+2026-11-12,overnight/random,20261111-overnight_random-sz002947,sz002947,恒铭达,sell,400,50.89,20356.0,5.09,10.18,0.2,0.0,-24.76,,True,overnight_exit,open_auction,
+2026-11-12,overnight/random,20261111-overnight_random-sh688323,sh688323,瑞华泰,sell,1100,19.86,21846.0,5.46,10.92,0.22,0.0,-22.28,,True,overnight_exit,open_auction,
+2026-11-12,overnight/random,20261111-overnight_random-sh605196,sh605196,华通线缆,sell,900,26.0,23400.0,5.85,11.7,0.23,0.0,48.16,,True,overnight_exit,open_auction,
