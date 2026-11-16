@@ -35,3 +35,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-12,overnight/quant,20261111-overnight_quant-sz300502,sz300502,新易盛,sell,100,212.5,21250.0,5.31,10.62,0.21,0.0,-271.74,,True,overnight_exit,open_auction,
 2026-11-12,overnight/quant,20261111-overnight_quant-sz300570,sz300570,太辰光,sell,100,125.75,12575.0,5,6.29,0.13,0.0,58.46,,True,overnight_exit,open_auction,
 2026-11-12,overnight/quant,20261111-overnight_quant-sz300394,sz300394,天孚通信,sell,100,143.5,14350.0,5,7.17,0.14,0.0,-73.45,,True,overnight_exit,open_auction,
+2026-11-16,overnight/quant,20261116-overnight_quant-sz000530,sz000530,冰山冷热,buy,2000,11.0,22000.0,5.5,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
+2026-11-16,overnight/quant,20261116-overnight_quant-sh600499,sh600499,科达制造,buy,1800,12.14,21852.0,5.46,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
+2026-11-16,overnight/quant,20261116-overnight_quant-sz000921,sz000921,海信家电,buy,900,23.6,21240.0,5.31,0.0,0.21,0.0,,True,,overnight_entry,close_auction,
+2026-11-16,overnight/quant,20261116-overnight_quant-sz301513,sz301513,尚水智能,buy,300,65.02,19506.0,5,0.0,0.2,0.0,,True,,overnight_entry,close_auction,

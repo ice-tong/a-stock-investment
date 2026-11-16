@@ -39,3 +39,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-12,overnight/random,20261111-overnight_random-sz002947,sz002947,恒铭达,sell,400,50.89,20356.0,5.09,10.18,0.2,0.0,-24.76,,True,overnight_exit,open_auction,
 2026-11-12,overnight/random,20261111-overnight_random-sh688323,sh688323,瑞华泰,sell,1100,19.86,21846.0,5.46,10.92,0.22,0.0,-22.28,,True,overnight_exit,open_auction,
 2026-11-12,overnight/random,20261111-overnight_random-sh605196,sh605196,华通线缆,sell,900,26.0,23400.0,5.85,11.7,0.23,0.0,48.16,,True,overnight_exit,open_auction,
+2026-11-16,overnight/random,20261116-overnight_random-sh600521,sh600521,华海药业,buy,1400,16.52,23128.0,5.78,0.0,0.23,0.0,,True,,overnight_entry,close_auction,
+2026-11-16,overnight/random,20261116-overnight_random-sh600036,sh600036,招商银行,buy,500,43.4,21700.0,5.42,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
+2026-11-16,overnight/random,20261116-overnight_random-sh601900,sh601900,南方传媒,buy,1600,14.65,23440.0,5.86,0.0,0.23,0.0,,True,,overnight_entry,close_auction,
+2026-11-16,overnight/random,20261116-overnight_random-sz002298,sz002298,中电鑫龙,buy,3100,7.43,23033.0,5.76,0.0,0.23,0.0,,True,,overnight_entry,close_auction,

@@ -39,3 +39,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-12,overnight/random_strong,20261111-overnight_random_strong-sz002851,sz002851,麦格米特,sell,200,82.19,16438.0,5,8.22,0.16,0.0,-16.54,,True,overnight_exit,open_auction,
 2026-11-12,overnight/random_strong,20261111-overnight_random_strong-sh688807,sh688807,优迅股份,sell,100,205.18,20518.0,5.13,10.26,0.21,0.0,97.1,,True,overnight_exit,open_auction,
 2026-11-12,overnight/random_strong,20261111-overnight_random_strong-sz300400,sz300400,劲拓股份,sell,900,25.27,22743.0,5.69,11.37,0.23,0.0,345.9,,True,overnight_exit,open_auction,
+2026-11-16,overnight/random_strong,20261116-overnight_random_strong-sz000860,sz000860,顺鑫农业,buy,1800,12.7,22860.0,5.71,0.0,0.23,0.0,,True,,overnight_entry,close_auction,
+2026-11-16,overnight/random_strong,20261116-overnight_random_strong-sz300770,sz300770,新媒股份,buy,500,42.13,21065.0,5.27,0.0,0.21,0.0,,True,,overnight_entry,close_auction,
+2026-11-16,overnight/random_strong,20261116-overnight_random_strong-sz002946,sz002946,新乳业,buy,1200,18.04,21648.0,5.41,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
+2026-11-16,overnight/random_strong,20261116-overnight_random_strong-sh600312,sh600312,平高电气,buy,1000,21.93,21930.0,5.48,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
