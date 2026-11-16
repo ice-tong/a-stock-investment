@@ -14,9 +14,9 @@
       "first_buy_date": "2026-11-11",
       "hfq": 5.6695054256078,
       "last_buy_date": "2026-11-11",
-      "last_price": 26.75,
+      "last_price": 28.65,
       "stop_price": 24.426,
-      "high_close": 26.75
+      "high_close": 28.65
     },
     "sh601166": {
       "name": "兴业银行",
@@ -27,9 +27,9 @@
       "first_buy_date": "2026-11-11",
       "hfq": 5.9911993595577,
       "last_buy_date": "2026-11-11",
-      "last_price": 19.83,
+      "last_price": 20.11,
       "stop_price": 18.067,
-      "high_close": 19.83
+      "high_close": 20.11
     },
     "sz300007": {
       "name": "汉威科技",
@@ -40,7 +40,7 @@
       "first_buy_date": "2026-11-12",
       "hfq": 4.2509480795954,
       "last_buy_date": "2026-11-12",
-      "last_price": 39.13,
+      "last_price": 38.56,
       "stop_price": 37.064,
       "high_close": 40.14
     },
@@ -54,7 +54,8 @@
       "hfq": 4.1261388933466,
       "last_buy_date": "2026-11-16",
       "last_price": 4.34,
-      "stop_price": 3.999
+      "stop_price": 3.999,
+      "high_close": 4.34
     },
     "sh605488": {
       "name": "福莱新材",
@@ -65,16 +66,17 @@
       "first_buy_date": "2026-11-16",
       "hfq": 2.1982927651381,
       "last_buy_date": "2026-11-16",
-      "last_price": 51.87,
-      "stop_price": 47.815
+      "last_price": 53.3,
+      "stop_price": 47.815,
+      "high_close": 53.3
     }
   },
-  "peak": 100056.91999999998,
+  "peak": 100230.33999999997,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-13",
+  "last_settled": "2026-11-16",
   "executed": [
     "2026-10-26",
     "2026-10-27",

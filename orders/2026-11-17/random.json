@@ -1,0 +1,54 @@
+{
+  "account": "random",
+  "strategy": "random",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-17",
+  "decided_on": "2026-11-16",
+  "frozen_at": "2026-11-16T20:00:38",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 98899.61,
+  "meta": {},
+  "draft_errors": [],
+  "orders": [
+    {
+      "code": "sz300296",
+      "name": "利亚德",
+      "target_weight": 0.0,
+      "reason_type": "stop_loss",
+      "reason": "系统强制卖出：stop_loss",
+      "status": "approved",
+      "risk_notes": [
+        "强制卖出"
+      ],
+      "id": "20261117-random-01"
+    },
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [],
+      "code": "sh600900",
+      "name": "长江电力",
+      "reason": "随机抽取（初筛排名 27）",
+      "status": "approved",
+      "id": "20261117-random-02"
+    },
+    {
+      "code": "sh510300",
+      "name": "沪深300ETF",
+      "target_weight": 0.2457,
+      "reason_type": "park",
+      "reason": "底仓 ETF：闲置资金停泊",
+      "status": "approved",
+      "risk_notes": [
+        "市场状态 defense，风控状态 normal，总仓位区间 30%-50%"
+      ],
+      "id": "20261117-random-03"
+    }
+  ]
+}

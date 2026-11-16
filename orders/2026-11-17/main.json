@@ -1,0 +1,56 @@
+{
+  "account": "main",
+  "strategy": "agent",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-17",
+  "decided_on": "2026-11-16",
+  "frozen_at": "2026-11-16T20:00:38",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 98979.5,
+  "meta": {
+    "tool": "qoder",
+    "model": "dfmodel",
+    "written_at": "2026-11-16T19:06:00",
+    "decided_on": "2026-11-16"
+  },
+  "draft_errors": [],
+  "orders": [
+    {
+      "target_weight": 0.08,
+      "reason_type": "entry",
+      "risk_notes": [],
+      "code": "sh601607",
+      "name": "上海医药",
+      "reason": "深度研究：PB 0.77（5年3%分位）、9M扣非+25.0%、控股股东拟增持H股叠加估值提升2.0方案，今日大盘下跌中放量突破半年线；置信度中",
+      "confidence": "中",
+      "channels": "defensive",
+      "industry": "商业百货",
+      "stop_price": 15.19,
+      "falsify": [
+        "2026 年报扣非归母同比转负",
+        "应收账款周转天数升破 110 天",
+        "收盘跌破 16.20（MA120）且 3 日未收回"
+      ],
+      "status": "approved",
+      "id": "20261117-main-01"
+    },
+    {
+      "code": "sh510300",
+      "name": "沪深300ETF",
+      "target_weight": 0.42,
+      "reason_type": "park",
+      "reason": "底仓 ETF：闲置资金停泊",
+      "status": "approved",
+      "risk_notes": [
+        "市场状态 defense，风控状态 normal，总仓位区间 30%-50%"
+      ],
+      "id": "20261117-main-02"
+    }
+  ]
+}

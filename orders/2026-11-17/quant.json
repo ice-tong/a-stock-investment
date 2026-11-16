@@ -1,0 +1,62 @@
+{
+  "account": "quant",
+  "strategy": "quant",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-17",
+  "decided_on": "2026-11-16",
+  "frozen_at": "2026-11-16T20:00:38",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 100230.34,
+  "meta": {},
+  "draft_errors": [],
+  "orders": [
+    {
+      "target_weight": 0.0,
+      "reason_type": "exit",
+      "risk_notes": [],
+      "code": "sz300007",
+      "name": "汉威科技",
+      "reason": "跌出初筛排名前 12 或不再符合条件",
+      "status": "approved",
+      "id": "20261117-quant-01"
+    },
+    {
+      "target_weight": 0.0,
+      "reason_type": "exit",
+      "risk_notes": [],
+      "code": "sz002242",
+      "name": "九阳股份",
+      "reason": "跌出初筛排名前 12 或不再符合条件",
+      "status": "approved",
+      "id": "20261117-quant-02"
+    },
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [],
+      "code": "sh600887",
+      "name": "伊利股份",
+      "reason": "初筛排名 3，20 日风险调整动量 0.67",
+      "status": "approved",
+      "id": "20261117-quant-03"
+    },
+    {
+      "code": "sh510300",
+      "name": "沪深300ETF",
+      "target_weight": 0.1278,
+      "reason_type": "park",
+      "reason": "底仓 ETF：闲置资金停泊",
+      "status": "approved",
+      "risk_notes": [
+        "市场状态 defense，风控状态 normal，总仓位区间 30%-50%"
+      ],
+      "id": "20261117-quant-04"
+    }
+  ]
+}
