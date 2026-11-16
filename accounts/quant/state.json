@@ -2,21 +2,9 @@
   "name": "quant",
   "strategy": "quant",
   "initial_cash": 100000,
-  "cash": 50480.05999999996,
+  "cash": 52428.33999999996,
   "start_date": "2026-10-23",
   "positions": {
-    "sh510300": {
-      "name": "沪深300ETF",
-      "kind": "etf",
-      "role": "park",
-      "shares": 3600.0,
-      "cost": 14927.778424657534,
-      "first_buy_date": "2026-10-26",
-      "hfq": 1.0,
-      "last_buy_date": "2026-11-12",
-      "last_price": 4.114,
-      "high_close": 4.195
-    },
     "sz002242": {
       "name": "九阳股份",
       "kind": "stock",
@@ -55,6 +43,30 @@
       "last_price": 39.13,
       "stop_price": 37.064,
       "high_close": 40.14
+    },
+    "sz002086": {
+      "name": "东方海洋",
+      "kind": "stock",
+      "role": "stock",
+      "shares": 1700.0,
+      "cost": 7389.87,
+      "first_buy_date": "2026-11-16",
+      "hfq": 4.1261388933466,
+      "last_buy_date": "2026-11-16",
+      "last_price": 4.34,
+      "stop_price": 3.999
+    },
+    "sh605488": {
+      "name": "福莱新材",
+      "kind": "stock",
+      "role": "stock",
+      "shares": 100.0,
+      "cost": 5197.25,
+      "first_buy_date": "2026-11-16",
+      "hfq": 2.1982927651381,
+      "last_buy_date": "2026-11-16",
+      "last_price": 51.87,
+      "stop_price": 47.815
     }
   },
   "peak": 100056.91999999998,
@@ -76,6 +88,7 @@
     "2026-11-06",
     "2026-11-11",
     "2026-11-12",
-    "2026-11-13"
+    "2026-11-13",
+    "2026-11-16"
   ]
 }
