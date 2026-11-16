@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "tool": "qoder",
+    "model": "dfmodel",
+    "written_at": "2026-11-16T19:06:00",
+    "decided_on": "2026-11-16"
+  },
+  "orders": [
+    {
+      "code": "sh601607",
+      "name": "上海医药",
+      "target_weight": 0.08,
+      "reason": "深度研究：PB 0.77（5年3%分位）、9M扣非+25.0%、控股股东拟增持H股叠加估值提升2.0方案，今日大盘下跌中放量突破半年线；置信度中",
+      "confidence": "中",
+      "channels": "defensive",
+      "industry": "商业百货",
+      "stop_price": 15.19,
+      "falsify": [
+        "2026 年报扣非归母同比转负",
+        "应收账款周转天数升破 110 天",
+        "收盘跌破 16.20（MA120）且 3 日未收回"
+      ]
+    }
+  ]
+}
