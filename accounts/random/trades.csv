@@ -5,3 +5,6 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-10-26,random,20261026-random-05,sh510300,沪深300ETF,buy,8400.0,4.167,35002.8,8.75,0.0,0.0,16.8,,True,,park,minute,
 2026-11-02,random,20261102-random-02,sh510300,沪深300ETF,sell,2400.0,4.087,9808.8,5,0.0,0.0,4.8,-199.5,,False,park,minute,
 2026-11-02,random,20261102-random-01,sz300296,利亚德,buy,2100.0,5.686,11940.6,5,0.0,0.12,12.6,,True,,entry,minute,
+2026-11-17,random,20261117-random-01,sz300296,利亚德,sell,2100.0,4.895,10279.5,5,5.14,0.1,10.5,-1676.46,,True,stop_loss,minute,
+2026-11-17,random,20261117-random-03,sh510300,沪深300ETF,sell,100.0,4.038,403.8,5,0.0,0.0,0.2,-18.0,,False,park,minute,
+2026-11-17,random,20261117-random-02,sh600900,长江电力,buy,400.0,30.53,12212.0,5,0.0,0.12,12.0,,True,,entry,minute,

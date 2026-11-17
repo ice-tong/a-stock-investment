@@ -2,7 +2,7 @@
   "name": "random",
   "strategy": "random",
   "initial_cash": 100000,
-  "cash": 50836.609999999986,
+  "cash": 49287.54999999999,
   "start_date": "2026-10-23",
   "positions": {
     "sh600036": {
@@ -48,26 +48,25 @@
       "name": "沪深300ETF",
       "kind": "etf",
       "role": "park",
-      "shares": 6000.0,
-      "cost": 25008.25,
+      "shares": 5900.0,
+      "cost": 24591.445833333335,
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
       "last_buy_date": "2026-10-26",
       "last_price": 4.083,
       "high_close": 4.195
     },
-    "sz300296": {
-      "name": "利亚德",
+    "sh600900": {
+      "name": "长江电力",
       "kind": "stock",
       "role": "stock",
-      "shares": 2100.0,
-      "cost": 11945.720000000001,
-      "first_buy_date": "2026-11-02",
-      "hfq": 20.0495450249254,
-      "last_buy_date": "2026-11-02",
-      "last_price": 5.13,
-      "stop_price": 5.233,
-      "high_close": 5.93
+      "shares": 400.0,
+      "cost": 12217.12,
+      "first_buy_date": "2026-11-17",
+      "hfq": 3.9287540492179,
+      "last_buy_date": "2026-11-17",
+      "last_price": 30.5,
+      "stop_price": 28.099
     }
   },
   "peak": 100558.60999999999,
@@ -92,6 +91,7 @@
     "2026-11-11",
     "2026-11-12",
     "2026-11-13",
-    "2026-11-16"
+    "2026-11-16",
+    "2026-11-17"
   ]
 }

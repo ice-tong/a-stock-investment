@@ -2,22 +2,9 @@
   "name": "quant",
   "strategy": "quant",
   "initial_cash": 100000,
-  "cash": 52428.33999999996,
+  "cash": 53146.40999999996,
   "start_date": "2026-10-23",
   "positions": {
-    "sz002242": {
-      "name": "九阳股份",
-      "kind": "stock",
-      "role": "stock",
-      "shares": 400.0,
-      "cost": 10619.91,
-      "first_buy_date": "2026-11-11",
-      "hfq": 5.6695054256078,
-      "last_buy_date": "2026-11-11",
-      "last_price": 28.65,
-      "stop_price": 24.426,
-      "high_close": 28.65
-    },
     "sh601166": {
       "name": "兴业银行",
       "kind": "stock",
@@ -30,19 +17,6 @@
       "last_price": 20.11,
       "stop_price": 18.067,
       "high_close": 20.11
-    },
-    "sz300007": {
-      "name": "汉威科技",
-      "kind": "stock",
-      "role": "stock",
-      "shares": 300.0,
-      "cost": 12086.120000000003,
-      "first_buy_date": "2026-11-12",
-      "hfq": 4.2509480795954,
-      "last_buy_date": "2026-11-12",
-      "last_price": 38.56,
-      "stop_price": 37.064,
-      "high_close": 40.14
     },
     "sz002086": {
       "name": "东方海洋",
@@ -69,6 +43,29 @@
       "last_price": 53.3,
       "stop_price": 47.815,
       "high_close": 53.3
+    },
+    "sh600887": {
+      "name": "伊利股份",
+      "kind": "stock",
+      "role": "stock",
+      "shares": 300.0,
+      "cost": 9719.699999999999,
+      "first_buy_date": "2026-11-17",
+      "hfq": 109.20660346095481,
+      "last_buy_date": "2026-11-17",
+      "last_price": 32.35,
+      "stop_price": 29.807
+    },
+    "sh510300": {
+      "name": "沪深300ETF",
+      "kind": "etf",
+      "role": "park",
+      "shares": 3100.0,
+      "cost": 12535.199999999999,
+      "first_buy_date": "2026-11-17",
+      "hfq": 1.0,
+      "last_buy_date": "2026-11-17",
+      "last_price": 4.04
     }
   },
   "peak": 100230.33999999997,
@@ -91,6 +88,7 @@
     "2026-11-11",
     "2026-11-12",
     "2026-11-13",
-    "2026-11-16"
+    "2026-11-16",
+    "2026-11-17"
   ]
 }
