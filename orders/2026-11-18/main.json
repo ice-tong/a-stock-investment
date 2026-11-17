@@ -1,0 +1,24 @@
+{
+  "account": "main",
+  "strategy": "agent",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-18",
+  "decided_on": "2026-11-17",
+  "frozen_at": "2026-11-17T20:00:44",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 98583.43,
+  "meta": {
+    "tool": "qoder",
+    "model": "dfmodel",
+    "written_at": "2026-11-17T19:06:00",
+    "decided_on": "2026-11-17"
+  },
+  "draft_errors": [],
+  "orders": []
+}

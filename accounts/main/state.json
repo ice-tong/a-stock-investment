@@ -14,7 +14,7 @@
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
       "last_buy_date": "2026-10-26",
-      "last_price": 4.083,
+      "last_price": 4.054,
       "high_close": 4.195
     },
     "sh601607": {
@@ -26,13 +26,14 @@
       "first_buy_date": "2026-11-17",
       "hfq": 15.3042880552166,
       "last_buy_date": "2026-11-17",
-      "last_price": 16.53,
+      "last_price": 16.54,
       "falsify": [
         "2026 年报扣非归母同比转负",
         "应收账款周转天数升破 110 天",
         "收盘跌破 16.20（MA120）且 3 日未收回"
       ],
-      "stop_price": 15.19
+      "stop_price": 15.19,
+      "high_close": 16.54
     }
   },
   "peak": 100323.5,
@@ -40,7 +41,7 @@
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-16",
+  "last_settled": "2026-11-17",
   "executed": [
     "2026-10-26",
     "2026-10-27",

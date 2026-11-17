@@ -1,0 +1,22 @@
+{
+  "etf": {
+    "sha256": "ca383b52e6d7ed3e8f6b324175e1f491ba7ed19d5a2a10fea421862618adf0ec",
+    "frozen_at": "2026-11-17T20:00:44"
+  },
+  "etf_band": {
+    "sha256": "4e8ca2cf3f99ceb5cd4cbfb394c2993cb52f4aa9d8b79b9e8ffe3e658539b0fd",
+    "frozen_at": "2026-11-17T20:00:44"
+  },
+  "main": {
+    "sha256": "f3b700439a35db3dc0a98d2a9bf836946259ddc64dd6118a0954ddfe2d8cfa90",
+    "frozen_at": "2026-11-17T20:00:44"
+  },
+  "quant": {
+    "sha256": "eef3cbdb578d3eed11d13af5d2460ae8d93aa89daad933d9fc679695cb8da761",
+    "frozen_at": "2026-11-17T20:00:44"
+  },
+  "random": {
+    "sha256": "e2ae679a57d08ccfbd648269dbd6ce14ecc0fd8a2cca10c6e665aa0b7e441f8e",
+    "frozen_at": "2026-11-17T20:00:44"
+  }
+}

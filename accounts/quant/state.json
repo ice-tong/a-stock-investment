@@ -14,9 +14,9 @@
       "first_buy_date": "2026-11-11",
       "hfq": 5.9911993595577,
       "last_buy_date": "2026-11-11",
-      "last_price": 20.11,
+      "last_price": 20.17,
       "stop_price": 18.067,
-      "high_close": 20.11
+      "high_close": 20.17
     },
     "sz002086": {
       "name": "东方海洋",
@@ -27,7 +27,7 @@
       "first_buy_date": "2026-11-16",
       "hfq": 4.1261388933466,
       "last_buy_date": "2026-11-16",
-      "last_price": 4.34,
+      "last_price": 4.14,
       "stop_price": 3.999,
       "high_close": 4.34
     },
@@ -40,7 +40,7 @@
       "first_buy_date": "2026-11-16",
       "hfq": 2.1982927651381,
       "last_buy_date": "2026-11-16",
-      "last_price": 53.3,
+      "last_price": 47.97,
       "stop_price": 47.815,
       "high_close": 53.3
     },
@@ -53,8 +53,9 @@
       "first_buy_date": "2026-11-17",
       "hfq": 109.20660346095481,
       "last_buy_date": "2026-11-17",
-      "last_price": 32.35,
-      "stop_price": 29.807
+      "last_price": 32.41,
+      "stop_price": 29.807,
+      "high_close": 32.41
     },
     "sh510300": {
       "name": "沪深300ETF",
@@ -65,7 +66,8 @@
       "first_buy_date": "2026-11-17",
       "hfq": 1.0,
       "last_buy_date": "2026-11-17",
-      "last_price": 4.04
+      "last_price": 4.054,
+      "high_close": 4.054
     }
   },
   "peak": 100230.33999999997,
@@ -73,7 +75,7 @@
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-16",
+  "last_settled": "2026-11-17",
   "executed": [
     "2026-10-26",
     "2026-10-27",
