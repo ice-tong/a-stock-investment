@@ -1,0 +1,80 @@
+{
+  "account": "quant",
+  "strategy": "quant",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-19",
+  "decided_on": "2026-11-18",
+  "frozen_at": "2026-11-18T20:00:40",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 98116.61,
+  "meta": {},
+  "draft_errors": [],
+  "orders": [
+    {
+      "code": "sz002086",
+      "name": "东方海洋",
+      "target_weight": 0.0,
+      "reason_type": "stop_loss",
+      "reason": "系统强制卖出：stop_loss",
+      "status": "approved",
+      "risk_notes": [
+        "强制卖出"
+      ],
+      "id": "20261119-quant-01"
+    },
+    {
+      "code": "sh605488",
+      "name": "福莱新材",
+      "target_weight": 0.0,
+      "reason_type": "stop_loss",
+      "reason": "系统强制卖出：stop_loss",
+      "status": "approved",
+      "risk_notes": [
+        "强制卖出"
+      ],
+      "id": "20261119-quant-02"
+    },
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [
+        "本周新开仓已达上限 3"
+      ],
+      "code": "sz000333",
+      "name": "美的集团",
+      "reason": "初筛排名 2，20 日风险调整动量 0.57",
+      "status": "rejected",
+      "id": "20261119-quant-03"
+    },
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [
+        "本周新开仓已达上限 3"
+      ],
+      "code": "sh600919",
+      "name": "江苏银行",
+      "reason": "初筛排名 4，20 日风险调整动量 0.54",
+      "status": "rejected",
+      "id": "20261119-quant-04"
+    },
+    {
+      "code": "sh510300",
+      "name": "沪深300ETF",
+      "target_weight": 0.2788,
+      "reason_type": "park",
+      "reason": "底仓 ETF：闲置资金停泊",
+      "status": "approved",
+      "risk_notes": [
+        "市场状态 defense，风控状态 normal，总仓位区间 30%-50%"
+      ],
+      "id": "20261119-quant-05"
+    }
+  ]
+}
