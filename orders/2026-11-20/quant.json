@@ -1,0 +1,45 @@
+{
+  "account": "quant",
+  "strategy": "quant",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-20",
+  "decided_on": "2026-11-19",
+  "frozen_at": "2026-11-19T20:00:50",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 97518.99,
+  "meta": {},
+  "draft_errors": [],
+  "orders": [
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [
+        "本周新开仓已达上限 3"
+      ],
+      "code": "sh600690",
+      "name": "海尔智家",
+      "reason": "初筛排名 2，20 日风险调整动量 0.58",
+      "status": "rejected",
+      "id": "20261120-quant-01"
+    },
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [
+        "按单票上限/单笔风险 1% 下调至 12.5%",
+        "本周新开仓已达上限 3"
+      ],
+      "code": "sz000333",
+      "name": "美的集团",
+      "reason": "初筛排名 3，20 日风险调整动量 0.56",
+      "status": "rejected",
+      "id": "20261120-quant-02"
+    }
+  ]
+}
