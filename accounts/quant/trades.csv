@@ -27,3 +27,6 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-17,quant,20261117-quant-02,sz002242,九阳股份,sell,400.0,31.488,12595.2,5,6.3,0.13,12.8,1963.86,,True,exit,minute,
 2026-11-17,quant,20261117-quant-03,sh600887,伊利股份,buy,300.0,32.382,9714.6,5,0.0,0.1,9.6,,True,,entry,minute,
 2026-11-17,quant,20261117-quant-04,sh510300,沪深300ETF,buy,3100.0,4.042,12530.2,5,0.0,0.0,6.2,,True,,park,minute,
+2026-11-19,quant,20261119-quant-01,sz002086,东方海洋,sell,1700.0,3.377,5740.9,5,2.87,0.06,5.1,-1656.9,,True,stop_loss,minute,
+2026-11-19,quant,20261119-quant-02,sh605488,福莱新材,sell,100.0,40.909,4090.9,5,2.05,0.04,4.1,-1113.44,,True,stop_loss,minute,
+2026-11-19,quant,20261119-quant-05,sh510300,沪深300ETF,buy,3600.0,4.043,14554.8,5,0.0,0.0,7.2,,False,,park,minute,

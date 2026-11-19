@@ -2,7 +2,7 @@
   "name": "quant",
   "strategy": "quant",
   "initial_cash": 100000,
-  "cash": 53146.40999999996,
+  "cash": 48403.389999999956,
   "start_date": "2026-10-23",
   "positions": {
     "sh601166": {
@@ -17,32 +17,6 @@
       "last_price": 19.97,
       "stop_price": 18.067,
       "high_close": 20.17
-    },
-    "sz002086": {
-      "name": "东方海洋",
-      "kind": "stock",
-      "role": "stock",
-      "shares": 1700.0,
-      "cost": 7389.87,
-      "first_buy_date": "2026-11-16",
-      "hfq": 4.1261388933466,
-      "last_buy_date": "2026-11-16",
-      "last_price": 3.73,
-      "stop_price": 3.999,
-      "high_close": 4.34
-    },
-    "sh605488": {
-      "name": "福莱新材",
-      "kind": "stock",
-      "role": "stock",
-      "shares": 100.0,
-      "cost": 5197.25,
-      "first_buy_date": "2026-11-16",
-      "hfq": 2.1982927651381,
-      "last_buy_date": "2026-11-16",
-      "last_price": 44.0,
-      "stop_price": 47.815,
-      "high_close": 53.3
     },
     "sh600887": {
       "name": "伊利股份",
@@ -61,12 +35,12 @@
       "name": "沪深300ETF",
       "kind": "etf",
       "role": "park",
-      "shares": 3100.0,
-      "cost": 12535.199999999999,
+      "shares": 6700.0,
+      "cost": 27095.0,
       "first_buy_date": "2026-11-17",
       "hfq": 1.0,
-      "last_buy_date": "2026-11-17",
-      "last_price": 4.042,
+      "last_buy_date": "2026-11-19",
+      "last_price": 4.041,
       "high_close": 4.054
     }
   },
@@ -95,6 +69,7 @@
     "2026-11-13",
     "2026-11-16",
     "2026-11-17",
-    "2026-11-18"
+    "2026-11-18",
+    "2026-11-19"
   ]
 }
