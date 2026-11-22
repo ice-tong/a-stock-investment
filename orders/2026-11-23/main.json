@@ -1,0 +1,71 @@
+{
+  "account": "main",
+  "strategy": "agent",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-23",
+  "decided_on": "2026-11-20",
+  "frozen_at": "2026-11-22T20:01:14",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 98588.63,
+  "meta": {
+    "tool": "workbuddy",
+    "model": "Tencent Hunyuan Hy",
+    "written_at": "2026-11-22T19:12:00",
+    "decided_on": "2026-11-22"
+  },
+  "draft_errors": [],
+  "orders": [
+    {
+      "target_weight": 0.12,
+      "reason_type": "entry",
+      "risk_notes": [],
+      "code": "sh511360",
+      "name": "短融ETF海富通",
+      "reason": "底仓证伪线触发（沪深300 11-20 收 3954.57，低于 3958.14 前低，边际触发 0.09%）：底仓 510300 park 机械化无法卖，约 12% 转短融 ETF 作现金替代；周末融资保证金下调封政策底但无增量资金、外盘仍弱，维持减半不追加；置信度中",
+      "confidence": "中",
+      "channels": "etf:money",
+      "falsify": [
+        "短融 ETF 单日回撤超过 0.1%（流动性或信用事件）",
+        "沪深300 收复 MA60（4295）且 regime 转非防守后 3 个交易日内未撤回现金"
+      ],
+      "status": "approved",
+      "stop_price": 111.905,
+      "id": "20261123-main-01"
+    },
+    {
+      "target_weight": 0.1,
+      "reason_type": "entry",
+      "risk_notes": [],
+      "code": "sh511220",
+      "name": "城投债ETF海富通",
+      "reason": "底仓减半第二块：约 10% 转债券类低波替代（一手 1039 元，仓位可精确到 10%）；年化波动 3.6%、20 日均额 33 亿；置信度中",
+      "confidence": "中",
+      "channels": "etf:bond",
+      "falsify": [
+        "城投债 ETF 20 日回撤超过 1.5%",
+        "10 年期国债收益率 20 个交易日内上行超过 30bp"
+      ],
+      "status": "approved",
+      "stop_price": 10.08,
+      "id": "20261123-main-02"
+    },
+    {
+      "code": "sh510300",
+      "name": "沪深300ETF",
+      "target_weight": 0.2135,
+      "reason_type": "park",
+      "reason": "底仓 ETF：闲置资金停泊",
+      "status": "approved",
+      "risk_notes": [
+        "市场状态 defense，风控状态 normal，总仓位区间 30%-50%"
+      ],
+      "id": "20261123-main-03"
+    }
+  ]
+}
