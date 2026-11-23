@@ -14,7 +14,7 @@
       "first_buy_date": "2026-11-11",
       "hfq": 5.9911993595577,
       "last_buy_date": "2026-11-11",
-      "last_price": 20.3,
+      "last_price": 20.06,
       "stop_price": 18.067,
       "high_close": 20.3
     },
@@ -27,7 +27,7 @@
       "first_buy_date": "2026-11-17",
       "hfq": 109.20660346095481,
       "last_buy_date": "2026-11-17",
-      "last_price": 33.35,
+      "last_price": 32.85,
       "stop_price": 29.807,
       "high_close": 33.35
     },
@@ -40,7 +40,7 @@
       "first_buy_date": "2026-11-17",
       "hfq": 1.0,
       "last_buy_date": "2026-11-19",
-      "last_price": 4.06,
+      "last_price": 4.018,
       "high_close": 4.06
     },
     "sh600919": {
@@ -52,8 +52,9 @@
       "first_buy_date": "2026-11-23",
       "hfq": 1.7060733710815,
       "last_buy_date": "2026-11-23",
-      "last_price": 13.44,
-      "stop_price": 12.382
+      "last_price": 13.5,
+      "stop_price": 12.382,
+      "high_close": 13.5
     },
     "sh601169": {
       "name": "北京银行",
@@ -64,8 +65,9 @@
       "first_buy_date": "2026-11-23",
       "hfq": 5.2082807743693,
       "last_buy_date": "2026-11-23",
-      "last_price": 6.23,
-      "stop_price": 5.74
+      "last_price": 6.27,
+      "stop_price": 5.74,
+      "high_close": 6.27
     }
   },
   "peak": 100230.33999999997,
@@ -73,7 +75,7 @@
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-20",
+  "last_settled": "2026-11-23",
   "executed": [
     "2026-10-26",
     "2026-10-27",

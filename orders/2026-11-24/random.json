@@ -1,0 +1,98 @@
+{
+  "account": "random",
+  "strategy": "random",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-24",
+  "decided_on": "2026-11-23",
+  "frozen_at": "2026-11-23T20:01:26",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 98502.75,
+  "meta": {},
+  "draft_errors": [],
+  "orders": [
+    {
+      "target_weight": 0.0,
+      "reason_type": "exit",
+      "risk_notes": [],
+      "code": "sh600036",
+      "name": "招商银行",
+      "reason": "持有满 20 个交易日轮换",
+      "status": "approved",
+      "id": "20261124-random-01"
+    },
+    {
+      "target_weight": 0.0,
+      "reason_type": "exit",
+      "risk_notes": [],
+      "code": "sh600887",
+      "name": "伊利股份",
+      "reason": "持有满 20 个交易日轮换",
+      "status": "approved",
+      "id": "20261124-random-02"
+    },
+    {
+      "target_weight": 0.0,
+      "reason_type": "exit",
+      "risk_notes": [],
+      "code": "sh601328",
+      "name": "交通银行",
+      "reason": "持有满 20 个交易日轮换",
+      "status": "approved",
+      "id": "20261124-random-03"
+    },
+    {
+      "target_weight": 0.1242,
+      "reason_type": "entry",
+      "risk_notes": [
+        "股票+主动 ETF 总仓位上限 50%，按比例压缩"
+      ],
+      "code": "sh601088",
+      "name": "中国神华",
+      "reason": "随机抽取（初筛排名 25）",
+      "status": "adjusted",
+      "id": "20261124-random-04"
+    },
+    {
+      "target_weight": 0.1242,
+      "reason_type": "entry",
+      "risk_notes": [
+        "股票+主动 ETF 总仓位上限 50%，按比例压缩"
+      ],
+      "code": "sz000001",
+      "name": "平安银行",
+      "reason": "随机抽取（初筛排名 8）",
+      "status": "adjusted",
+      "id": "20261124-random-05"
+    },
+    {
+      "target_weight": 0.1242,
+      "reason_type": "entry",
+      "risk_notes": [
+        "股票+主动 ETF 总仓位上限 50%，按比例压缩"
+      ],
+      "code": "sh601288",
+      "name": "农业银行",
+      "reason": "随机抽取（初筛排名 12）",
+      "status": "adjusted",
+      "id": "20261124-random-06"
+    },
+    {
+      "code": "sh510300",
+      "name": "沪深300ETF",
+      "target_weight": 0.0001,
+      "reason_type": "park",
+      "reason": "底仓 ETF：闲置资金停泊",
+      "status": "approved",
+      "risk_notes": [
+        "市场状态 defense，风控状态 normal，总仓位区间 30%-50%"
+      ],
+      "id": "20261124-random-07"
+    }
+  ]
+}
