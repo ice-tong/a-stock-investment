@@ -73,3 +73,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-20,overnight/random_strong,20261120-overnight_random_strong-sz301288,sz301288,清研环境,buy,1000,21.28,21280.0,5.32,0.0,0.21,0.0,,True,,overnight_entry,close_auction,
 2026-11-20,overnight/random_strong,20261120-overnight_random_strong-sz301322,sz301322,绿通科技,buy,500,41.33,20665.0,5.17,0.0,0.21,0.0,,True,,overnight_entry,close_auction,
 2026-11-20,overnight/random_strong,20261120-overnight_random_strong-sz301052,sz301052,果麦文化,buy,500,36.8,18400.0,5,0.0,0.18,0.0,,True,,overnight_entry,close_auction,
+2026-11-23,overnight/random_strong,20261120-overnight_random_strong-sz002638,sz002638,勤上股份,sell,4800,4.44,21312.0,5.33,10.66,0.21,0.0,-213.8,,True,overnight_exit,open_auction,
+2026-11-23,overnight/random_strong,20261120-overnight_random_strong-sz301288,sz301288,清研环境,sell,1000,20.18,20180.0,5.04,10.09,0.2,0.0,-1120.86,,True,overnight_exit,open_auction,
+2026-11-23,overnight/random_strong,20261120-overnight_random_strong-sz301322,sz301322,绿通科技,sell,500,40.29,20145.0,5.04,10.07,0.2,0.0,-540.69,,True,overnight_exit,open_auction,
+2026-11-23,overnight/random_strong,20261120-overnight_random_strong-sz301052,sz301052,果麦文化,sell,500,35.82,17910.0,5,8.96,0.18,0.0,-509.32,,True,overnight_exit,open_auction,

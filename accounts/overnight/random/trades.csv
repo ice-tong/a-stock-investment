@@ -75,3 +75,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-20,overnight/random,20261120-overnight_random-sz300151,sz300151,昌红科技,buy,1700,12.98,22066.0,5.52,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
 2026-11-20,overnight/random,20261120-overnight_random-sh603688,sh603688,石英股份,buy,700,29.44,20608.0,5.15,0.0,0.21,0.0,,True,,overnight_entry,close_auction,
 2026-11-20,overnight/random,20261120-overnight_random-sz002223,sz002223,鱼跃医疗,buy,800,28.06,22448.0,5.61,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
+2026-11-23,overnight/random,20261120-overnight_random-sh688818,sh688818,电科蓝天,sell,600,32.77,19662.0,5,9.83,0.2,0.0,-566.28,,True,overnight_exit,open_auction,
+2026-11-23,overnight/random,20261120-overnight_random-sz300151,sz300151,昌红科技,sell,1700,12.84,21828.0,5.46,10.91,0.22,0.0,-260.33,,True,overnight_exit,open_auction,
+2026-11-23,overnight/random,20261120-overnight_random-sh603688,sh603688,石英股份,sell,700,28.95,20265.0,5.07,10.13,0.2,0.0,-363.76,,True,overnight_exit,open_auction,
+2026-11-23,overnight/random,20261120-overnight_random-sz002223,sz002223,鱼跃医疗,sell,800,27.79,22232.0,5.56,11.12,0.22,0.0,-238.73,,True,overnight_exit,open_auction,
