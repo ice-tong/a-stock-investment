@@ -2,15 +2,15 @@
   "name": "main",
   "strategy": "agent",
   "initial_cash": 100000,
-  "cash": 50616.630000000005,
+  "cash": 49920.01,
   "start_date": "2026-10-23",
   "positions": {
     "sh510300": {
       "name": "沪深300ETF",
       "kind": "etf",
       "role": "park",
-      "shares": 10200.0,
-      "cost": 42514.025,
+      "shares": 5200.0,
+      "cost": 21673.81666666667,
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
       "last_buy_date": "2026-10-26",
@@ -34,6 +34,36 @@
       ],
       "stop_price": 15.19,
       "high_close": 16.66
+    },
+    "sh511360": {
+      "name": "短融ETF海富通",
+      "kind": "etf",
+      "role": "etf",
+      "shares": 100.0,
+      "cost": 11430.1,
+      "first_buy_date": "2026-11-23",
+      "hfq": 1.0,
+      "last_buy_date": "2026-11-23",
+      "last_price": 114.194,
+      "falsify": [
+        "短融 ETF 单日回撤超过 0.1%（流动性或信用事件）",
+        "沪深300 收复 MA60（4295）且 regime 转非防守后 3 个交易日内未撤回现金"
+      ]
+    },
+    "sh511220": {
+      "name": "城投债ETF海富通",
+      "kind": "etf",
+      "role": "etf",
+      "shares": 900.0,
+      "cost": 9351.5,
+      "first_buy_date": "2026-11-23",
+      "hfq": 1.0,
+      "last_buy_date": "2026-11-23",
+      "last_price": 10.38,
+      "falsify": [
+        "城投债 ETF 20 日回撤超过 1.5%",
+        "10 年期国债收益率 20 个交易日内上行超过 30bp"
+      ]
     }
   },
   "peak": 100323.5,
@@ -60,6 +90,7 @@
     "2026-11-17",
     "2026-11-18",
     "2026-11-19",
-    "2026-11-20"
+    "2026-11-20",
+    "2026-11-23"
   ]
 }
