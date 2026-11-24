@@ -2,60 +2,9 @@
   "name": "random",
   "strategy": "random",
   "initial_cash": 100000,
-  "cash": 49287.54999999999,
+  "cash": 52982.11999999997,
   "start_date": "2026-10-23",
   "positions": {
-    "sh600036": {
-      "name": "招商银行",
-      "kind": "stock",
-      "role": "stock",
-      "shares": 100.0,
-      "cost": 4223.24,
-      "first_buy_date": "2026-10-26",
-      "hfq": 6.7422879877129,
-      "last_buy_date": "2026-10-26",
-      "last_price": 43.26,
-      "stop_price": 38.854,
-      "high_close": 44.0
-    },
-    "sh601328": {
-      "name": "交通银行",
-      "kind": "stock",
-      "role": "stock",
-      "shares": 600.0,
-      "cost": 4929.85,
-      "first_buy_date": "2026-10-26",
-      "hfq": 2.7912206056332,
-      "last_buy_date": "2026-10-26",
-      "last_price": 8.93,
-      "stop_price": 7.559,
-      "high_close": 8.98
-    },
-    "sh600887": {
-      "name": "伊利股份",
-      "kind": "stock",
-      "role": "stock",
-      "shares": 100.0,
-      "cost": 2856.8300000000004,
-      "first_buy_date": "2026-10-26",
-      "hfq": 109.20660346095481,
-      "last_buy_date": "2026-10-26",
-      "last_price": 32.85,
-      "stop_price": 26.283,
-      "high_close": 33.35
-    },
-    "sh510300": {
-      "name": "沪深300ETF",
-      "kind": "etf",
-      "role": "park",
-      "shares": 5900.0,
-      "cost": 24591.445833333335,
-      "first_buy_date": "2026-10-26",
-      "hfq": 1.0,
-      "last_buy_date": "2026-10-26",
-      "last_price": 4.018,
-      "high_close": 4.195
-    },
     "sh600900": {
       "name": "长江电力",
       "kind": "stock",
@@ -68,6 +17,42 @@
       "last_price": 31.35,
       "stop_price": 28.099,
       "high_close": 31.62
+    },
+    "sh601088": {
+      "name": "中国神华",
+      "kind": "stock",
+      "role": "stock",
+      "shares": 200.0,
+      "cost": 10189.300000000001,
+      "first_buy_date": "2026-11-24",
+      "hfq": 2.8074025480892,
+      "last_buy_date": "2026-11-24",
+      "last_price": 50.87,
+      "stop_price": 46.871
+    },
+    "sz000001": {
+      "name": "平安银行",
+      "kind": "stock",
+      "role": "stock",
+      "shares": 900.0,
+      "cost": 11076.91,
+      "first_buy_date": "2026-11-24",
+      "hfq": 154.0324234714716,
+      "last_buy_date": "2026-11-24",
+      "last_price": 12.29,
+      "stop_price": 11.323
+    },
+    "sh601288": {
+      "name": "农业银行",
+      "kind": "stock",
+      "role": "stock",
+      "shares": 1500.0,
+      "cost": 11882.12,
+      "first_buy_date": "2026-11-24",
+      "hfq": 2.319458342765,
+      "last_buy_date": "2026-11-24",
+      "last_price": 7.91,
+      "stop_price": 7.288
     }
   },
   "peak": 100558.60999999999,
@@ -95,6 +80,7 @@
     "2026-11-18",
     "2026-11-19",
     "2026-11-20",
-    "2026-11-23"
+    "2026-11-23",
+    "2026-11-24"
   ]
 }
