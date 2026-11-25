@@ -79,3 +79,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-23,overnight/random,20261120-overnight_random-sz300151,sz300151,昌红科技,sell,1700,12.84,21828.0,5.46,10.91,0.22,0.0,-260.33,,True,overnight_exit,open_auction,
 2026-11-23,overnight/random,20261120-overnight_random-sh603688,sh603688,石英股份,sell,700,28.95,20265.0,5.07,10.13,0.2,0.0,-363.76,,True,overnight_exit,open_auction,
 2026-11-23,overnight/random,20261120-overnight_random-sz002223,sz002223,鱼跃医疗,sell,800,27.79,22232.0,5.56,11.12,0.22,0.0,-238.73,,True,overnight_exit,open_auction,
+2026-11-25,overnight/random,20261125-overnight_random-sh688599,sh688599,天合光能,buy,2600,8.55,22230.0,5.56,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
+2026-11-25,overnight/random,20261125-overnight_random-sz002903,sz002903,宇环数控,buy,1200,18.57,22284.0,5.57,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
+2026-11-25,overnight/random,20261125-overnight_random-sz002236,sz002236,大华股份,buy,1600,13.7,21920.0,5.48,0.0,0.22,0.0,,True,,overnight_entry,close_auction,
+2026-11-25,overnight/random,20261125-overnight_random-sz300145,sz300145,南方泵业,buy,6700,3.38,22646.0,5.66,0.0,0.23,0.0,,True,,overnight_entry,close_auction,

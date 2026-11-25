@@ -77,3 +77,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-23,overnight/random_strong,20261120-overnight_random_strong-sz301288,sz301288,清研环境,sell,1000,20.18,20180.0,5.04,10.09,0.2,0.0,-1120.86,,True,overnight_exit,open_auction,
 2026-11-23,overnight/random_strong,20261120-overnight_random_strong-sz301322,sz301322,绿通科技,sell,500,40.29,20145.0,5.04,10.07,0.2,0.0,-540.69,,True,overnight_exit,open_auction,
 2026-11-23,overnight/random_strong,20261120-overnight_random_strong-sz301052,sz301052,果麦文化,sell,500,35.82,17910.0,5,8.96,0.18,0.0,-509.32,,True,overnight_exit,open_auction,
+2026-11-25,overnight/random_strong,20261125-overnight_random_strong-sz001219,sz001219,青岛食品,buy,1000,19.94,19940.0,5,0.0,0.2,0.0,,True,,overnight_entry,close_auction,
+2026-11-25,overnight/random_strong,20261125-overnight_random_strong-sh600865,sh600865,百大集团,buy,2100,9.86,20706.0,5.18,0.0,0.21,0.0,,True,,overnight_entry,close_auction,
+2026-11-25,overnight/random_strong,20261125-overnight_random_strong-sz001358,sz001358,兴欣新材,buy,600,33.54,20124.0,5.03,0.0,0.2,0.0,,True,,overnight_entry,close_auction,
+2026-11-25,overnight/random_strong,20261125-overnight_random_strong-sz300893,sz300893,松原安全,buy,1200,17.4,20880.0,5.22,0.0,0.21,0.0,,True,,overnight_entry,close_auction,

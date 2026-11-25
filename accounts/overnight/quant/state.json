@@ -2,15 +2,85 @@
   "name": "overnight/quant",
   "strategy": "overnight_quant",
   "initial_cash": 100000,
-  "cash": 82028.42,
+  "cash": 33426.93,
   "start_date": "2026-11-02",
-  "positions": {},
+  "positions": {
+    "sh601088": {
+      "name": "中国神华",
+      "kind": "stock",
+      "shares": 300,
+      "cost": 15551.16,
+      "buy_price": 51.82,
+      "night": "2026-11-25",
+      "last_price": 51.82,
+      "order_id": "20261125-overnight_quant-sh601088",
+      "pred": {
+        "night": "2026-11-25",
+        "account": "quant",
+        "code": "sh601088",
+        "name": "中国神华",
+        "weight": 0.25,
+        "p_win": null,
+        "exp_gap": null,
+        "thesis_type": null,
+        "source": "quant",
+        "exception": "",
+        "buy_price": 51.82
+      }
+    },
+    "sh600809": {
+      "name": "山西汾酒",
+      "kind": "stock",
+      "shares": 100,
+      "cost": 13305.13,
+      "buy_price": 133.0,
+      "night": "2026-11-25",
+      "last_price": 133.0,
+      "order_id": "20261125-overnight_quant-sh600809",
+      "pred": {
+        "night": "2026-11-25",
+        "account": "quant",
+        "code": "sh600809",
+        "name": "山西汾酒",
+        "weight": 0.25,
+        "p_win": null,
+        "exp_gap": null,
+        "thesis_type": null,
+        "source": "quant",
+        "exception": "",
+        "buy_price": 133.0
+      }
+    },
+    "sz300824": {
+      "name": "北鼎股份",
+      "kind": "stock",
+      "shares": 2000,
+      "cost": 19745.2,
+      "buy_price": 9.87,
+      "night": "2026-11-25",
+      "last_price": 9.87,
+      "order_id": "20261125-overnight_quant-sz300824",
+      "pred": {
+        "night": "2026-11-25",
+        "account": "quant",
+        "code": "sz300824",
+        "name": "北鼎股份",
+        "weight": 0.25,
+        "p_win": null,
+        "exp_gap": null,
+        "thesis_type": null,
+        "source": "quant",
+        "exception": "",
+        "buy_price": 9.87
+      }
+    }
+  },
   "peak": 100000,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-24",
+  "last_settled": "2026-11-25",
   "executed": [],
   "veto_pending": []
 }

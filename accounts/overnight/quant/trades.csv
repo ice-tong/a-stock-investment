@@ -73,3 +73,6 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-23,overnight/quant,20261120-overnight_quant-sz002638,sz002638,勤上股份,sell,4600,4.44,20424.0,5.11,10.21,0.2,0.0,-204.88,,True,overnight_exit,open_auction,
 2026-11-23,overnight/quant,20261120-overnight_quant-sz002148,sz002148,北纬科技,sell,2000,10.3,20600.0,5.15,10.3,0.21,0.0,459.11,,True,overnight_exit,open_auction,
 2026-11-23,overnight/quant,20261120-overnight_quant-sh600886,sh600886,国投电力,sell,1200,16.82,20184.0,5.05,10.09,0.2,0.0,-20.59,,True,overnight_exit,open_auction,
+2026-11-25,overnight/quant,20261125-overnight_quant-sh601088,sh601088,中国神华,buy,300,51.82,15546.0,5,0.0,0.16,0.0,,True,,overnight_entry,close_auction,
+2026-11-25,overnight/quant,20261125-overnight_quant-sh600809,sh600809,山西汾酒,buy,100,133.0,13300.0,5,0.0,0.13,0.0,,True,,overnight_entry,close_auction,
+2026-11-25,overnight/quant,20261125-overnight_quant-sz300824,sz300824,北鼎股份,buy,2000,9.87,19740.0,5,0.0,0.2,0.0,,True,,overnight_entry,close_auction,

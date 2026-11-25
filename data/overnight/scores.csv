@@ -240,3 +240,4 @@ night,exit_date,account,code,name,status,weight,buy_price,sell_price,ret_gross,r
 2026-11-20,2026-11-23,random_strong,sz301288,清研环境,filled,0.25,21.28,20.18,-0.051692,-0.052658,0,,,,random_strong,,
 2026-11-20,2026-11-23,random_strong,sz301322,绿通科技,filled,0.25,41.33,40.29,-0.025163,-0.026158,0,,,,random_strong,,
 2026-11-20,2026-11-23,random_strong,sz301052,果麦文化,filled,0.25,36.8,35.82,-0.02663,-0.027673,0,,,,random_strong,,
+2026-11-25,,quant,sz002579,中京电子,unfilled,0.25,,,,,,,,,quant,收盘涨停 17.82，买不到,
