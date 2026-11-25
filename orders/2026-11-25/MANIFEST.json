@@ -18,5 +18,21 @@
   "random": {
     "sha256": "60802f7dc70ddc9572cd92dc295b7c4f3eefd27ae3ccc784602f491f929236f2",
     "frozen_at": "2026-11-24T20:01:30"
+  },
+  "overnight_agent": {
+    "sha256": "37501878e24522a091cb222ff0528d887befc343eee7bf8825ae8a9ec03d61db",
+    "frozen_at": "2026-11-25T14:55:26"
+  },
+  "overnight_quant": {
+    "sha256": "66cfd6e90b7826fdd37f611e13961c622124aca82b61a88cc6790b996aaab62d",
+    "frozen_at": "2026-11-25T14:55:27"
+  },
+  "overnight_random": {
+    "sha256": "3e4557d37eac15542e2920836bc09a6c1a6fdfce40b8988833340d41f3dab195",
+    "frozen_at": "2026-11-25T14:55:28"
+  },
+  "overnight_random_strong": {
+    "sha256": "42f4f1574a10a37e0199f82080f36a438418918c272fadd7f5a6ad83a0383359",
+    "frozen_at": "2026-11-25T14:55:29"
   }
 }
