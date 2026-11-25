@@ -14,7 +14,7 @@
       "first_buy_date": "2026-10-26",
       "hfq": 1.0,
       "last_buy_date": "2026-10-26",
-      "last_price": 4.023,
+      "last_price": 4.033,
       "high_close": 4.195
     },
     "sh601607": {
@@ -26,7 +26,7 @@
       "first_buy_date": "2026-11-17",
       "hfq": 15.3042880552166,
       "last_buy_date": "2026-11-17",
-      "last_price": 16.05,
+      "last_price": 16.23,
       "falsify": [
         "2026 年报扣非归母同比转负",
         "应收账款周转天数升破 110 天",
@@ -44,12 +44,12 @@
       "first_buy_date": "2026-11-23",
       "hfq": 1.0,
       "last_buy_date": "2026-11-23",
-      "last_price": 114.195,
+      "last_price": 114.197,
       "falsify": [
         "短融 ETF 单日回撤超过 0.1%（流动性或信用事件）",
         "沪深300 收复 MA60（4295）且 regime 转非防守后 3 个交易日内未撤回现金"
       ],
-      "high_close": 114.195
+      "high_close": 114.197
     },
     "sh511220": {
       "name": "城投债ETF海富通",
@@ -60,7 +60,7 @@
       "first_buy_date": "2026-11-23",
       "hfq": 1.0,
       "last_buy_date": "2026-11-23",
-      "last_price": 10.382,
+      "last_price": 10.379,
       "falsify": [
         "城投债 ETF 20 日回撤超过 1.5%",
         "10 年期国债收益率 20 个交易日内上行超过 30bp"
@@ -73,7 +73,7 @@
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-24",
+  "last_settled": "2026-11-25",
   "executed": [
     "2026-10-26",
     "2026-10-27",

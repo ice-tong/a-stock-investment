@@ -1,0 +1,32 @@
+{
+  "account": "quant",
+  "strategy": "quant",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-26",
+  "decided_on": "2026-11-25",
+  "frozen_at": "2026-11-25T20:01:16",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 97754.51,
+  "meta": {},
+  "draft_errors": [],
+  "orders": [
+    {
+      "target_weight": 0.0,
+      "reason_type": "exit",
+      "risk_notes": [
+        "未满最短持有期 3 个交易日"
+      ],
+      "code": "sz000530",
+      "name": "冰山冷热",
+      "reason": "跌出初筛排名前 12 或不再符合条件",
+      "status": "rejected",
+      "id": "20261126-quant-01"
+    }
+  ]
+}
