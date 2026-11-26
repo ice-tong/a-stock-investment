@@ -1,0 +1,24 @@
+{
+  "account": "main",
+  "strategy": "agent",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-27",
+  "decided_on": "2026-11-26",
+  "frozen_at": "2026-11-26T20:01:21",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 97728.61,
+  "meta": {
+    "tool": "workbuddy",
+    "model": "Tencent Hunyuan Hy",
+    "written_at": "2026-11-26T19:08:09",
+    "decided_on": "2026-11-26"
+  },
+  "draft_errors": [],
+  "orders": []
+}

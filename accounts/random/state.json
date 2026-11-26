@@ -14,7 +14,7 @@
       "first_buy_date": "2026-11-17",
       "hfq": 3.9287540492179,
       "last_buy_date": "2026-11-17",
-      "last_price": 31.96,
+      "last_price": 31.8,
       "stop_price": 28.099,
       "high_close": 31.96
     },
@@ -27,9 +27,9 @@
       "first_buy_date": "2026-11-24",
       "hfq": 2.8074025480892,
       "last_buy_date": "2026-11-24",
-      "last_price": 51.82,
+      "last_price": 53.0,
       "stop_price": 46.871,
-      "high_close": 51.82
+      "high_close": 53.0
     },
     "sz000001": {
       "name": "平安银行",
@@ -40,9 +40,9 @@
       "first_buy_date": "2026-11-24",
       "hfq": 154.0324234714716,
       "last_buy_date": "2026-11-24",
-      "last_price": 12.4,
+      "last_price": 12.45,
       "stop_price": 11.323,
-      "high_close": 12.4
+      "high_close": 12.45
     },
     "sh601288": {
       "name": "农业银行",
@@ -53,9 +53,9 @@
       "first_buy_date": "2026-11-24",
       "hfq": 2.319458342765,
       "last_buy_date": "2026-11-24",
-      "last_price": 7.96,
+      "last_price": 8.02,
       "stop_price": 7.288,
-      "high_close": 7.96
+      "high_close": 8.02
     }
   },
   "peak": 100558.60999999999,
@@ -63,7 +63,7 @@
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-25",
+  "last_settled": "2026-11-26",
   "executed": [
     "2026-10-26",
     "2026-10-27",

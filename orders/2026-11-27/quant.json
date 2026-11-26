@@ -1,0 +1,66 @@
+{
+  "account": "quant",
+  "strategy": "quant",
+  "strategy_version": "strategy-v1.7",
+  "trade_date": "2026-11-27",
+  "decided_on": "2026-11-26",
+  "frozen_at": "2026-11-26T20:01:22",
+  "regime": "defense",
+  "risk_state": "normal",
+  "band": {
+    "min": 0.3,
+    "max": 0.5,
+    "stock_max": 0.5
+  },
+  "equity_estimate": 98149.51,
+  "meta": {},
+  "draft_errors": [],
+  "orders": [
+    {
+      "target_weight": 0.0,
+      "reason_type": "exit",
+      "risk_notes": [
+        "未满最短持有期 3 个交易日"
+      ],
+      "code": "sz000530",
+      "name": "冰山冷热",
+      "reason": "跌出初筛排名前 12 或不再符合条件",
+      "status": "rejected",
+      "id": "20261127-quant-01"
+    },
+    {
+      "target_weight": 0.0,
+      "reason_type": "exit",
+      "risk_notes": [],
+      "code": "sh601169",
+      "name": "北京银行",
+      "reason": "跌出初筛排名前 12 或不再符合条件",
+      "status": "approved",
+      "id": "20261127-quant-02"
+    },
+    {
+      "target_weight": 0.125,
+      "reason_type": "entry",
+      "risk_notes": [
+        "本周新开仓已达上限 3"
+      ],
+      "code": "sh600410",
+      "name": "华胜天成",
+      "reason": "初筛排名 1，20 日风险调整动量 1.08",
+      "status": "rejected",
+      "id": "20261127-quant-03"
+    },
+    {
+      "code": "sh510300",
+      "name": "沪深300ETF",
+      "target_weight": 0.1302,
+      "reason_type": "park",
+      "reason": "底仓 ETF：闲置资金停泊",
+      "status": "approved",
+      "risk_notes": [
+        "市场状态 defense，风控状态 normal，总仓位区间 30%-50%"
+      ],
+      "id": "20261127-quant-04"
+    }
+  ]
+}
