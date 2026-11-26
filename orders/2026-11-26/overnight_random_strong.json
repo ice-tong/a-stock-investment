@@ -1,0 +1,66 @@
+{
+  "account": "random_strong",
+  "strategy": "overnight_random_strong",
+  "version": "overnight-v0.2",
+  "trade_date": "2026-11-26",
+  "frozen_at": "2026-11-26T14:56:49",
+  "source": "random_strong",
+  "market_view": "",
+  "market": null,
+  "draft_errors": [],
+  "orders": [
+    {
+      "code": "sz000823",
+      "name": "超声电子",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sz300049",
+      "name": "福瑞医科",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sz301211",
+      "name": "亨迪药业",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sh603466",
+      "name": "风语筑",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    }
+  ],
+  "vetoed": []
+}

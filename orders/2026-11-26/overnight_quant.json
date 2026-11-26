@@ -1,0 +1,66 @@
+{
+  "account": "quant",
+  "strategy": "overnight_quant",
+  "version": "overnight-v0.2",
+  "trade_date": "2026-11-26",
+  "frozen_at": "2026-11-26T14:56:49",
+  "source": "quant",
+  "market_view": "",
+  "market": null,
+  "draft_errors": [],
+  "orders": [
+    {
+      "code": "sz301282",
+      "name": "金禄电子",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sz300829",
+      "name": "金丹科技",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sh688820",
+      "name": "盛合晶微",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sh603078",
+      "name": "江化微",
+      "weight": 0.25,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    }
+  ],
+  "vetoed": []
+}

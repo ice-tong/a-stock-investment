@@ -1,0 +1,68 @@
+{
+  "account": "random",
+  "strategy": "overnight_random",
+  "version": "overnight-v0.2",
+  "trade_date": "2026-11-26",
+  "frozen_at": "2026-11-26T14:56:49",
+  "source": "random",
+  "market_view": "",
+  "market": null,
+  "draft_errors": [],
+  "orders": [
+    {
+      "code": "sh601678",
+      "name": "滨化股份",
+      "weight": 0.3333,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sz301381",
+      "name": "赛维时代",
+      "weight": 0.3333,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    },
+    {
+      "code": "sh601515",
+      "name": "衢州东峰",
+      "weight": null,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [
+        "近 20 日日均成交额 0.45 亿 < 0.5 亿"
+      ],
+      "status": "rejected"
+    },
+    {
+      "code": "sh601579",
+      "name": "会稽山",
+      "weight": 0.3333,
+      "p_win": null,
+      "exp_gap": null,
+      "thesis_type": null,
+      "thesis": null,
+      "kill": null,
+      "exception": null,
+      "notes": [],
+      "status": "approved"
+    }
+  ],
+  "vetoed": []
+}
