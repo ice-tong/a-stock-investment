@@ -2,85 +2,15 @@
   "name": "overnight/random",
   "strategy": "overnight_random",
   "initial_cash": 100000,
-  "cash": 3433.01,
+  "cash": 92241.47,
   "start_date": "2026-11-02",
-  "positions": {
-    "sh601678": {
-      "name": "滨化股份",
-      "kind": "stock",
-      "shares": 7700,
-      "cost": 30499.92,
-      "buy_price": 3.96,
-      "night": "2026-11-26",
-      "last_price": 3.96,
-      "order_id": "20261126-overnight_random-sh601678",
-      "pred": {
-        "night": "2026-11-26",
-        "account": "random",
-        "code": "sh601678",
-        "name": "滨化股份",
-        "weight": 0.3333,
-        "p_win": null,
-        "exp_gap": null,
-        "thesis_type": null,
-        "source": "random",
-        "exception": "",
-        "buy_price": 3.96
-      }
-    },
-    "sz301381": {
-      "name": "赛维时代",
-      "kind": "stock",
-      "shares": 1300,
-      "cost": 29101.56,
-      "buy_price": 22.38,
-      "night": "2026-11-26",
-      "last_price": 22.38,
-      "order_id": "20261126-overnight_random-sz301381",
-      "pred": {
-        "night": "2026-11-26",
-        "account": "random",
-        "code": "sz301381",
-        "name": "赛维时代",
-        "weight": 0.3333,
-        "p_win": null,
-        "exp_gap": null,
-        "thesis_type": null,
-        "source": "random",
-        "exception": "",
-        "buy_price": 22.38
-      }
-    },
-    "sh601579": {
-      "name": "会稽山",
-      "kind": "stock",
-      "shares": 1500,
-      "cost": 29062.55,
-      "buy_price": 19.37,
-      "night": "2026-11-26",
-      "last_price": 19.37,
-      "order_id": "20261126-overnight_random-sh601579",
-      "pred": {
-        "night": "2026-11-26",
-        "account": "random",
-        "code": "sh601579",
-        "name": "会稽山",
-        "weight": 0.3333,
-        "p_win": null,
-        "exp_gap": null,
-        "thesis_type": null,
-        "source": "random",
-        "exception": "",
-        "buy_price": 19.37
-      }
-    }
-  },
+  "positions": {},
   "peak": 100000,
   "halted": false,
   "breaker_until": null,
   "dd_warn": false,
   "pending_exits": {},
-  "last_settled": "2026-11-26",
+  "last_settled": "2026-11-27",
   "executed": [],
   "veto_pending": []
 }

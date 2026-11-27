@@ -83,3 +83,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-26,overnight/quant,20261126-overnight_quant-sz300829,sz300829,金丹科技,buy,600,32.4,19440.0,5,0.0,0.19,0.0,,True,,overnight_entry,close_auction,
 2026-11-26,overnight/quant,20261126-overnight_quant-sh688820,sh688820,盛合晶微,buy,100,101.1,10110.0,5,0.0,0.1,0.0,,True,,overnight_entry,close_auction,
 2026-11-26,overnight/quant,20261126-overnight_quant-sh603078,sh603078,江化微,buy,700,26.23,18361.0,5,0.0,0.18,0.0,,True,,overnight_entry,close_auction,
+2026-11-27,overnight/quant,20261126-overnight_quant-sz301282,sz301282,金禄电子,sell,500,34.6,17300.0,5,8.65,0.17,0.0,-208.99,,True,overnight_exit,open_auction,
+2026-11-27,overnight/quant,20261126-overnight_quant-sz300829,sz300829,金丹科技,sell,600,32.98,19788.0,5,9.89,0.2,0.0,327.72,,True,overnight_exit,open_auction,
+2026-11-27,overnight/quant,20261126-overnight_quant-sh688820,sh688820,盛合晶微,sell,100,100.18,10018.0,5,5.01,0.1,0.0,-107.21,,True,overnight_exit,open_auction,
+2026-11-27,overnight/quant,20261126-overnight_quant-sh603078,sh603078,江化微,sell,700,25.5,17850.0,5,8.93,0.18,0.0,-530.29,,True,overnight_exit,open_auction,

@@ -89,3 +89,7 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-26,overnight/random_strong,20261126-overnight_random_strong-sz300049,sz300049,福瑞医科,buy,500,39.53,19765.0,5,0.0,0.2,0.0,,True,,overnight_entry,close_auction,
 2026-11-26,overnight/random_strong,20261126-overnight_random_strong-sz301211,sz301211,亨迪药业,buy,1700,11.89,20213.0,5.05,0.0,0.2,0.0,,True,,overnight_entry,close_auction,
 2026-11-26,overnight/random_strong,20261126-overnight_random_strong-sh603466,sh603466,风语筑,buy,1200,16.08,19296.0,5,0.0,0.19,0.0,,True,,overnight_entry,close_auction,
+2026-11-27,overnight/random_strong,20261126-overnight_random_strong-sz000823,sz000823,超声电子,sell,900,20.12,18108.0,5,9.05,0.18,0.0,-604.42,,True,overnight_exit,open_auction,
+2026-11-27,overnight/random_strong,20261126-overnight_random_strong-sz300049,sz300049,福瑞医科,sell,500,39.49,19745.0,5,9.87,0.2,0.0,-40.27,,True,overnight_exit,open_auction,
+2026-11-27,overnight/random_strong,20261126-overnight_random_strong-sz301211,sz301211,亨迪药业,sell,1700,11.0,18700.0,5,9.35,0.19,0.0,-1532.79,,True,overnight_exit,open_auction,
+2026-11-27,overnight/random_strong,20261126-overnight_random_strong-sh603466,sh603466,风语筑,sell,1200,15.77,18924.0,5,9.46,0.19,0.0,-391.84,,True,overnight_exit,open_auction,
