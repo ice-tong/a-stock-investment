@@ -35,3 +35,5 @@ date,account,order_id,code,name,side,shares,price,amount,commission,stamp_tax,tr
 2026-11-23,quant,20261123-quant-02,sh601169,北京银行,buy,1900.0,6.236,11848.4,5,0.0,0.12,11.4,,True,,entry,minute,
 2026-11-25,quant,20261125-quant-05,sh510300,沪深300ETF,sell,500.0,3.965,1982.5,5,0.0,0.0,1.0,-44.51,,True,park,minute,
 2026-11-25,quant,20261125-quant-03,sz000530,冰山冷热,buy,100.0,14.264,1426.4,5,0.0,0.01,1.4,,True,,entry,minute,
+2026-11-27,quant,20261127-quant-02,sh601169,北京银行,sell,1900.0,6.194,11768.6,5,5.88,0.12,11.4,-95.92,,True,exit,minute,
+2026-11-27,quant,20261127-quant-04,sh510300,沪深300ETF,buy,3000.0,4.147,12441.0,5,0.0,0.0,6.0,,True,,park,minute,

@@ -2,7 +2,7 @@
   "name": "quant",
   "strategy": "quant",
   "initial_cash": 100000,
-  "cash": 49888.50999999995,
+  "cash": 49200.10999999995,
   "start_date": "2026-10-23",
   "positions": {
     "sh601166": {
@@ -44,19 +44,6 @@
       "stop_price": 12.382,
       "high_close": 13.69
     },
-    "sh601169": {
-      "name": "北京银行",
-      "kind": "stock",
-      "role": "stock",
-      "shares": 1900.0,
-      "cost": 11853.52,
-      "first_buy_date": "2026-11-23",
-      "hfq": 5.2082807743693,
-      "last_buy_date": "2026-11-23",
-      "last_price": 6.3,
-      "stop_price": 5.74,
-      "high_close": 6.32
-    },
     "sz000530": {
       "name": "冰山冷热",
       "kind": "stock",
@@ -69,6 +56,17 @@
       "last_price": 16.17,
       "stop_price": 13.169,
       "high_close": 16.17
+    },
+    "sh510300": {
+      "name": "沪深300ETF",
+      "kind": "etf",
+      "role": "park",
+      "shares": 3000.0,
+      "cost": 12446.0,
+      "first_buy_date": "2026-11-27",
+      "hfq": 1.0,
+      "last_buy_date": "2026-11-27",
+      "last_price": 4.145
     }
   },
   "peak": 100230.33999999997,
@@ -99,6 +97,7 @@
     "2026-11-23",
     "2026-11-24",
     "2026-11-25",
-    "2026-11-26"
+    "2026-11-26",
+    "2026-11-27"
   ]
 }
